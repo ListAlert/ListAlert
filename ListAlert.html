@@ -180,6 +180,25 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 
+/* Near Me Now */
+.nearby-wrap{margin:12px 16px 0}
+.nearby-label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px;padding:0 2px}
+.nearby-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border:1px solid var(--green-border);border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:background .15s}
+.nearby-row:active{background:var(--bg3)}
+.nearby-ico{font-size:22px;flex-shrink:0}
+.nearby-info{flex:1;min-width:0}
+.nearby-name{font-size:14px;font-weight:700;color:var(--text)}
+.nearby-meta{font-size:12px;color:var(--text2);margin-top:2px}
+.nearby-count{font-size:13px;font-weight:700;color:var(--green);flex-shrink:0;background:var(--green-dim);padding:4px 10px;border-radius:20px}
+.nearby-gps-prompt{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:var(--r);cursor:pointer}
+.nearby-gps-prompt span{font-size:13px;color:var(--amber);font-weight:600;flex:1}
+
+/* Near Me Now */
+.filter-bar{display:flex;gap:7px;padding:12px 16px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-chip{height:32px;padding:0 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;font-family:"Outfit",sans-serif;white-space:nowrap;flex-shrink:0;transition:all .15s}
+.filter-chip.active{background:var(--green-dim);color:var(--green);border-color:var(--green-border)}
+
 /* Onboarding modal */
 .ob-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:flex;align-items:flex-end;justify-content:center}
 .ob-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;padding:32px 24px max(32px,env(safe-area-inset-bottom));animation:slideup .35s cubic-bezier(.32,.72,0,1)}
@@ -224,12 +243,13 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
   <div class="tabs">
     <div class="tab active" id="tab-list" onclick="show('list')">List</div>
     <div class="tab" id="tab-stores" onclick="show('stores')">Stores</div>
-    <div class="tab" id="tab-organize" onclick="show('organize')">Organize</div>
+    <div class="tab" id="tab-organize" onclick="show('organize')">Assign</div>
   </div>
 
   <!-- LIST -->
   <div class="view active" id="view-list">
     <div id="notif-area"></div>
+    <div id="nearby-area"></div>
     <div id="list-body"></div>
   </div>
 
@@ -377,7 +397,7 @@ function show(t) {
     document.getElementById('view-' + n).classList.toggle('active', n === t);
   });
   document.getElementById('add-bar').style.display = t === 'list' ? 'flex' : 'none';
-  if (t === 'list')     renderList();
+  if (t === 'list')     { renderList(); renderNearby(); }
   if (t === 'stores')   renderStores();
   if (t === 'organize') renderOrganize();
 }
@@ -426,6 +446,57 @@ function checkFences() {
       st.inside = false; st.alerted = false;
     }
   });
+  if (curTab === 'list') renderNearby();
+}
+
+// ── Near Me Now ────────────────────────────────────────────────
+function renderNearby() {
+  var el = document.getElementById('nearby-area');
+  if (!el) return;
+
+  // GPS not active yet
+  if (lat === null) {
+    el.innerHTML = '<div class="nearby-wrap">' +
+      '<div class="nearby-gps-prompt" onclick="startGPS()">' +
+        '<span>📍 Enable GPS to see nearby stores</span>' +
+        '<span style="color:var(--amber);font-size:13px;font-weight:700">Enable →</span>' +
+      '</div>' +
+    '</div>';
+    return;
+  }
+
+  // Find nearby stores with pending items — use 3x radius as "near me" threshold
+  var nearbyStores = [];
+  stores.forEach(function(s) {
+    if (s.lat === null) return;
+    var d = dist(lat, lng, s.lat, s.lng);
+    var nearThreshold = Math.max(radius * 3, 2000);
+    if (d > nearThreshold) return;
+    var pending = items.filter(function(i) { return i.store === s.id && !i.done; });
+    if (!pending.length) return;
+    nearbyStores.push({store: s, pending: pending.length, dist: d});
+  });
+
+  if (!nearbyStores.length) { el.innerHTML = ''; return; }
+
+  nearbyStores.sort(function(a,b){ return a.dist - b.dist; });
+
+  var html = '<div class="nearby-wrap"><div class="nearby-label">Near you now</div>';
+  nearbyStores.forEach(function(n) {
+    var distStr = n.dist < 1000
+      ? Math.round(n.dist) + 'm away'
+      : (n.dist / 1000).toFixed(1) + 'km away';
+    html += '<div class="nearby-row" onclick="setFilter(' + n.store.id + ');document.getElementById(\'view-list\').scrollTop=200">' +
+      '<div class="nearby-ico">' + n.store.emoji + '</div>' +
+      '<div class="nearby-info">' +
+        '<div class="nearby-name">' + n.store.name + '</div>' +
+        '<div class="nearby-meta">' + distStr + '</div>' +
+      '</div>' +
+      '<div class="nearby-count">' + n.pending + ' item' + (n.pending !== 1 ? 's' : '') + '</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
 }
 
 function fireAlert(store, pending) {
@@ -553,23 +624,53 @@ function setRadius(v) {
 }
 
 // ── List render ────────────────────────────────────────────────
+var listFilter = null; // store id or null for all
+
 function renderList() {
   var el = document.getElementById('list-body');
   if (!items.length) { el.innerHTML = '<div class="empty"><b>Your list is empty</b>Add items below, or tap 🍳 to import from a recipe.</div>'; return; }
   var sm = {}; stores.forEach(function(s){sm[s.id]=s;});
-  el.innerHTML = '<div class="card-list">' + items.map(function(it) {
-    var s = sm[it.store]; var badge = s ? s.emoji + ' ' + s.name : '';
-    return '<div class="item-row">' +
-      '<div class="chk' + (it.done?' done':'') + '" onclick="toggleItem(' + it.id + ')">' +
-        '<svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-      '</div>' +
-      '<div class="item-info">' +
-        '<div class="item-name' + (it.done?' done':'') + '">' + it.name + '</div>' +
-        (badge ? '<div class="item-tag">' + badge + '</div>' : '') +
-      '</div>' +
-      '<button class="del" onclick="delItem(' + it.id + ')">×</button>' +
-    '</div>';
-  }).join('') + '</div>';
+
+  // Sort: active first, done at bottom
+  var sorted = items.slice().sort(function(a,b){ return (a.done?1:0)-(b.done?1:0); });
+
+  // Apply store filter
+  var filtered = listFilter
+    ? sorted.filter(function(it){ return it.store === listFilter; })
+    : sorted;
+
+  // Build filter bar
+  var filterBar = '<div class="filter-bar">';
+  filterBar += '<button class="filter-chip' + (!listFilter?' active':'') + '" onclick="setFilter(null)">All</button>';
+  stores.forEach(function(s){
+    var hasPending = items.some(function(i){ return i.store===s.id && !i.done; });
+    if (!hasPending && listFilter !== s.id) return;
+    filterBar += '<button class="filter-chip' + (listFilter===s.id?' active':'') + '" onclick="setFilter(' + s.id + ')">' + s.emoji + ' ' + s.name + '</button>';
+  });
+  filterBar += '</div>';
+
+  var listHtml = filtered.length
+    ? '<div class="card-list">' + filtered.map(function(it) {
+        var s = sm[it.store]; var badge = s ? s.emoji + ' ' + s.name : '';
+        return '<div class="item-row">' +
+          '<div class="chk' + (it.done?' done':'') + '" onclick="toggleItem(' + it.id + ')">' +
+            '<svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          '</div>' +
+          '<div class="item-info">' +
+            '<div class="item-name' + (it.done?' done':'') + '">' + it.name + '</div>' +
+            (badge && !listFilter ? '<div class="item-tag">' + badge + '</div>' : '') +
+          '</div>' +
+          '<button class="del" onclick="delItem(' + it.id + ')">×</button>' +
+        '</div>';
+      }).join('') + '</div>'
+    : '<div class="empty">No items for this store yet.<br>Add some on the List tab or assign them in <b>Assign</b>.</div>';
+
+  el.innerHTML = filterBar + listHtml;
+}
+
+function setFilter(storeId) {
+  listFilter = storeId;
+  renderList();
 }
 
 function addItem() {
@@ -585,7 +686,7 @@ function delItem(id) { items=items.filter(function(i){return i.id!==id;}); persi
 // ── Organize render ────────────────────────────────────────────
 function renderOrganize() {
   var el = document.getElementById('org-body');
-  if (!items.length) { el.innerHTML = '<div class="empty"><b>Nothing to organize</b>Add items on the List tab first.</div>'; return; }
+  if (!items.length) { el.innerHTML = '<div class="empty"><b>Nothing to assign</b>Add items on the List tab first.</div>'; return; }
   var grouped = {}; stores.forEach(function(s){grouped[s.id]=[];});
   var unassigned = [];
   items.forEach(function(it) {
@@ -892,6 +993,7 @@ function finishOnboarding(goToStores) {
 
 // ── Init ───────────────────────────────────────────────────────
 renderList();
+renderNearby();
 show('list');
 if (!localStorage.getItem('la_onboarded')) {
   document.getElementById('ob-modal').style.display = 'flex';
