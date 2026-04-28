@@ -733,7 +733,7 @@ async function runRecipeExtraction() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         system: 'You are a grocery list assistant. When asked to extract ingredients, return ONLY a raw JSON array of strings. No markdown, no explanation, no backticks. Just the array.',
         messages: messages
