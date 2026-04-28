@@ -644,16 +644,32 @@ function handlePhotoSelect(input) {
   var reader = new FileReader();
   reader.onload = function(e) {
     var dataUrl = e.target.result;
-    recipePhotoBase64 = dataUrl.split(',')[1];
-
-    var area = document.getElementById('recipe-input-area');
-    area.innerHTML =
-      '<div class="photo-preview-wrap">' +
-        '<img src="' + dataUrl + '" alt="Recipe photo"/>' +
-        '<button class="photo-clear" onclick="clearPhoto()">×</button>' +
-      '</div>';
+    // Resize via canvas to keep payload under API limits
+    var img = new Image();
+    img.onload = function() {
+      var maxDim = 1120;
+      var w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else        { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      var resized = canvas.toDataURL('image/jpeg', 0.85);
+      recipePhotoBase64 = resized.split(',')[1];
+      recipePhotoMime = 'image/jpeg';
+      var area = document.getElementById('recipe-input-area');
+      area.innerHTML =
+        '<div class="photo-preview-wrap">' +
+          '<img src="' + resized + '" alt="Recipe photo"/>' +
+          '<button class="photo-clear" onclick="clearPhoto()">×</button>' +
+        '</div>';
+    };
+    img.src = dataUrl;
   };
-  reader.onerror = function() {
+  reader.onerror = function(e) {
+    alert('FileReader error: ' + (reader.error ? reader.error.name + ' - ' + reader.error.message : 'unknown'));
     showRecipeError('Could not read that image. Try a different file.');
   };
   reader.readAsDataURL(file);
@@ -725,6 +741,13 @@ async function runRecipeExtraction() {
     });
 
     var data = await response.json();
+    // DEBUG: show full response
+    if (data.error) {
+      showRecipeError('API said: ' + data.error.type + ' — ' + data.error.message);
+      recipeLoading = false;
+      resetGoBtn();
+      return;
+    }
     var raw = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text.trim() : '';
 
     // Strip any accidental markdown fences
@@ -756,7 +779,7 @@ async function runRecipeExtraction() {
 
   } catch(e) {
     var errMsg = recipeTab === 'photo'
-      ? 'Couldn\'t read ingredients from this photo. Try a clearer shot with better lighting, or paste the recipe text instead.'
+      ? 'API error: ' + (e && e.message ? e.message : JSON.stringify(e))
       : 'Couldn\'t parse the ingredients. Try pasting more of the recipe text, or make sure it includes a clear ingredient list.';
     showRecipeError(errMsg);
     resetGoBtn();
