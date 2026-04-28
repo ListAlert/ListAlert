@@ -624,8 +624,8 @@ function switchRecipeTab(tab) {
 
 function resetGoBtn() {
   var btn = document.getElementById('recipe-go-btn');
+  if (!btn) return;
   btn.disabled = false;
-  document.getElementById('recipe-go-label').textContent = 'Extract ingredients';
   btn.innerHTML = '<span id="recipe-go-label">Extract ingredients</span>';
 }
 
