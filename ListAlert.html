@@ -362,10 +362,40 @@ var items  = JSON.parse(localStorage.getItem('la_items')  || '[]');
 var radius = parseInt(localStorage.getItem('la_radius')   || '800');
 var nid    = parseInt(localStorage.getItem('la_nid')      || '1');
 var watchId = null, lat = null, lng = null, ss = {}, curTab = 'list', searchResults = [];
-var EMOJIS = ['🛒','🏪','🥦','💊','🧴','🧺','🥩','🏬','🍎','🌿'];
+var EMOJI_MAP = [
+  {emoji:'💊', keywords:['pharmacy','drug','walgreen','cvs','rite aid','rite-aid','duane reade','health mart']},
+  {emoji:'🌿', keywords:['whole foods','sprouts','trader joe','fresh market','natural grocers','organic','earth fare','lucky\'s']},
+  {emoji:'🛒', keywords:['kroger','safeway','albertsons','heb','h-e-b','publix','aldi','meijer','giant','stop & shop','stop and shop','food lion','winn dixie','winn-dixie','grocery','grocer','market','ralphs','fry\'s','smith\'s','king soopers']},
+  {emoji:'🏪', keywords:['costco','sam\'s club','sams club','bj\'s','bjs','wholesale','warehouse club']},
+  {emoji:'🏬', keywords:['walmart','wal-mart','target','kmart','k-mart','department','macy','nordstrom','jcpenney','j.c. penney','sears']},
+  {emoji:'🥩', keywords:['meat','butcher','deli','carniceríа']},
+  {emoji:'💄', keywords:['beauty','sephora','ulta','salon','cosmetic','bath & body','bath and body']},
+  {emoji:'💰', keywords:['dollar','five below','family dollar','dollar tree','dollar general','99 cent']},
+  {emoji:'🐾', keywords:['pet','petco','petsmart','pet supplies']},
+  {emoji:'🔨', keywords:['home depot','lowe\'s','lowes','ace hardware','hardware','menards','true value']},
+];
+
+function getStoreEmoji(name) {
+  var lower = name.toLowerCase();
+  for (var i = 0; i < EMOJI_MAP.length; i++) {
+    for (var j = 0; j < EMOJI_MAP[i].keywords.length; j++) {
+      if (lower.indexOf(EMOJI_MAP[i].keywords[j]) !== -1) {
+        return EMOJI_MAP[i].emoji;
+      }
+    }
+  }
+  return '🛍️';
+}
 
 document.getElementById('radius-range').value = radius;
 document.getElementById('radius-lbl').textContent = radius + 'm';
+
+// One-time emoji migration for existing saved stores
+if (!localStorage.getItem('la_emoji_v2')) {
+  stores.forEach(function(s) { s.emoji = getStoreEmoji(s.name); });
+  persist();
+  localStorage.setItem('la_emoji_v2', '1');
+}
 
 function persist() {
   localStorage.setItem('la_stores', JSON.stringify(stores));
@@ -535,7 +565,7 @@ function zipToLatLng(zip) {
 function searchStores(storeName, centerLat, centerLng) {
   var delta = 0.09; // ~10km bounding box
   var bbox = (centerLat - delta) + ',' + (centerLng - delta) + ',' + (centerLat + delta) + ',' + (centerLng + delta);
-  var query = '[out:json][timeout:10];(node["name"~"' + storeName + '",i]["shop"]('+bbox+');node["name"~"' + storeName + '",i]["amenity"]('+bbox+');way["name"~"' + storeName + '",i]["shop"]('+bbox+'););out center 8;';
+  var query = '[out:json][timeout:10];(node["name"~"' + storeName + '",i]["shop"~"supermarket|convenience|department_store|general|wholesale|grocery"]('+bbox+');way["name"~"' + storeName + '",i]["shop"~"supermarket|convenience|department_store|general|wholesale|grocery"]('+bbox+');node["name"~"' + storeName + '",i]["shop"]('+bbox+');way["name"~"' + storeName + '",i]["shop"]('+bbox+'););out center 8;';
   return fetch('https://listalert.serbronn93.workers.dev/?target=overpass', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -623,7 +653,7 @@ function addResult(idx) {
   if (!r) return;
   var exists = stores.find(function(s) { return s.name === r.name && s.addr === r.addr; });
   if (exists) { alert(r.name + ' is already saved.'); return; }
-  stores.push({id:nid++, name:r.name, addr:r.addr, emoji:EMOJIS[stores.length % EMOJIS.length], geo:true, fav:false, lat:r.lat, lng:r.lng});
+  stores.push({id:nid++, name:r.name, addr:r.addr, emoji:getStoreEmoji(r.name), geo:true, fav:false, lat:r.lat, lng:r.lng});
   persist();
   document.getElementById('search-results').innerHTML = '';
   document.getElementById('sname').value = '';
