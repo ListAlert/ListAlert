@@ -95,6 +95,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .result-addr{font-size:12px;color:var(--text2);margin-top:2px}
 .add-lbl{font-size:13px;font-weight:700;color:var(--green);flex-shrink:0}
 .store-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;margin-bottom:10px;display:flex;align-items:center;gap:11px}
+.store-card.needs-loc{border-color:var(--amber-border)}
+.loc-nudge{font-size:12px;color:var(--amber);font-weight:600;margin-bottom:5px;margin-top:2px}
+.stag.loc-needed{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border)}
+
 .store-card.fav{border-color:var(--amber-border);background:var(--amber-dim)}
 .store-ico{font-size:24px;flex-shrink:0;position:relative}
 .store-star{position:absolute;top:-4px;right:-4px;font-size:12px}
@@ -660,6 +664,13 @@ function addResult(idx) {
   document.getElementById('szip').value = '';
   document.getElementById('szip').placeholder = 'Zip code (e.g. 75075)';
   renderStores();
+  // Show nudge to save location
+  var nudge = document.createElement('div');
+  nudge.style.cssText = 'margin:10px 16px 0;padding:12px 14px;background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:14px;font-size:13px;color:var(--amber);font-weight:600;line-height:1.5';
+  nudge.innerHTML = '📍 <b>' + r.name + '</b> added! Now tap <b>Save location</b> on the card below while you\'re near this store — this is what enables alerts.';
+  var storesList = document.getElementById('stores-list');
+  storesList.parentNode.insertBefore(nudge, storesList);
+  setTimeout(function() { if (nudge.parentNode) nudge.parentNode.removeChild(nudge); }, 6000);
 }
 
 // ── Stores render ──────────────────────────────────────────────
@@ -669,15 +680,19 @@ function renderStores() {
   var sorted = stores.slice().sort(function(a,b) { return (b.fav?1:0)-(a.fav?1:0); });
   el.innerHTML = sorted.map(function(s) {
     var pending = items.filter(function(i) { return i.store === s.id && !i.done; }).length;
-    return '<div class="store-card' + (s.fav?' fav':'') + '">' +
+    var needsLocation = s.lat === null;
+    return '<div class="store-card' + (s.fav?' fav':'') + (needsLocation?' needs-loc':'') + '">' +
       '<div class="store-ico">' + s.emoji + (s.fav ? '<span class="store-star">⭐</span>' : '') + '</div>' +
       '<div class="store-info">' +
         '<div class="store-name">' + s.name + '</div>' +
         '<div class="store-addr">' + (s.addr || '') + '</div>' +
+        (needsLocation ? '<div class="loc-nudge">⚠️ Save your location to enable alerts</div>' : '') +
         '<div class="store-tags">' +
           '<span class="stag ' + (s.geo?'aon':'aoff') + '">' + (s.geo?'Alerts on':'Alerts off') + '</span>' +
           '<button class="stag ' + (s.fav?'fon':'foff') + '" onclick="toggleFav(' + s.id + ')">' + (s.fav?'★ Fav':'☆ Fav') + '</button>' +
-          (s.lat !== null ? '<span class="stag lon">✓ Location saved</span>' : '<button class="stag loff" onclick="pinHere(' + s.id + ')">Save location</button>') +
+          (needsLocation
+            ? '<button class="stag loc-needed" onclick="pinHere(' + s.id + ')">📍 Save location</button>'
+            : '<span class="stag lon">✓ Location saved</span>') +
         '</div>' +
       '</div>' +
       '<div class="store-right">' +
@@ -697,9 +712,9 @@ function delStore(id) {
   persist(); renderStores();
 }
 function pinHere(id) {
-  if (lat === null) { alert('Enable GPS first, then tap Pin location.'); return; }
+  if (lat === null) { alert('Enable GPS first using the button at the top, then tap Save location.'); return; }
   var s = stores.find(function(s){return s.id===id;});
-  if (s) { s.lat=lat; s.lng=lng; persist(); renderStores(); alert(s.name + ' — location saved!'); }
+  if (s) { s.lat=lat; s.lng=lng; persist(); renderStores(); }
 }
 function setRadius(v) {
   radius = parseInt(v);
