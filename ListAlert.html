@@ -87,6 +87,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .srow{display:flex;gap:8px}
 .srow .sinput{margin-bottom:0;flex:1}
 .sbtn{height:44px;padding:0 16px;background:var(--green);border:none;border-radius:var(--r-sm);color:#0A0A0A;font-size:14px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;white-space:nowrap;flex-shrink:0}
+.loc-btn{width:100%;height:38px;margin-top:8px;background:none;border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:"Outfit",sans-serif;transition:all .15s}
+.loc-btn:active{background:var(--bg3);color:var(--text)}
 .result-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer}
 .result-card:active{background:var(--bg3)}
 .result-name{font-size:14px;font-weight:600;color:var(--text);flex:1}
@@ -268,6 +270,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
           <input class="sinput" id="szip" placeholder="Zip code (e.g. 75075)" maxlength="10"/>
           <button class="sbtn" onclick="doSearch()">Search</button>
         </div>
+        <button class="loc-btn" onclick="useMyLocation()">📍 Use my current location</button>
       </div>
       <div id="search-results"></div>
       <div id="stores-list"></div>
@@ -360,24 +363,6 @@ var radius = parseInt(localStorage.getItem('la_radius')   || '800');
 var nid    = parseInt(localStorage.getItem('la_nid')      || '1');
 var watchId = null, lat = null, lng = null, ss = {}, curTab = 'list', searchResults = [];
 var EMOJIS = ['🛒','🏪','🥦','💊','🧴','🧺','🥩','🏬','🍎','🌿'];
-
-// Seed demo data
-if (!stores.length) {
-  stores = [
-    {id:1,name:'Kroger',addr:'Legacy Dr, Plano TX 75024',emoji:'🛒',geo:true,fav:true,lat:null,lng:null},
-    {id:2,name:'Whole Foods',addr:'Preston Rd, Dallas TX 75093',emoji:'🥦',geo:true,fav:false,lat:null,lng:null},
-    {id:3,name:'CVS',addr:'Parker Rd, Plano TX 75023',emoji:'💊',geo:false,fav:false,lat:null,lng:null}
-  ];
-  items = [
-    {id:1,name:'Eggs',store:1,done:false},
-    {id:2,name:'Salmon',store:2,done:false},
-    {id:3,name:'Face cream',store:3,done:false},
-    {id:4,name:'Milk',store:1,done:false},
-    {id:5,name:'Spinach',store:null,done:false}
-  ];
-  nid = 10;
-  persist();
-}
 
 document.getElementById('radius-range').value = radius;
 document.getElementById('radius-lbl').textContent = radius + 'm';
@@ -533,36 +518,104 @@ function showBanner(store, names) {
 }
 
 // ── Store search ───────────────────────────────────────────────
+
+// Convert zip to lat/lng using Nominatim (geocoding only — reliable for this)
+function zipToLatLng(zip) {
+  return fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&postalcode=' + encodeURIComponent(zip), {headers:{'Accept-Language':'en'}})
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.length) throw new Error('zip_not_found');
+      return {lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon)};
+    });
+}
+
+// Core search function — isolated for easy phone app / Google Places transition
+// Input: storeName (string), centerLat (number), centerLng (number)
+// Output: Promise resolving to array of {name, addr, lat, lng}
+function searchStores(storeName, centerLat, centerLng) {
+  var delta = 0.09; // ~10km bounding box
+  var bbox = (centerLat - delta) + ',' + (centerLng - delta) + ',' + (centerLat + delta) + ',' + (centerLng + delta);
+  var query = '[out:json][timeout:10];(node["name"~"' + storeName + '",i]["shop"]('+bbox+');node["name"~"' + storeName + '",i]["amenity"]('+bbox+');way["name"~"' + storeName + '",i]["shop"]('+bbox+'););out center 8;';
+  return fetch('https://listalert.serbronn93.workers.dev/?target=overpass', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'data=' + encodeURIComponent(query)
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('overpass_error');
+    return r.json();
+  })
+  .then(function(data) {
+    if (!data.elements || !data.elements.length) return [];
+    return data.elements.map(function(el) {
+      var elLat = el.lat || (el.center && el.center.lat);
+      var elLng = el.lon || (el.center && el.center.lon);
+      var tags = el.tags || {};
+      var addr = [tags['addr:housenumber'], tags['addr:street'], tags['addr:city'], tags['addr:state']].filter(Boolean).join(' ');
+      if (!addr) addr = tags['addr:full'] || '';
+      var d = dist(centerLat, centerLng, elLat, elLng);
+      return {name: tags.name || storeName, addr: addr, lat: elLat, lng: elLng, dist: d};
+    })
+    .filter(function(r) { return r.lat && r.lng; })
+    .sort(function(a,b) { return a.dist - b.dist; })
+    .slice(0, 6);
+  });
+}
+
 function doSearch() {
   var name = document.getElementById('sname').value.trim();
   var zip  = document.getElementById('szip').value.trim();
   if (!name) { alert('Enter a store name.'); return; }
-  var q = name + (zip ? ' ' + zip : '');
   var res = document.getElementById('search-results');
   res.innerHTML = '<div class="empty">Searching...</div>';
-  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&q=' + encodeURIComponent(q), {headers:{'Accept-Language':'en'}})
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (!data.length) { res.innerHTML = '<div class="empty">No results. Try a different name or zip.</div>'; return; }
-      searchResults = [];
-      data.forEach(function(p) {
-        var parts = p.display_name.split(',');
-        var pname = parts[0].trim();
-        var addr  = parts.slice(1, 4).join(',').trim();
-        var zc    = (p.address && p.address.postcode) ? p.address.postcode : zip;
-        if (zc && addr.indexOf(zc) === -1) addr += ' ' + zc;
-        searchResults.push({name: pname, addr: addr, lat: parseFloat(p.lat), lng: parseFloat(p.lon)});
-      });
-      var html = '';
-      searchResults.forEach(function(r, i) {
-        html += '<div class="result-card" onclick="addResult(' + i + ')">';
-        html += '<div style="flex:1"><div class="result-name">' + r.name + '</div>';
-        html += '<div class="result-addr">' + r.addr + '</div></div>';
-        html += '<span class="add-lbl">+ Add</span></div>';
-      });
-      res.innerHTML = html;
-    })
-    .catch(function() { res.innerHTML = '<div class="empty" style="color:var(--red)">Search failed. Check connection.</div>'; });
+
+  var locationPromise;
+  if (zip) {
+    locationPromise = zipToLatLng(zip).catch(function() {
+      res.innerHTML = '<div class="empty" style="color:var(--red)">Zip code not found. Try again.</div>';
+      throw new Error('stop');
+    });
+  } else if (lat !== null) {
+    locationPromise = Promise.resolve({lat: lat, lng: lng});
+  } else {
+    res.innerHTML = '<div class="empty">Enter a zip code or enable GPS to search.</div>';
+    return;
+  }
+
+  locationPromise.then(function(center) {
+    return searchStores(name, center.lat, center.lng);
+  }).then(function(results) {
+    searchResults = results;
+    if (!results.length) {
+      res.innerHTML = '<div class="empty">No results nearby. Try a different name or zip.</div>';
+      return;
+    }
+    var html = '';
+    results.forEach(function(r, i) {
+      var distStr = r.dist < 1000 ? Math.round(r.dist) + 'm' : (r.dist/1000).toFixed(1) + 'km';
+      html += '<div class="result-card" onclick="addResult(' + i + ')">';
+      html += '<div style="flex:1"><div class="result-name">' + r.name + '</div>';
+      html += '<div class="result-addr">' + (r.addr || 'Tap to add') + ' <span style="color:var(--text3)">· ' + distStr + '</span></div></div>';
+      html += '<span class="add-lbl">+ Add</span></div>';
+    });
+    res.innerHTML = html;
+  }).catch(function(e) {
+    if (e.message !== 'stop') {
+      res.innerHTML = '<div class="empty" style="color:var(--red)">Search failed. Check connection and try again.</div>';
+    }
+  });
+}
+
+function useMyLocation() {
+  var res = document.getElementById('search-results');
+  if (lat !== null) {
+    document.getElementById('szip').value = '';
+    document.getElementById('szip').placeholder = 'Using your location';
+    res.innerHTML = '<div class="empty" style="color:var(--green)">📍 Using your current location — enter a store name and search.</div>';
+  } else {
+    res.innerHTML = '<div class="empty" style="color:var(--amber)">Enable GPS first using the button at the top of the screen.</div>';
+    startGPS();
+  }
 }
 
 function addResult(idx) {
@@ -575,6 +628,7 @@ function addResult(idx) {
   document.getElementById('search-results').innerHTML = '';
   document.getElementById('sname').value = '';
   document.getElementById('szip').value = '';
+  document.getElementById('szip').placeholder = 'Zip code (e.g. 75075)';
   renderStores();
 }
 
@@ -593,7 +647,7 @@ function renderStores() {
         '<div class="store-tags">' +
           '<span class="stag ' + (s.geo?'aon':'aoff') + '">' + (s.geo?'Alerts on':'Alerts off') + '</span>' +
           '<button class="stag ' + (s.fav?'fon':'foff') + '" onclick="toggleFav(' + s.id + ')">' + (s.fav?'★ Fav':'☆ Fav') + '</button>' +
-          (s.lat !== null ? '<span class="stag lon">📍 Pinned</span>' : '<button class="stag loff" onclick="pinHere(' + s.id + ')">Pin location</button>') +
+          (s.lat !== null ? '<span class="stag lon">✓ Location saved</span>' : '<button class="stag loff" onclick="pinHere(' + s.id + ')">Save location</button>') +
         '</div>' +
       '</div>' +
       '<div class="store-right">' +
@@ -615,7 +669,7 @@ function delStore(id) {
 function pinHere(id) {
   if (lat === null) { alert('Enable GPS first, then tap Pin location.'); return; }
   var s = stores.find(function(s){return s.id===id;});
-  if (s) { s.lat=lat; s.lng=lng; persist(); renderStores(); alert(s.name + ' pinned!'); }
+  if (s) { s.lat=lat; s.lng=lng; persist(); renderStores(); alert(s.name + ' — location saved!'); }
 }
 function setRadius(v) {
   radius = parseInt(v);
@@ -881,7 +935,7 @@ async function runRecipeExtraction() {
   }
 
   try {
-    var response = await fetch('https://listalert.serbronn93.workers.dev/', {
+    var response = await fetch('https://listalert.serbronn93.workers.dev/?target=anthropic', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
