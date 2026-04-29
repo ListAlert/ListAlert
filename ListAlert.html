@@ -1067,13 +1067,7 @@ async function runRecipeExtraction() {
 
     var data = await response.json();
 
-    // DEBUG — show everything for inspire tab
-    if (recipeTab === 'inspire') {
-      showRecipeError('Raw API response: ' + JSON.stringify(data).slice(0, 400));
-      recipeLoading = false;
-      resetGoBtn();
-      return;
-    }
+    
 
     if (data.error) {
       showRecipeError('API said: ' + data.error.type + ' — ' + data.error.message);
