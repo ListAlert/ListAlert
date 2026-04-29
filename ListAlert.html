@@ -395,13 +395,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 <div class="modal-backdrop" id="recipe-modal" onclick="closeRecipeModalBackdrop(event)">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span>🍳</span> From a Recipe</div>
-    <div class="modal-subtitle">Paste recipe text or a URL — Claude will pull out the ingredients for you.</div>
+    <div class="modal-title"><span>🍳</span> Build Your List</div>
+    <div class="modal-subtitle">Scan a recipe, paste text, or get inspired — Claude will pull out the ingredients.</div>
 
-    <div class="modal-tabs">
+    <div class="modal-tabs" style="flex-wrap:wrap;gap:4px">
       <button class="modal-tab active" id="rtab-paste" onclick="switchRecipeTab('paste')">Paste text</button>
       <button class="modal-tab" id="rtab-url" onclick="switchRecipeTab('url')">URL</button>
       <button class="modal-tab" id="rtab-photo" onclick="switchRecipeTab('photo')">📷 Photo</button>
+      <button class="modal-tab" id="rtab-inspire" onclick="switchRecipeTab('inspire')" style="background:var(--violet-dim);color:var(--violet);border-color:var(--violet-border)">✨ Inspire</button>
     </div>
 
     <div class="modal-input-wrap" id="recipe-input-area">
@@ -912,6 +913,7 @@ function switchRecipeTab(tab) {
   document.getElementById('rtab-paste').classList.toggle('active', tab === 'paste');
   document.getElementById('rtab-url').classList.toggle('active', tab === 'url');
   document.getElementById('rtab-photo').classList.toggle('active', tab === 'photo');
+  document.getElementById('rtab-inspire').classList.toggle('active', tab === 'inspire');
   document.getElementById('recipe-result-area').innerHTML = '';
   extractedIngredients = [];
   recipePhotoBase64 = null;
@@ -923,6 +925,10 @@ function switchRecipeTab(tab) {
   } else if (tab === 'url') {
     area.innerHTML = '<input class="modal-url" id="recipe-url" type="url" placeholder="https://www.allrecipes.com/recipe/..."/>' +
       '<div class="modal-url-note">⚠️ Some recipe sites block outside requests. If it fails, paste the text instead.</div>';
+  } else if (tab === 'inspire') {
+    area.innerHTML =
+      '<textarea class="modal-textarea" id="inspire-text" placeholder="What are you in the mood for?\n\nTry: &quot;pepperoni pizza&quot;, &quot;high protein breakfast&quot;, &quot;low carb dinner&quot;, &quot;something my kids will eat&quot;, &quot;pre-workout meal&quot;..." style="min-height:100px"></textarea>' +
+      '<div class="modal-url-note" style="color:var(--violet);opacity:0.8">✨ Claude will suggest a meal and build your shopping list automatically.</div>';
   } else {
     area.innerHTML =
       '<div class="photo-drop" id="photo-drop-zone" onclick="document.getElementById(\'photo-file-input\').click()">' +
@@ -937,7 +943,7 @@ function resetGoBtn() {
   var btn = document.getElementById('recipe-go-btn');
   if (!btn) return;
   btn.disabled = false;
-  btn.innerHTML = '<span id="recipe-go-label">Extract ingredients</span>';
+  btn.innerHTML = '<span id="recipe-go-label">' + (recipeTab === 'inspire' ? 'Inspire my list ✨' : 'Extract ingredients') + '</span>';
 }
 
 function setGoBtnLoading() {
@@ -1019,6 +1025,11 @@ async function runRecipeExtraction() {
         }
       ]
     }];
+  } else if (recipeTab === 'inspire') {
+    var inspireInput = (document.getElementById('inspire-text') || {}).value || '';
+    inspireInput = inspireInput.trim();
+    if (!inspireInput) { alert('Tell us what you\'re in the mood for first.'); recipeLoading = false; resetGoBtn(); return; }
+    messages = [{ role: 'user', content: inspireInput }];
   } else {
     var input = '';
     if (recipeTab === 'paste') {
@@ -1040,19 +1051,30 @@ async function runRecipeExtraction() {
   }
 
   try {
+    var systemPrompt = recipeTab === 'inspire'
+      ? 'You are a meal planning assistant. When given a craving, dish name, or dietary goal, pick one specific simple meal that fits and return ONLY a JSON array of grocery store ingredient names needed to make it. No quantities, no measurements, no prep notes, no explanation, no markdown. Just the raw JSON array. Example output: ["Chicken Breast","Garlic","Olive Oil","Lemon","Rosemary"]'
+      : 'You are a grocery list assistant. When asked to extract ingredients, return ONLY a raw JSON array of strings. No markdown, no explanation, no backticks. Just the array.';
     var response = await fetch('https://listalert.serbronn93.workers.dev/?target=anthropic', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
         max_tokens: 1000,
-        system: 'You are a grocery list assistant. When asked to extract ingredients, return ONLY a raw JSON array of strings. No markdown, no explanation, no backticks. Just the array.',
+        system: systemPrompt,
         messages: messages
       })
     });
 
     var data = await response.json();
-    // DEBUG: show full response
+
+    // DEBUG — show everything for inspire tab
+    if (recipeTab === 'inspire') {
+      showRecipeError('Raw API response: ' + JSON.stringify(data).slice(0, 400));
+      recipeLoading = false;
+      resetGoBtn();
+      return;
+    }
+
     if (data.error) {
       showRecipeError('API said: ' + data.error.type + ' — ' + data.error.message);
       recipeLoading = false;
@@ -1091,6 +1113,8 @@ async function runRecipeExtraction() {
   } catch(e) {
     var errMsg = recipeTab === 'photo'
       ? 'API error: ' + (e && e.message ? e.message : JSON.stringify(e))
+      : recipeTab === 'inspire'
+      ? 'Couldn\'t generate a list for that. Try being more specific — like "chicken tacos," "high protein breakfast," or "low carb dinner."'
       : 'Couldn\'t parse the ingredients. Try pasting more of the recipe text, or make sure it includes a clear ingredient list.';
     showRecipeError(errMsg);
     resetGoBtn();
