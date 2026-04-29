@@ -60,8 +60,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .add-bar input::placeholder{color:var(--text3)}
 .add-bar input:focus{border-color:var(--green)}
 .add-bar button{height:46px;padding:0 18px;background:var(--green);border:none;border-radius:var(--r-sm);color:#0A0A0A;font-size:15px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;flex-shrink:0}
-.add-bar .recipe-btn{height:46px;width:46px;padding:0;background:var(--violet-dim);border:1px solid var(--violet-border);border-radius:var(--r-sm);color:var(--violet);font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.add-bar .recipe-btn:active{background:var(--violet);color:#0A0A0A}
+.add-bar .recipe-btn{height:46px;padding:0 12px;background:var(--violet-dim);border:1px solid var(--violet-border);border-radius:var(--r-sm);color:var(--violet);font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:5px;font-family:"Outfit",sans-serif;transition:all .15s}
+.add-bar .recipe-btn:active{background:var(--violet);color:#fff}
 
 /* List tab */
 .card-list{margin:12px 16px 0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
@@ -223,6 +223,23 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .ob-btn{width:100%;height:52px;background:var(--green);border:none;border-radius:var(--r);color:#0A0A0A;font-size:16px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;margin-bottom:10px}
 .ob-skip{width:100%;height:36px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;font-family:"Outfit",sans-serif}
 
+/* Demo mode */
+.demo-backdrop{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;background:var(--bg);max-width:430px;margin:0 auto}
+.demo-app-frame{flex:1;overflow:hidden;position:relative;pointer-events:none;user-select:none}
+.demo-caption{flex-shrink:0;background:rgba(10,10,10,0.97);border-top:1px solid var(--border);padding:14px 20px max(16px,env(safe-area-inset-bottom))}
+.demo-caption-text{font-size:14px;color:var(--text);line-height:1.5;min-height:42px}
+.demo-progress{display:flex;gap:4px;margin-bottom:10px}
+.demo-pip{flex:1;height:3px;border-radius:2px;background:var(--bg4);transition:background .3s}
+.demo-pip.done{background:var(--green)}
+.demo-pip.active{background:var(--green);opacity:0.5}
+.demo-btns{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.demo-skip{background:none;border:none;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer;font-family:"Outfit",sans-serif;padding:0}
+.demo-next{background:var(--green);border:none;border-radius:8px;color:#0A0A0A;font-size:13px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;padding:8px 18px}
+
+/* Demo fake app states */
+.demo-screen{position:absolute;inset:0;background:var(--bg);overflow:hidden}
+.demo-highlight{position:absolute;border-radius:12px;box-shadow:0 0 0 2000px rgba(0,0,0,0.6);pointer-events:none;transition:all .4s;z-index:10}
+
 /* Photo upload tab */
 .photo-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1.5px dashed var(--violet-border);border-radius:var(--r-sm);padding:28px 16px;cursor:pointer;background:var(--violet-dim);transition:all .15s;position:relative}
 .photo-drop:active{border-color:var(--violet);background:rgba(167,139,250,0.2)}
@@ -289,42 +306,85 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
   <!-- Add bar: input + recipe button + add button -->
   <div class="add-bar" id="add-bar">
     <input id="item-input" placeholder="Add an item..." onkeydown="if(event.key==='Enter')addItem()"/>
-    <button class="recipe-btn" onclick="openRecipeModal()" title="Import from recipe">🍳</button>
+    <button class="recipe-btn" onclick="openRecipeModal()" title="Import from recipe">🍳 Recipe</button>
     <button onclick="addItem()">Add</button>
   </div>
 
+</div>
+
+<!-- ── Demo Prompt ────────────────────────────────────────────── -->
+<div id="demo-prompt" class="modal-backdrop" style="display:none">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span>👋</span> Welcome to ListAlert</div>
+    <div class="modal-subtitle" style="padding-bottom:16px">Want to see a quick 30-second demo of how it works before you get started?</div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="skipDemo()">No thanks</button>
+      <button class="modal-go" onclick="watchDemo()"><span>Show me →</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Demo Mode ─────────────────────────────────────────────── -->
+<div id="demo-backdrop" class="demo-backdrop" style="display:none">
+  <div class="demo-app-frame" id="demo-frame"></div>
+  <div class="demo-caption">
+    <div class="demo-progress" id="demo-progress"></div>
+    <div class="demo-caption-text" id="demo-caption"></div>
+    <div class="demo-btns">
+      <button class="demo-skip" onclick="endDemo()">Skip demo</button>
+      <button class="demo-next" onclick="demoNext()">Next →</button>
+    </div>
+  </div>
 </div>
 
 <!-- ── Onboarding Modal ───────────────────────────────────────── -->
 <div id="ob-modal" style="display:none" class="ob-backdrop">
   <div class="ob-sheet">
     <div class="ob-logo">List<em>Alert</em></div>
-    <div class="ob-tagline">A smarter shopping list that alerts you when you're near a store that has your items.</div>
+    <div class="ob-tagline">Build your shopping list from a recipe photo — then get alerted when you're near the right store.</div>
     <div class="ob-steps">
+      <div class="ob-step">
+        <div class="ob-step-ico v">🍳</div>
+        <div>
+          <div class="ob-step-title">Scan a recipe or add items</div>
+          <div class="ob-step-body">Photograph a recipe and we'll extract every ingredient automatically. Or add items one by one — whatever works for you.</div>
+        </div>
+      </div>
       <div class="ob-step">
         <div class="ob-step-ico g">🏪</div>
         <div>
           <div class="ob-step-title">Add your stores</div>
-          <div class="ob-step-body">Search for the stores you shop at and save them to your list.</div>
+          <div class="ob-step-body">Search for the stores you shop at. Assign items to each one so ListAlert knows where you're headed.</div>
         </div>
       </div>
       <div class="ob-step">
         <div class="ob-step-ico a">📍</div>
         <div>
-          <div class="ob-step-title">Enable location</div>
-          <div class="ob-step-body">ListAlert watches your location in the background so it knows when you're nearby.</div>
-        </div>
-      </div>
-      <div class="ob-step">
-        <div class="ob-step-ico v">🛒</div>
-        <div>
           <div class="ob-step-title">Get alerted automatically</div>
-          <div class="ob-step-body">When you're close to a store that has items on your list, you'll get a reminder.</div>
+          <div class="ob-step-body">Enable location and ListAlert will remind you when you're near a store that has your items.</div>
         </div>
       </div>
     </div>
-    <button class="ob-btn" onclick="finishOnboarding(true)">Get started — add a store</button>
-    <button class="ob-skip" onclick="finishOnboarding(false)">I'll explore on my own</button>
+    <button class="ob-btn" onclick="finishOnboarding(false)">Start building my list</button>
+    <button class="ob-skip" onclick="finishOnboarding(true)">Set up stores first</button>
+  </div>
+</div>
+
+<!-- ── Home Screen Prompt ─────────────────────────────────────── -->
+<div id="homescreen-prompt" class="modal-backdrop" style="display:none">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span>📲</span> Save to your home screen</div>
+    <div class="modal-subtitle" style="padding-bottom:4px">Add ListAlert to your home screen so your list is always one tap away — and your data stays safe even if you close the browser.</div>
+    <div style="margin:14px 20px 0;background:var(--bg3);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;color:var(--text2);line-height:1.7">
+      On iPhone: tap <b style="color:var(--text)">Share</b> → <b style="color:var(--text)">Add to Home Screen</b><br>
+      On Android: tap <b style="color:var(--text)">Menu ⋮</b> → <b style="color:var(--text)">Add to Home Screen</b>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="dismissHomescreen()">Maybe later</button>
+      <button class="modal-go" onclick="dismissHomescreen()"><span>Got it ✓</span></button>
+    </div>
   </div>
 </div>
 
@@ -1083,18 +1143,390 @@ function showRecipeError(msg) {
     '<div class="recipe-error"><div class="recipe-error-box">' + msg + '</div></div>';
 }
 
-// ── Onboarding ─────────────────────────────────────────────────
+// ── Demo Mode ──────────────────────────────────────────────────
+var demoStep = 0;
+var demoTimer = null;
+
+var DEMO_STEPS = [
+  {
+    duration: 2000,
+    caption: 'Welcome to ListAlert — a smarter shopping list that alerts you when you\'re near a store that has your items.',
+    html: function() { return demoScreen('list', [], [], 'wait', ''); }
+  },
+  {
+    duration: 2000,
+    caption: 'New users see a quick setup guide. Tap "Get started" to add your stores.',
+    html: function() { return demoOnboarding(); }
+  },
+  {
+    duration: 1000,
+    caption: 'Enable GPS so ListAlert knows when you\'re nearby a store.',
+    html: function() { return demoScreen('stores', [], [], 'on', ''); }
+  },
+  {
+    duration: 3000,
+    caption: 'Search for Whole Foods near you — results show distance so you pick the right location.',
+    html: function() { return demoScreen('stores', [], [], 'on', 'search-wf'); }
+  },
+  {
+    duration: 3000,
+    caption: 'Add Kroger the same way. Now you have two stores — each will alert you independently.',
+    html: function() { return demoScreen('stores', [{name:'Whole Foods Market',emoji:'🌿',saved:true}], [], 'on', 'search-kr'); }
+  },
+  {
+    duration: 2000,
+    caption: 'Both stores saved with their locations. Mark your favorite for quick access.',
+    html: function() { return demoScreen('stores', [{name:'Whole Foods Market',emoji:'🌿',saved:true,fav:true},{name:'Kroger',emoji:'🛒',saved:true}], [], 'on', ''); }
+  },
+  {
+    duration: 2000,
+    caption: 'Tap the 🍳 button to import ingredients directly from a recipe photo.',
+    html: function() { return demoScreen('list', [{name:'Whole Foods Market',emoji:'🌿',saved:true,fav:true},{name:'Kroger',emoji:'🛒',saved:true}], [], 'on', 'recipe-btn'); }
+  },
+  {
+    duration: 3000,
+    caption: 'Choose a photo from your library — a recipe card, cookbook page, or screenshot.',
+    html: function() { return demoRecipePhoto(); }
+  },
+  {
+    duration: 3000,
+    caption: 'Claude reads the photo and extracts every ingredient automatically.',
+    html: function() { return demoRecipeExtracting(); }
+  },
+  {
+    duration: 3000,
+    caption: 'Ingredients land on your list instantly. Deselect anything you already have.',
+    html: function() { return demoRecipeResults(); }
+  },
+  {
+    duration: 2000,
+    caption: 'Add any extra items manually — cleaning supplies, medicine, whatever you need.',
+    html: function() { return demoScreen('list', [{name:'Whole Foods Market',emoji:'🌿',saved:true,fav:true},{name:'Kroger',emoji:'🛒',saved:true}], demoItems(), 'on', 'add-item'); }
+  },
+  {
+    duration: 3000,
+    caption: 'Use the Assign tab to split items between stores — Whole Foods for fresh, Kroger for staples.',
+    html: function() { return demoAssign(); }
+  },
+  {
+    duration: 2000,
+    caption: 'Enable push notifications so alerts reach you even when the app is closed.',
+    html: function() { return demoNotifPrompt(); }
+  },
+  {
+    duration: 3000,
+    caption: 'When you\'re near Kroger, ListAlert reminds you exactly what you need there. Tap "Got it" to open your list.',
+    html: function() { return demoNotification(); }
+  }
+];
+
+function demoItems() {
+  return [
+    {name:'Salmon',store:'Whole Foods Market',done:false},
+    {name:'Spinach',store:'Whole Foods Market',done:false},
+    {name:'Avocado',store:'Whole Foods Market',done:false},
+    {name:'Milk',store:'Kroger',done:false},
+    {name:'Eggs',store:'Kroger',done:false},
+    {name:'Butter',store:'Kroger',done:false},
+    {name:'Dish soap',store:'Kroger',done:false},
+  ];
+}
+
+function demoHeader(gpsState) {
+  var cls = gpsState === 'on' ? 'on' : gpsState === 'wait' ? 'wait' : 'off';
+  var txt = gpsState === 'on' ? 'GPS active' : 'Enable GPS';
+  return '<div class="header"><h1>List<em>Alert</em></h1>' +
+    '<button class="gps-btn ' + cls + '" style="pointer-events:none">' +
+    '<span class="dot ' + cls + '"></span><span>' + txt + '</span></button></div>';
+}
+
+function demoTabs(active) {
+  return '<div class="tabs">' +
+    ['list','stores','organize'].map(function(t) {
+      var label = t === 'organize' ? 'Assign' : t.charAt(0).toUpperCase() + t.slice(1);
+      return '<div class="tab' + (t===active?' active':'') + '">' + label + '</div>';
+    }).join('') + '</div>';
+}
+
+function demoScreen(tab, stores, items, gps, highlight) {
+  var content = '';
+  if (tab === 'list') {
+    var listHtml = items.length
+      ? '<div class="card-list" style="margin:12px 16px 0">' + items.map(function(it) {
+          return '<div class="item-row"><div class="chk"></div>' +
+            '<div class="item-info"><div class="item-name">' + it.name + '</div>' +
+            (it.store ? '<div class="item-tag">' + it.store + '</div>' : '') +
+            '</div></div>';
+        }).join('') + '</div>'
+      : '<div class="empty"><b>Your list is empty</b>Add items below, or tap 🍳 to import from a recipe.</div>';
+    content = '<div style="flex:1;overflow:hidden">' + listHtml + '</div>' +
+      '<div class="add-bar" style="position:relative;transform:none;border-top:1px solid var(--border)">' +
+        (highlight === 'recipe-btn'
+          ? '<input style="flex:1;height:46px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text3);padding:0 14px;font-family:Outfit,sans-serif" placeholder="Add an item..." disabled/>' +
+            '<button class="recipe-btn" style="box-shadow:0 0 0 3px var(--violet),0 0 20px var(--violet)">🍳</button>' +
+            '<button style="height:46px;padding:0 18px;background:var(--green);border:none;border-radius:10px;color:#0A0A0A;font-size:15px;font-weight:700;font-family:Outfit,sans-serif">Add</button>'
+          : '<input style="flex:1;height:46px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text3);padding:0 14px;font-family:Outfit,sans-serif" placeholder="Add an item..." disabled/>' +
+            '<button class="recipe-btn">🍳</button>' +
+            '<button style="height:46px;padding:0 18px;background:var(--green);border:none;border-radius:10px;color:#0A0A0A;font-size:15px;font-weight:700;font-family:Outfit,sans-serif">Add</button>') +
+      '</div>';
+  } else if (tab === 'stores') {
+    var storeCards = stores.map(function(s) {
+      return '<div class="store-card' + (s.fav?' fav':'') + '" style="margin-bottom:10px">' +
+        '<div class="store-ico">' + s.emoji + (s.fav?'<span class="store-star">⭐</span>':'') + '</div>' +
+        '<div class="store-info"><div class="store-name">' + s.name + '</div>' +
+        '<div class="store-tags"><span class="stag aon">Alerts on</span>' +
+        (s.fav?'<span class="stag fon">★ Fav</span>':'') +
+        '<span class="stag lon">✓ Location saved</span></div></div>' +
+        '<div class="store-right"><button class="toggle on" style="pointer-events:none"></button></div></div>';
+    }).join('');
+    var searchHtml = '';
+    if (highlight === 'search-wf') {
+      searchHtml = '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:8px">' +
+        '<div class="result-card" style="border:none;box-shadow:0 0 0 2px var(--green)">' +
+        '<div style="flex:1"><div class="result-name">Whole Foods Market</div>' +
+        '<div class="result-addr">Preston Rd, Plano TX · 1.2km</div></div>' +
+        '<span class="add-lbl">+ Add</span></div>' +
+        '<div class="result-card" style="border:none"><div style="flex:1"><div class="result-name">Whole Foods Market</div>' +
+        '<div class="result-addr">Greenville Ave, Dallas TX · 8.4km</div></div>' +
+        '<span class="add-lbl">+ Add</span></div></div>';
+    } else if (highlight === 'search-kr') {
+      searchHtml = '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:8px">' +
+        '<div class="result-card" style="border:none;box-shadow:0 0 0 2px var(--green)">' +
+        '<div style="flex:1"><div class="result-name">Kroger</div>' +
+        '<div class="result-addr">Legacy Dr, Plano TX · 0.8km</div></div>' +
+        '<span class="add-lbl">+ Add</span></div>' +
+        '<div class="result-card" style="border:none"><div style="flex:1"><div class="result-name">Kroger</div>' +
+        '<div class="result-addr">Parker Rd, Plano TX · 3.1km</div></div>' +
+        '<span class="add-lbl">+ Add</span></div></div>';
+    }
+    content = '<div style="flex:1;overflow:hidden;padding:12px 16px 0">' + searchHtml + storeCards + '</div>';
+  }
+  return demoHeader(gps) + demoTabs(tab === 'organize' ? 'organize' : tab) +
+    '<div style="display:flex;flex-direction:column;flex:1;overflow:hidden">' + content + '</div>';
+}
+
+function demoOnboarding() {
+  return demoHeader('wait') + demoTabs('list') +
+    '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:flex-end;z-index:10">' +
+    '<div style="width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding:32px 24px 32px">' +
+    '<div class="ob-logo">List<em>Alert</em></div>' +
+    '<div class="ob-tagline">A smarter shopping list that alerts you when you\'re near a store.</div>' +
+    '<div class="ob-steps">' +
+    '<div class="ob-step"><div class="ob-step-ico g">🏪</div><div><div class="ob-step-title">Add your stores</div><div class="ob-step-body">Search for the stores you shop at.</div></div></div>' +
+    '<div class="ob-step"><div class="ob-step-ico a">📍</div><div><div class="ob-step-title">Enable location</div><div class="ob-step-body">ListAlert watches your location in the background.</div></div></div>' +
+    '<div class="ob-step"><div class="ob-step-ico v">🛒</div><div><div class="ob-step-title">Get alerted automatically</div><div class="ob-step-body">Get reminded when you\'re near a store with items.</div></div></div>' +
+    '</div>' +
+    '<button class="ob-btn" style="box-shadow:0 0 0 3px var(--green),0 0 20px rgba(74,222,128,0.4)">Get started — add a store</button>' +
+    '<button class="ob-skip">I\'ll explore on my own</button>' +
+    '</div></div>';
+}
+
+function demoRecipePhoto() {
+  return demoHeader('on') + demoTabs('list') +
+    '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:flex-end;z-index:10">' +
+    '<div style="width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 24px">' +
+    '<div style="width:36px;height:4px;border-radius:2px;background:var(--bg4);margin:12px auto 0"></div>' +
+    '<div style="font-size:17px;font-weight:700;padding:16px 20px 0;display:flex;align-items:center;gap:8px"><span style="color:var(--violet)">🍳</span> From a Recipe</div>' +
+    '<div style="display:flex;gap:4px;padding:14px 20px 0">' +
+    '<button class="modal-tab">Paste text</button><button class="modal-tab">URL</button>' +
+    '<button class="modal-tab active" style="background:var(--violet-dim);color:var(--violet);border-color:var(--violet-border)">📷 Photo</button></div>' +
+    '<div style="padding:14px 20px 0">' +
+    '<div style="border:1.5px dashed var(--violet-border);border-radius:10px;padding:28px 16px;background:var(--violet-dim);text-align:center;box-shadow:0 0 0 3px var(--violet),0 0 20px rgba(167,139,250,0.3)">' +
+    '<div style="font-size:32px">📷</div>' +
+    '<div style="font-size:14px;font-weight:600;color:var(--violet);margin-top:8px">Tap to take or choose a photo</div>' +
+    '<div style="font-size:12px;color:var(--text3);margin-top:4px">Recipe card, cookbook page, screenshot</div>' +
+    '</div></div>' +
+    '<div style="padding:16px 20px 0;display:flex;gap:8px">' +
+    '<button class="modal-cancel">Cancel</button>' +
+    '<button class="modal-go"><span>Extract ingredients</span></button></div>' +
+    '</div></div>';
+}
+
+function demoRecipeExtracting() {
+  return demoHeader('on') + demoTabs('list') +
+    '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:flex-end;z-index:10">' +
+    '<div style="width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 24px">' +
+    '<div style="width:36px;height:4px;border-radius:2px;background:var(--bg4);margin:12px auto 0"></div>' +
+    '<div style="font-size:17px;font-weight:700;padding:16px 20px 0;display:flex;align-items:center;gap:8px"><span style="color:var(--violet)">🍳</span> From a Recipe</div>' +
+    '<div style="padding:14px 20px 0">' +
+    '<div style="border-radius:10px;overflow:hidden;border:1px solid var(--violet-border)">' +
+    '<div style="background:#1a1a2e;padding:16px;font-size:13px;color:#aaa;font-family:monospace;line-height:1.8">' +
+    '<div><b style="color:#fff">INGREDIENTS</b></div>' +
+    '<div>6 frozen boneless chicken breasts</div>' +
+    '<div>2 jars red salsa</div>' +
+    '<div>1 can refried beans</div>' +
+    '<div>¼ cup taco seasoning</div>' +
+    '<div>Tortilla chips...</div>' +
+    '</div></div></div>' +
+    '<div style="padding:14px 20px 0;display:flex;gap:8px">' +
+    '<button class="modal-cancel">Cancel</button>' +
+    '<button class="modal-go" style="opacity:0.7"><div class="spinner"></div><span>Extracting...</span></button></div>' +
+    '</div></div>';
+}
+
+function demoRecipeResults() {
+  var ingredients = ['Chicken Breasts','Red Salsa','Refried Beans','Taco Seasoning','Tortilla Chips','Kosher Salt'];
+  return demoHeader('on') + demoTabs('list') +
+    '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:flex-end;z-index:10">' +
+    '<div style="width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 24px">' +
+    '<div style="width:36px;height:4px;border-radius:2px;background:var(--bg4);margin:12px auto 0"></div>' +
+    '<div style="font-size:17px;font-weight:700;padding:16px 20px 0;display:flex;align-items:center;gap:8px"><span style="color:var(--violet)">🍳</span> From a Recipe</div>' +
+    '<div style="padding:14px 20px 0">' +
+    '<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">' + ingredients.length + ' ingredients found — tap to deselect</div>' +
+    '<div style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow:hidden">' +
+    ingredients.map(function(name) {
+      return '<div class="recipe-item-row"><div class="recipe-item-check sel">' +
+        '<svg width="10" height="7" viewBox="0 0 10 7" fill="none"><path d="M1 3L3.5 5.5L9 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '</div><span class="recipe-item-name">' + name + '</span></div>';
+    }).join('') +
+    '</div></div>' +
+    '<div style="padding:16px 20px 0;display:flex;gap:8px">' +
+    '<button class="modal-cancel">Cancel</button>' +
+    '<button class="modal-go" style="box-shadow:0 0 0 2px var(--violet)"><span>Add to list</span></button></div>' +
+    '</div></div>';
+}
+
+function demoAssign() {
+  var wfItems = ['Chicken Breasts','Red Salsa','Salmon','Spinach','Avocado'];
+  var krItems = ['Milk','Eggs','Butter','Dish Soap','Taco Seasoning'];
+  return demoHeader('on') + demoTabs('organize') +
+    '<div style="flex:1;overflow:hidden;padding:12px 16px 0">' +
+    '<div class="org-group" style="margin-bottom:12px">' +
+    '<div class="org-hdr"><span class="org-hdr-ico">🌿</span><span class="org-hdr-name">Whole Foods Market</span><span class="org-hdr-count">' + wfItems.length + ' left</span></div>' +
+    wfItems.map(function(n) {
+      return '<div class="org-row"><span class="org-name">' + n + '</span>' +
+        '<select class="org-sel" style="pointer-events:none"><option>🌿 Whole Foods</option></select></div>';
+    }).join('') + '</div>' +
+    '<div class="org-group">' +
+    '<div class="org-hdr"><span class="org-hdr-ico">🛒</span><span class="org-hdr-name">Kroger</span><span class="org-hdr-count">' + krItems.length + ' left</span></div>' +
+    krItems.map(function(n) {
+      return '<div class="org-row"><span class="org-name">' + n + '</span>' +
+        '<select class="org-sel" style="pointer-events:none"><option>🛒 Kroger</option></select></div>';
+    }).join('') + '</div></div>';
+}
+
+function demoNotifPrompt() {
+  return demoHeader('on') + demoTabs('list') +
+    '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:10;padding:20px">' +
+    '<div style="background:var(--bg2);border-radius:16px;padding:24px;width:100%;max-width:320px;text-align:center">' +
+    '<div style="font-size:36px;margin-bottom:12px">🔔</div>' +
+    '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px">Enable Notifications</div>' +
+    '<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:20px">Allow ListAlert to send alerts when you\'re near a store with items on your list.</div>' +
+    '<button style="width:100%;height:46px;background:var(--green);border:none;border-radius:10px;color:#0A0A0A;font-size:15px;font-weight:700;font-family:Outfit,sans-serif;box-shadow:0 0 0 3px var(--green),0 0 20px rgba(74,222,128,0.3)">Allow Notifications</button>' +
+    '<button style="width:100%;height:36px;background:none;border:none;color:var(--text3);font-size:13px;font-family:Outfit,sans-serif;margin-top:8px">Not now</button>' +
+    '</div></div>';
+}
+
+function demoNotification() {
+  return demoHeader('on') + demoTabs('list') +
+    '<div style="flex:1;overflow:hidden">' +
+    '<div class="notif" style="margin:10px 16px 4px">' +
+    '<span class="notif-ico">🛒</span>' +
+    '<div style="flex:1">' +
+    '<div class="notif-title">You are near Kroger</div>' +
+    '<div class="notif-body">Still need: Milk, Eggs, Butter, Dish Soap, Taco Seasoning</div>' +
+    '<div class="notif-btns">' +
+    '<button class="nbtn p" style="box-shadow:0 0 0 2px var(--green)">Got it</button>' +
+    '<button class="nbtn">Not this time</button>' +
+    '</div></div></div>' +
+    '<div class="card-list" style="margin:8px 16px 0">' +
+    ['Milk','Eggs','Butter','Dish Soap','Taco Seasoning'].map(function(n) {
+      return '<div class="item-row"><div class="chk"></div>' +
+        '<div class="item-info"><div class="item-name">' + n + '</div>' +
+        '<div class="item-tag">🛒 Kroger</div></div></div>';
+    }).join('') + '</div></div>' +
+    '<div class="add-bar" style="position:relative;transform:none;border-top:1px solid var(--border)">' +
+    '<input style="flex:1;height:46px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text3);padding:0 14px;font-family:Outfit,sans-serif" placeholder="Add an item..." disabled/>' +
+    '<button class="recipe-btn">🍳</button>' +
+    '<button style="height:46px;padding:0 18px;background:var(--green);border:none;border-radius:10px;color:#0A0A0A;font-size:15px;font-weight:700;font-family:Outfit,sans-serif">Add</button></div>';
+}
+
+function watchDemo() {
+  document.getElementById('demo-prompt').classList.remove('open');
+  document.getElementById('demo-prompt').style.display = 'none';
+  startDemo();
+}
+
+function skipDemo() {
+  localStorage.setItem('la_demo_seen', '1');
+  document.getElementById('demo-prompt').classList.remove('open');
+  document.getElementById('demo-prompt').style.display = 'none';
+  if (!localStorage.getItem('la_onboarded')) {
+    document.getElementById('ob-modal').style.display = 'flex';
+  }
+}
+
+function startDemo() {
+  demoStep = 0;
+  document.getElementById('demo-backdrop').style.display = 'flex';
+  renderDemoStep();
+}
+
+function renderDemoStep() {
+  if (demoStep >= DEMO_STEPS.length) { endDemo(); return; }
+  var step = DEMO_STEPS[demoStep];
+
+  // Progress pips
+  var pips = DEMO_STEPS.map(function(_, i) {
+    return '<div class="demo-pip' + (i < demoStep ? ' done' : i === demoStep ? ' active' : '') + '"></div>';
+  }).join('');
+  document.getElementById('demo-progress').innerHTML = pips;
+  document.getElementById('demo-caption').textContent = step.caption;
+  document.getElementById('demo-frame').innerHTML = step.html();
+
+  if (demoTimer) clearTimeout(demoTimer);
+  demoTimer = setTimeout(function() { demoStep++; renderDemoStep(); }, step.duration);
+}
+
+function demoNext() {
+  if (demoTimer) clearTimeout(demoTimer);
+  demoStep++;
+  renderDemoStep();
+}
+
+function endDemo() {
+  if (demoTimer) clearTimeout(demoTimer);
+  localStorage.setItem('la_demo_seen', '1');
+  document.getElementById('demo-backdrop').style.display = 'none';
+  if (!localStorage.getItem('la_onboarded')) {
+    document.getElementById('ob-modal').style.display = 'flex';
+  }
+}
 function finishOnboarding(goToStores) {
   localStorage.setItem('la_onboarded', '1');
   document.getElementById('ob-modal').style.display = 'none';
-  if (goToStores) show('stores');
+  if (goToStores) {
+    show('stores');
+  } else {
+    show('list');
+    setTimeout(function() { openRecipeModal(); }, 300);
+  }
+  // Show home screen prompt once
+  if (!localStorage.getItem('la_homescreen')) {
+    setTimeout(function() {
+      var p = document.getElementById('homescreen-prompt');
+      p.style.display = 'flex';
+      setTimeout(function() { p.classList.add('open'); }, 10);
+    }, goToStores ? 1000 : 4000);
+  }
+}
+
+function dismissHomescreen() {
+  localStorage.setItem('la_homescreen', '1');
+  var p = document.getElementById('homescreen-prompt');
+  p.classList.remove('open');
+  setTimeout(function() { p.style.display = 'none'; }, 300);
 }
 
 // ── Init ───────────────────────────────────────────────────────
 renderList();
 renderNearby();
 show('list');
-if (!localStorage.getItem('la_onboarded')) {
+if (!localStorage.getItem('la_demo_seen')) {
+  var dp = document.getElementById('demo-prompt');
+  dp.style.display = 'flex';
+  setTimeout(function() { dp.classList.add('open'); }, 10);
+} else if (!localStorage.getItem('la_onboarded')) {
   document.getElementById('ob-modal').style.display = 'flex';
 }
 </script>
