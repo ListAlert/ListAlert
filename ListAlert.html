@@ -45,7 +45,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .view{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:88px}
 .view.active{display:block}
 
-/* Notification */
 .notif{margin:10px 16px 4px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:var(--r);padding:13px 15px;display:flex;gap:11px;align-items:flex-start}
 .notif-ico{font-size:20px;flex-shrink:0}
 .notif-title{font-size:14px;font-weight:700;color:var(--green)}
@@ -54,7 +53,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .nbtn{height:33px;padding:0 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;border:1px solid var(--green-border);background:transparent;color:var(--green)}
 .nbtn.p{background:var(--green);color:#0A0A0A;border-color:var(--green)}
 
-/* Add bar */
 .add-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:10px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--border);display:flex;gap:8px;z-index:100}
 .add-bar input{flex:1;height:46px;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:14px;font-weight:500;color:var(--text);background:var(--bg2);padding:0 14px;outline:none;font-family:"Outfit",sans-serif}
 .add-bar input::placeholder{color:var(--text3)}
@@ -63,7 +61,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .add-bar .recipe-btn{height:46px;padding:0 12px;background:var(--violet-dim);border:1px solid var(--violet-border);border-radius:var(--r-sm);color:var(--violet);font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:5px;font-family:"Outfit",sans-serif;transition:all .15s}
 .add-bar .recipe-btn:active{background:var(--violet);color:#fff}
 
-/* List tab */
 .card-list{margin:12px 16px 0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
 .item-row{display:flex;align-items:center;padding:13px 15px;gap:12px;background:var(--bg2);border-bottom:1px solid var(--border)}
 .item-row:last-child{border-bottom:none}
@@ -77,7 +74,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .item-tag{font-size:11px;font-weight:600;color:var(--text3);margin-top:2px}
 .del{font-size:21px;color:var(--text3);cursor:pointer;background:none;border:none;font-family:"Outfit",sans-serif;padding:2px 4px;line-height:1}
 
-/* Stores tab */
 .stores-wrap{padding:12px 16px 0}
 .search-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px}
 .search-label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px}
@@ -98,7 +94,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .store-card.needs-loc{border-color:var(--amber-border)}
 .loc-nudge{font-size:12px;color:var(--amber);font-weight:600;margin-bottom:5px;margin-top:2px}
 .stag.loc-needed{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border)}
-
 .store-card.fav{border-color:var(--amber-border);background:var(--amber-dim)}
 .store-ico{font-size:24px;flex-shrink:0;position:relative}
 .store-star{position:absolute;top:-4px;right:-4px;font-size:12px}
@@ -126,7 +121,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .radius-bar input[type=range]{flex:1;accent-color:var(--green)}
 .radius-bar span{font-size:12px;font-weight:700;color:var(--green);min-width:44px;text-align:right}
 
-/* Organize tab */
 .org-wrap{padding:12px 16px 0}
 .org-group{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
 .org-hdr{display:flex;align-items:center;padding:11px 14px;gap:9px;background:var(--bg3);border-bottom:1px solid var(--border)}
@@ -143,7 +137,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .empty b{color:var(--text2);display:block;font-size:16px;margin-bottom:6px}
 .sec-label{padding:14px 20px 6px;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase}
 
-/* ── Recipe Modal ─────────────────────────────────────────────── */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-backdrop.open{opacity:1;pointer-events:all}
 .modal-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)}
@@ -168,7 +161,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .modal-go{height:46px;flex:2;background:var(--violet);border:none;border-radius:var(--r-sm);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s}
 .modal-go:disabled{opacity:0.5;cursor:not-allowed}
 
-/* Recipe results preview */
 .recipe-preview{padding:14px 20px 0}
 .recipe-preview-title{font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px}
 .recipe-items{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
@@ -182,11 +174,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .recipe-error{padding:14px 20px 0}
 .recipe-error-box{background:var(--red-dim);border:1px solid rgba(248,113,113,0.3);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;color:var(--red);line-height:1.5}
 
-/* Spinner */
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 
-/* Near Me Now */
 .nearby-wrap{margin:12px 16px 0}
 .nearby-label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px;padding:0 2px}
 .nearby-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border:1px solid var(--green-border);border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:background .15s}
@@ -199,13 +189,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .nearby-gps-prompt{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:var(--r);cursor:pointer}
 .nearby-gps-prompt span{font-size:13px;color:var(--amber);font-weight:600;flex:1}
 
-/* Near Me Now */
 .filter-bar{display:flex;gap:7px;padding:12px 16px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .filter-bar::-webkit-scrollbar{display:none}
 .filter-chip{height:32px;padding:0 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;font-family:"Outfit",sans-serif;white-space:nowrap;flex-shrink:0;transition:all .15s}
 .filter-chip.active{background:var(--green-dim);color:var(--green);border-color:var(--green-border)}
 
-/* Onboarding modal */
 .ob-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:flex;align-items:flex-end;justify-content:center}
 .ob-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;padding:32px 24px max(32px,env(safe-area-inset-bottom));animation:slideup .35s cubic-bezier(.32,.72,0,1)}
 @keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -223,7 +211,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .ob-btn{width:100%;height:52px;background:var(--green);border:none;border-radius:var(--r);color:#0A0A0A;font-size:16px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;margin-bottom:10px}
 .ob-skip{width:100%;height:36px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;font-family:"Outfit",sans-serif}
 
-/* Demo mode */
 .demo-backdrop{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;background:var(--bg);max-width:430px;margin:0 auto}
 .demo-app-frame{flex:1;overflow:hidden;position:relative;pointer-events:none;user-select:none}
 .demo-caption{flex-shrink:0;background:rgba(10,10,10,0.97);border-top:1px solid var(--border);padding:14px 20px max(16px,env(safe-area-inset-bottom))}
@@ -236,11 +223,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .demo-skip{background:none;border:none;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer;font-family:"Outfit",sans-serif;padding:0}
 .demo-next{background:var(--green);border:none;border-radius:8px;color:#0A0A0A;font-size:13px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;padding:8px 18px}
 
-/* Demo fake app states */
 .demo-screen{position:absolute;inset:0;background:var(--bg);overflow:hidden}
 .demo-highlight{position:absolute;border-radius:12px;box-shadow:0 0 0 2000px rgba(0,0,0,0.6);pointer-events:none;transition:all .4s;z-index:10}
 
-/* Photo upload tab */
 .photo-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1.5px dashed var(--violet-border);border-radius:var(--r-sm);padding:28px 16px;cursor:pointer;background:var(--violet-dim);transition:all .15s;position:relative}
 .photo-drop:active{border-color:var(--violet);background:rgba(167,139,250,0.2)}
 .photo-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
@@ -269,14 +254,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
     <div class="tab" id="tab-organize" onclick="show('organize')">Assign</div>
   </div>
 
-  <!-- LIST -->
   <div class="view active" id="view-list">
     <div id="notif-area"></div>
     <div id="nearby-area"></div>
     <div id="list-body"></div>
   </div>
 
-  <!-- STORES -->
   <div class="view" id="view-stores">
     <div class="radius-bar">
       <label>Alert radius</label>
@@ -298,12 +281,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
     </div>
   </div>
 
-  <!-- ORGANIZE -->
   <div class="view" id="view-organize">
     <div class="org-wrap" id="org-body"></div>
   </div>
 
-  <!-- Add bar: input + recipe button + add button -->
   <div class="add-bar" id="add-bar">
     <input id="item-input" placeholder="Add an item..." onkeydown="if(event.key==='Enter')addItem()"/>
     <button class="recipe-btn" onclick="openRecipeModal()" title="Import from recipe">🍳 Recipe</button>
@@ -317,10 +298,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title"><span>👋</span> Welcome to ListAlert</div>
-    <div class="modal-subtitle" style="padding-bottom:16px">Want to see a quick 30-second demo of how it works before you get started?</div>
+    <div class="modal-subtitle" style="padding-bottom:16px">See how ListAlert turns recipes into smart shopping lists — with store grouping, sale alerts, and location reminders.</div>
     <div class="modal-actions">
-      <button class="modal-cancel" onclick="skipDemo()">No thanks</button>
-      <button class="modal-go" onclick="watchDemo()"><span>Show me →</span></button>
+      <button class="modal-cancel" onclick="skipDemo()">Skip</button>
+      <button class="modal-go" onclick="watchDemo()"><span>Show me how it works →</span></button>
     </div>
   </div>
 </div>
@@ -332,8 +313,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
     <div class="demo-progress" id="demo-progress"></div>
     <div class="demo-caption-text" id="demo-caption"></div>
     <div class="demo-btns">
-      <button class="demo-skip" onclick="endDemo()">Skip demo</button>
-      <button class="demo-next" onclick="demoNext()">Next →</button>
+      <button class="demo-skip" onclick="endDemo()">Skip</button>
+      <button class="demo-next" id="demo-next-btn" onclick="demoNext()">Next →</button>
     </div>
   </div>
 </div>
@@ -389,7 +370,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 </div>
 
 <!-- ── Recipe Modal ──────────────────────────────────────────── -->
-<!-- Hidden file input lives here permanently — never re-injected -->
 <input type="file" accept="image/*" id="photo-file-input" style="display:none" onchange="handlePhotoSelect(this)"/>
 
 <div class="modal-backdrop" id="recipe-modal" onclick="closeRecipeModalBackdrop(event)">
@@ -397,20 +377,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
     <div class="modal-handle"></div>
     <div class="modal-title"><span>🍳</span> Build Your List</div>
     <div class="modal-subtitle">Scan a recipe, paste text, or get inspired — Claude will pull out the ingredients.</div>
-
     <div class="modal-tabs" style="flex-wrap:wrap;gap:4px">
       <button class="modal-tab active" id="rtab-paste" onclick="switchRecipeTab('paste')">Paste text</button>
       <button class="modal-tab" id="rtab-url" onclick="switchRecipeTab('url')">URL</button>
       <button class="modal-tab" id="rtab-photo" onclick="switchRecipeTab('photo')">📷 Photo</button>
       <button class="modal-tab" id="rtab-inspire" onclick="switchRecipeTab('inspire')" style="background:var(--violet-dim);color:var(--violet);border-color:var(--violet-border)">✨ Inspire</button>
     </div>
-
-    <div class="modal-input-wrap" id="recipe-input-area">
-      <!-- filled by switchRecipeTab -->
-    </div>
-
+    <div class="modal-input-wrap" id="recipe-input-area"></div>
     <div id="recipe-result-area"></div>
-
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeRecipeModal()">Cancel</button>
       <button class="modal-go" id="recipe-go-btn" onclick="runRecipeExtraction()">
@@ -421,7 +395,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 </div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────
 var stores = JSON.parse(localStorage.getItem('la_stores') || '[]');
 var items  = JSON.parse(localStorage.getItem('la_items')  || '[]');
 var radius = parseInt(localStorage.getItem('la_radius')   || '800');
@@ -439,1114 +412,130 @@ var EMOJI_MAP = [
   {emoji:'🐾', keywords:['pet','petco','petsmart','pet supplies']},
   {emoji:'🔨', keywords:['home depot','lowe\'s','lowes','ace hardware','hardware','menards','true value']},
 ];
-
-function getStoreEmoji(name) {
-  var lower = name.toLowerCase();
-  for (var i = 0; i < EMOJI_MAP.length; i++) {
-    for (var j = 0; j < EMOJI_MAP[i].keywords.length; j++) {
-      if (lower.indexOf(EMOJI_MAP[i].keywords[j]) !== -1) {
-        return EMOJI_MAP[i].emoji;
-      }
-    }
-  }
-  return '🛍️';
-}
-
+function getStoreEmoji(name){var lower=name.toLowerCase();for(var i=0;i<EMOJI_MAP.length;i++){for(var j=0;j<EMOJI_MAP[i].keywords.length;j++){if(lower.indexOf(EMOJI_MAP[i].keywords[j])!==-1){return EMOJI_MAP[i].emoji;}}}return '🛍️';}
 document.getElementById('radius-range').value = radius;
 document.getElementById('radius-lbl').textContent = radius + 'm';
-
-// One-time emoji migration for existing saved stores
-if (!localStorage.getItem('la_emoji_v2')) {
-  stores.forEach(function(s) { s.emoji = getStoreEmoji(s.name); });
-  persist();
-  localStorage.setItem('la_emoji_v2', '1');
-}
-
-function persist() {
-  localStorage.setItem('la_stores', JSON.stringify(stores));
-  localStorage.setItem('la_items',  JSON.stringify(items));
-  localStorage.setItem('la_radius', radius);
-  localStorage.setItem('la_nid',    nid);
-}
-
-// ── Tabs ───────────────────────────────────────────────────────
-function show(t) {
-  curTab = t;
-  ['list','stores','organize'].forEach(function(n) {
-    document.getElementById('tab-' + n).classList.toggle('active', n === t);
-    document.getElementById('view-' + n).classList.toggle('active', n === t);
-  });
-  document.getElementById('add-bar').style.display = t === 'list' ? 'flex' : 'none';
-  if (t === 'list')     { renderList(); renderNearby(); }
-  if (t === 'stores')   renderStores();
-  if (t === 'organize') renderOrganize();
-}
-
-// ── GPS ────────────────────────────────────────────────────────
-function startGPS() {
-  if (!navigator.geolocation) { setGPS('off', 'No GPS'); return; }
-  setGPS('wait', 'Locating...');
-  navigator.geolocation.getCurrentPosition(function(p) {
-    lat = p.coords.latitude; lng = p.coords.longitude;
-    setGPS('on', 'GPS active');
-    if (!watchId) watchId = navigator.geolocation.watchPosition(function(p) {
-      lat = p.coords.latitude; lng = p.coords.longitude; checkFences();
-    }, null, {enableHighAccuracy:true, maximumAge:10000});
-    checkFences();
-    if (window.Notification && Notification.permission === 'default') Notification.requestPermission();
-  }, function() { setGPS('off', 'GPS denied'); }, {enableHighAccuracy:true, timeout:15000});
-}
-
-function setGPS(state, txt) {
-  document.getElementById('gpsbtn').className = 'gps-btn ' + state;
-  document.getElementById('gpsdot').className = 'dot ' + state;
-  document.getElementById('gpstxt').textContent = txt;
-}
-
-// ── Geofencing ─────────────────────────────────────────────────
-function dist(a, b, c, d) {
-  var R=6371000, dL=(c-a)*Math.PI/180, dN=(d-b)*Math.PI/180;
-  var x = Math.sin(dL/2)*Math.sin(dL/2) + Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);
-  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
-}
-
-function checkFences() {
-  if (lat === null) return;
-  stores.forEach(function(s) {
-    if (!s.geo || s.lat === null) return;
-    var d = dist(lat, lng, s.lat, s.lng);
-    var pending = items.filter(function(i) { return i.store === s.id && !i.done; });
-    var st = ss[s.id] || (ss[s.id] = {inside:false, alerted:false});
-    if (d <= radius) {
-      if (!st.inside) {
-        st.inside = true;
-        if (pending.length && !st.alerted) { st.alerted = true; fireAlert(s, pending); }
-      }
-    } else if (d > radius * 1.5) {
-      st.inside = false; st.alerted = false;
-    }
-  });
-  if (curTab === 'list') renderNearby();
-}
-
-// ── Near Me Now ────────────────────────────────────────────────
-function renderNearby() {
-  var el = document.getElementById('nearby-area');
-  if (!el) return;
-
-  // GPS not active yet
-  if (lat === null) {
-    el.innerHTML = '<div class="nearby-wrap">' +
-      '<div class="nearby-gps-prompt" onclick="startGPS()">' +
-        '<span>📍 Enable GPS to see nearby stores</span>' +
-        '<span style="color:var(--amber);font-size:13px;font-weight:700">Enable →</span>' +
-      '</div>' +
-    '</div>';
-    return;
-  }
-
-  // Find nearby stores with pending items — use 3x radius as "near me" threshold
-  var nearbyStores = [];
-  stores.forEach(function(s) {
-    if (s.lat === null) return;
-    var d = dist(lat, lng, s.lat, s.lng);
-    var nearThreshold = Math.max(radius * 3, 2000);
-    if (d > nearThreshold) return;
-    var pending = items.filter(function(i) { return i.store === s.id && !i.done; });
-    if (!pending.length) return;
-    nearbyStores.push({store: s, pending: pending.length, dist: d});
-  });
-
-  if (!nearbyStores.length) { el.innerHTML = ''; return; }
-
-  nearbyStores.sort(function(a,b){ return a.dist - b.dist; });
-
-  var html = '<div class="nearby-wrap"><div class="nearby-label">Near you now</div>';
-  nearbyStores.forEach(function(n) {
-    var distStr = n.dist < 1000
-      ? Math.round(n.dist) + 'm away'
-      : (n.dist / 1000).toFixed(1) + 'km away';
-    html += '<div class="nearby-row" onclick="setFilter(' + n.store.id + ');document.getElementById(\'view-list\').scrollTop=200">' +
-      '<div class="nearby-ico">' + n.store.emoji + '</div>' +
-      '<div class="nearby-info">' +
-        '<div class="nearby-name">' + n.store.name + '</div>' +
-        '<div class="nearby-meta">' + distStr + '</div>' +
-      '</div>' +
-      '<div class="nearby-count">' + n.pending + ' item' + (n.pending !== 1 ? 's' : '') + '</div>' +
-    '</div>';
-  });
-  html += '</div>';
-  el.innerHTML = html;
-}
-
-function fireAlert(store, pending) {
-  var names = pending.map(function(i) { return i.name; }).join(', ');
-  showBanner(store, names);
-  if (window.Notification && Notification.permission === 'granted') {
-    var n = new Notification('Near ' + store.name, {body: 'Still need: ' + names, tag: 'la-' + store.id, requireInteraction: true});
-    n.onclick = function() { gotIt(store.id); };
-  }
-}
-
-function gotIt(sid) {
-  if (ss[sid]) ss[sid].alerted = true;
-  document.getElementById('notif-area').innerHTML = '';
-  show('list');
-}
-
-function notNow(sid) {
-  if (ss[sid]) { ss[sid].alerted = false; ss[sid].inside = false; }
-  document.getElementById('notif-area').innerHTML = '';
-}
-
-function showBanner(store, names) {
-  document.getElementById('notif-area').innerHTML =
-    '<div class="notif">' +
-    '<span class="notif-ico">' + store.emoji + '</span>' +
-    '<div style="flex:1">' +
-    '<div class="notif-title">You are near ' + store.name + '</div>' +
-    '<div class="notif-body">Still need: ' + names + '</div>' +
-    '<div class="notif-btns">' +
-    '<button class="nbtn p" onclick="gotIt(' + store.id + ')">Got it</button>' +
-    '<button class="nbtn" onclick="notNow(' + store.id + ')">Not this time</button>' +
-    '</div></div></div>';
-}
-
-// ── Store search ───────────────────────────────────────────────
-
-// Convert zip to lat/lng using Nominatim (geocoding only — reliable for this)
-function zipToLatLng(zip) {
-  return fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&postalcode=' + encodeURIComponent(zip), {headers:{'Accept-Language':'en'}})
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (!data.length) throw new Error('zip_not_found');
-      return {lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon)};
-    });
-}
-
-// Core search function — isolated for easy phone app / Google Places transition
-// Input: storeName (string), centerLat (number), centerLng (number)
-// Output: Promise resolving to array of {name, addr, lat, lng}
-function searchStores(storeName, centerLat, centerLng) {
-  var delta = 0.09; // ~10km bounding box
-  var bbox = (centerLat - delta) + ',' + (centerLng - delta) + ',' + (centerLat + delta) + ',' + (centerLng + delta);
-  var query = '[out:json][timeout:10];(node["name"~"' + storeName + '",i]["shop"~"supermarket|convenience|department_store|general|wholesale|grocery"]('+bbox+');way["name"~"' + storeName + '",i]["shop"~"supermarket|convenience|department_store|general|wholesale|grocery"]('+bbox+');node["name"~"' + storeName + '",i]["shop"]('+bbox+');way["name"~"' + storeName + '",i]["shop"]('+bbox+'););out center 8;';
-  return fetch('https://listalert.serbronn93.workers.dev/?target=overpass', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'data=' + encodeURIComponent(query)
-  })
-  .then(function(r) {
-    if (!r.ok) throw new Error('overpass_error');
-    return r.json();
-  })
-  .then(function(data) {
-    if (!data.elements || !data.elements.length) return [];
-    return data.elements.map(function(el) {
-      var elLat = el.lat || (el.center && el.center.lat);
-      var elLng = el.lon || (el.center && el.center.lon);
-      var tags = el.tags || {};
-      var addr = [tags['addr:housenumber'], tags['addr:street'], tags['addr:city'], tags['addr:state']].filter(Boolean).join(' ');
-      if (!addr) addr = tags['addr:full'] || '';
-      var d = dist(centerLat, centerLng, elLat, elLng);
-      return {name: tags.name || storeName, addr: addr, lat: elLat, lng: elLng, dist: d};
-    })
-    .filter(function(r) { return r.lat && r.lng; })
-    .sort(function(a,b) { return a.dist - b.dist; })
-    .slice(0, 6);
-  });
-}
-
-function doSearch() {
-  var name = document.getElementById('sname').value.trim();
-  var zip  = document.getElementById('szip').value.trim();
-  if (!name) { alert('Enter a store name.'); return; }
-  var res = document.getElementById('search-results');
-  res.innerHTML = '<div class="empty">Searching...</div>';
-
-  var locationPromise;
-  if (zip) {
-    locationPromise = zipToLatLng(zip).catch(function() {
-      res.innerHTML = '<div class="empty" style="color:var(--red)">Zip code not found. Try again.</div>';
-      throw new Error('stop');
-    });
-  } else if (lat !== null) {
-    locationPromise = Promise.resolve({lat: lat, lng: lng});
-  } else {
-    res.innerHTML = '<div class="empty">Enter a zip code or enable GPS to search.</div>';
-    return;
-  }
-
-  locationPromise.then(function(center) {
-    return searchStores(name, center.lat, center.lng);
-  }).then(function(results) {
-    searchResults = results;
-    if (!results.length) {
-      res.innerHTML = '<div class="empty">No results nearby. Try a different name or zip.</div>';
-      return;
-    }
-    var html = '';
-    results.forEach(function(r, i) {
-      var distStr = r.dist < 1000 ? Math.round(r.dist) + 'm' : (r.dist/1000).toFixed(1) + 'km';
-      html += '<div class="result-card" onclick="addResult(' + i + ')">';
-      html += '<div style="flex:1"><div class="result-name">' + r.name + '</div>';
-      html += '<div class="result-addr">' + (r.addr || 'Tap to add') + ' <span style="color:var(--text3)">· ' + distStr + '</span></div></div>';
-      html += '<span class="add-lbl">+ Add</span></div>';
-    });
-    res.innerHTML = html;
-  }).catch(function(e) {
-    if (e.message !== 'stop') {
-      res.innerHTML = '<div class="empty" style="color:var(--red)">Search failed. Check connection and try again.</div>';
-    }
-  });
-}
-
-function useMyLocation() {
-  var res = document.getElementById('search-results');
-  if (lat !== null) {
-    document.getElementById('szip').value = '';
-    document.getElementById('szip').placeholder = 'Using your location';
-    res.innerHTML = '<div class="empty" style="color:var(--green)">📍 Using your current location — enter a store name and search.</div>';
-  } else {
-    res.innerHTML = '<div class="empty" style="color:var(--amber)">Enable GPS first using the button at the top of the screen.</div>';
-    startGPS();
-  }
-}
-
-function addResult(idx) {
-  var r = searchResults[idx];
-  if (!r) return;
-  var exists = stores.find(function(s) { return s.name === r.name && s.addr === r.addr; });
-  if (exists) { alert(r.name + ' is already saved.'); return; }
-  stores.push({id:nid++, name:r.name, addr:r.addr, emoji:getStoreEmoji(r.name), geo:true, fav:false, lat:r.lat, lng:r.lng});
-  persist();
-  document.getElementById('search-results').innerHTML = '';
-  document.getElementById('sname').value = '';
-  document.getElementById('szip').value = '';
-  document.getElementById('szip').placeholder = 'Zip code (e.g. 75075)';
-  renderStores();
-  // Show nudge to save location
-  var nudge = document.createElement('div');
-  nudge.style.cssText = 'margin:10px 16px 0;padding:12px 14px;background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:14px;font-size:13px;color:var(--amber);font-weight:600;line-height:1.5';
-  nudge.innerHTML = '📍 <b>' + r.name + '</b> added! Now tap <b>Save location</b> on the card below while you\'re near this store — this is what enables alerts.';
-  var storesList = document.getElementById('stores-list');
-  storesList.parentNode.insertBefore(nudge, storesList);
-  setTimeout(function() { if (nudge.parentNode) nudge.parentNode.removeChild(nudge); }, 6000);
-}
-
-// ── Stores render ──────────────────────────────────────────────
-function renderStores() {
-  var el = document.getElementById('stores-list');
-  if (!stores.length) { el.innerHTML = '<div class="empty"><b>No stores yet</b>Search above to add your first store. ListAlert will alert you when you\'re nearby.</div>'; return; }
-  var sorted = stores.slice().sort(function(a,b) { return (b.fav?1:0)-(a.fav?1:0); });
-  el.innerHTML = sorted.map(function(s) {
-    var pending = items.filter(function(i) { return i.store === s.id && !i.done; }).length;
-    var needsLocation = s.lat === null;
-    return '<div class="store-card' + (s.fav?' fav':'') + (needsLocation?' needs-loc':'') + '">' +
-      '<div class="store-ico">' + s.emoji + (s.fav ? '<span class="store-star">⭐</span>' : '') + '</div>' +
-      '<div class="store-info">' +
-        '<div class="store-name">' + s.name + '</div>' +
-        '<div class="store-addr">' + (s.addr || '') + '</div>' +
-        (needsLocation ? '<div class="loc-nudge">⚠️ Save your location to enable alerts</div>' : '') +
-        '<div class="store-tags">' +
-          '<span class="stag ' + (s.geo?'aon':'aoff') + '">' + (s.geo?'Alerts on':'Alerts off') + '</span>' +
-          '<button class="stag ' + (s.fav?'fon':'foff') + '" onclick="toggleFav(' + s.id + ')">' + (s.fav?'★ Fav':'☆ Fav') + '</button>' +
-          (needsLocation
-            ? '<button class="stag loc-needed" onclick="pinHere(' + s.id + ')">📍 Save location</button>'
-            : '<span class="stag lon">✓ Location saved</span>') +
-        '</div>' +
-      '</div>' +
-      '<div class="store-right">' +
-        '<button class="toggle ' + (s.geo?'on':'off') + '" onclick="toggleGeo(' + s.id + ')"></button>' +
-        '<button class="sdel" onclick="delStore(' + s.id + ')">×</button>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-
-function toggleGeo(id) { var s=stores.find(function(s){return s.id===id;}); if(s){s.geo=!s.geo;persist();renderStores();} }
-function toggleFav(id) { var s=stores.find(function(s){return s.id===id;}); if(s){s.fav=!s.fav;persist();renderStores();} }
-function delStore(id) {
-  if (!confirm('Remove this store?')) return;
-  stores = stores.filter(function(s){return s.id!==id;});
-  items.forEach(function(i){if(i.store===id)i.store=null;});
-  persist(); renderStores();
-}
-function pinHere(id) {
-  if (lat === null) { alert('Enable GPS first using the button at the top, then tap Save location.'); return; }
-  var s = stores.find(function(s){return s.id===id;});
-  if (s) { s.lat=lat; s.lng=lng; persist(); renderStores(); }
-}
-function setRadius(v) {
-  radius = parseInt(v);
-  document.getElementById('radius-lbl').textContent = v + 'm';
-  persist();
-}
-
-// ── List render ────────────────────────────────────────────────
-var listFilter = null; // store id or null for all
-
-function renderList() {
-  var el = document.getElementById('list-body');
-  if (!items.length) { el.innerHTML = '<div class="empty"><b>Your list is empty</b>Add items below, or tap 🍳 to import from a recipe.</div>'; return; }
-  var sm = {}; stores.forEach(function(s){sm[s.id]=s;});
-
-  // Sort: active first, done at bottom
-  var sorted = items.slice().sort(function(a,b){ return (a.done?1:0)-(b.done?1:0); });
-
-  // Apply store filter
-  var filtered = listFilter
-    ? sorted.filter(function(it){ return it.store === listFilter; })
-    : sorted;
-
-  // Build filter bar
-  var filterBar = '<div class="filter-bar">';
-  filterBar += '<button class="filter-chip' + (!listFilter?' active':'') + '" onclick="setFilter(null)">All</button>';
-  stores.forEach(function(s){
-    var hasPending = items.some(function(i){ return i.store===s.id && !i.done; });
-    if (!hasPending && listFilter !== s.id) return;
-    filterBar += '<button class="filter-chip' + (listFilter===s.id?' active':'') + '" onclick="setFilter(' + s.id + ')">' + s.emoji + ' ' + s.name + '</button>';
-  });
-  filterBar += '</div>';
-
-  var listHtml = filtered.length
-    ? '<div class="card-list">' + filtered.map(function(it) {
-        var s = sm[it.store]; var badge = s ? s.emoji + ' ' + s.name : '';
-        return '<div class="item-row">' +
-          '<div class="chk' + (it.done?' done':'') + '" onclick="toggleItem(' + it.id + ')">' +
-            '<svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-          '</div>' +
-          '<div class="item-info">' +
-            '<div class="item-name' + (it.done?' done':'') + '">' + it.name + '</div>' +
-            (badge && !listFilter ? '<div class="item-tag">' + badge + '</div>' : '') +
-          '</div>' +
-          '<button class="del" onclick="delItem(' + it.id + ')">×</button>' +
-        '</div>';
-      }).join('') + '</div>'
-    : '<div class="empty">No items for this store yet.<br>Add some on the List tab or assign them in <b>Assign</b>.</div>';
-
-  el.innerHTML = filterBar + listHtml;
-}
-
-function setFilter(storeId) {
-  listFilter = storeId;
-  renderList();
-}
-
-function addItem() {
-  var input = document.getElementById('item-input');
-  var name = input.value.trim();
-  if (!name) return;
-  items.push({id:nid++, name:name, store:null, done:false});
-  input.value = ''; persist(); renderList(); input.focus();
-}
-function toggleItem(id) { var it=items.find(function(i){return i.id===id;}); if(it){it.done=!it.done;persist();renderList();} }
-function delItem(id) { items=items.filter(function(i){return i.id!==id;}); persist(); renderList(); }
-
-// ── Organize render ────────────────────────────────────────────
-function renderOrganize() {
-  var el = document.getElementById('org-body');
-  if (!items.length) { el.innerHTML = '<div class="empty"><b>Nothing to assign</b>Add items on the List tab first.</div>'; return; }
-  var grouped = {}; stores.forEach(function(s){grouped[s.id]=[];});
-  var unassigned = [];
-  items.forEach(function(it) {
-    if (it.store && grouped[it.store] !== undefined) grouped[it.store].push(it);
-    else unassigned.push(it);
-  });
-  var html = '';
-  if (unassigned.length) {
-    html += '<div class="sec-label">Not assigned</div><div class="org-group">' +
-      unassigned.map(function(it){return orgRow(it);}).join('') + '</div>';
-  }
-  stores.forEach(function(s) {
-    var its = grouped[s.id] || [];
-    if (!its.length) return;
-    var left = its.filter(function(i){return !i.done;}).length;
-    html += '<div class="org-group">' +
-      '<div class="org-hdr"><span class="org-hdr-ico">' + s.emoji + '</span><span class="org-hdr-name">' + s.name + '</span><span class="org-hdr-count">' + left + ' left</span></div>' +
-      its.map(function(it){return orgRow(it);}).join('') +
-    '</div>';
-  });
-  el.innerHTML = html;
-}
-
-function orgRow(it) {
-  var opts = '<option value="">No store</option>' + stores.map(function(s) {
-    return '<option value="' + s.id + '"' + (it.store===s.id?' selected':'') + '>' + s.emoji + ' ' + s.name + '</option>';
-  }).join('');
-  return '<div class="org-row"><span class="org-name">' + it.name + '</span>' +
-    '<select class="org-sel" onchange="assign(' + it.id + ',this.value)">' + opts + '</select></div>';
-}
-
-function assign(itemId, storeId) {
-  var it = items.find(function(i){return i.id===itemId;});
-  if (it) { it.store = storeId ? parseInt(storeId) : null; persist(); renderOrganize(); renderList(); }
-}
-
-// ── Recipe Modal ───────────────────────────────────────────────
-var recipeTab = 'paste';
-var extractedIngredients = []; // [{name, selected}]
-var recipeLoading = false;
-var recipePhotoBase64 = null;  // base64 string of selected image
-var recipePhotoMime = 'image/jpeg';
-
-function openRecipeModal() {
-  recipeTab = 'paste';
-  extractedIngredients = [];
-  recipePhotoBase64 = null;
-  document.getElementById('recipe-result-area').innerHTML = '';
-  document.getElementById('recipe-modal').classList.add('open');
-  switchRecipeTab('paste');
-  resetGoBtn();
-}
-
-function closeRecipeModal() {
-  document.getElementById('recipe-modal').classList.remove('open');
-}
-
-function closeRecipeModalBackdrop(e) {
-  if (e.target === document.getElementById('recipe-modal')) closeRecipeModal();
-}
-
-function switchRecipeTab(tab) {
-  recipeTab = tab;
-  document.getElementById('rtab-paste').classList.toggle('active', tab === 'paste');
-  document.getElementById('rtab-url').classList.toggle('active', tab === 'url');
-  document.getElementById('rtab-photo').classList.toggle('active', tab === 'photo');
-  document.getElementById('rtab-inspire').classList.toggle('active', tab === 'inspire');
-  document.getElementById('recipe-result-area').innerHTML = '';
-  extractedIngredients = [];
-  recipePhotoBase64 = null;
-  resetGoBtn();
-
-  var area = document.getElementById('recipe-input-area');
-  if (tab === 'paste') {
-    area.innerHTML = '<textarea class="modal-textarea" id="recipe-text" placeholder="Paste your recipe here — ingredients, steps, anything. Claude will find the ingredients."></textarea>';
-  } else if (tab === 'url') {
-    area.innerHTML = '<input class="modal-url" id="recipe-url" type="url" placeholder="https://www.allrecipes.com/recipe/..."/>' +
-      '<div class="modal-url-note">⚠️ Some recipe sites block outside requests. If it fails, paste the text instead.</div>';
-  } else if (tab === 'inspire') {
-    area.innerHTML =
-      '<textarea class="modal-textarea" id="inspire-text" placeholder="What are you in the mood for?\n\nTry: &quot;pepperoni pizza&quot;, &quot;high protein breakfast&quot;, &quot;low carb dinner&quot;, &quot;something my kids will eat&quot;, &quot;pre-workout meal&quot;..." style="min-height:100px"></textarea>' +
-      '<div class="modal-url-note" style="color:var(--violet);opacity:0.8">✨ Claude will suggest a meal and build your shopping list automatically.</div>';
-  } else {
-    area.innerHTML =
-      '<div class="photo-drop" id="photo-drop-zone" onclick="document.getElementById(\'photo-file-input\').click()">' +
-        '<div class="photo-drop-ico">📷</div>' +
-        '<div class="photo-drop-label">Tap to take or choose a photo</div>' +
-        '<div class="photo-drop-sub">Recipe card, cookbook page, screenshot — anything with ingredients</div>' +
-      '</div>';
-  }
-}
-
-function resetGoBtn() {
-  var btn = document.getElementById('recipe-go-btn');
-  if (!btn) return;
-  btn.disabled = false;
-  btn.innerHTML = '<span id="recipe-go-label">' + (recipeTab === 'inspire' ? 'Inspire my list ✨' : 'Extract ingredients') + '</span>';
-}
-
-function setGoBtnLoading() {
-  var btn = document.getElementById('recipe-go-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div><span>Extracting...</span>';
-}
-
-// ── Photo handling ─────────────────────────────────────────────
-function handlePhotoSelect(input) {
-  var file = input.files && input.files[0];
-  if (!file) return;
-  recipePhotoMime = file.type && file.type.startsWith('image/') ? file.type : 'image/jpeg';
-
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var dataUrl = e.target.result;
-    // Resize via canvas to keep payload under API limits
-    var img = new Image();
-    img.onload = function() {
-      var maxDim = 1120;
-      var w = img.width, h = img.height;
-      if (w > maxDim || h > maxDim) {
-        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-        else        { w = Math.round(w * maxDim / h); h = maxDim; }
-      }
-      var canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      var resized = canvas.toDataURL('image/jpeg', 0.85);
-      recipePhotoBase64 = resized.split(',')[1];
-      recipePhotoMime = 'image/jpeg';
-      var area = document.getElementById('recipe-input-area');
-      area.innerHTML =
-        '<div class="photo-preview-wrap">' +
-          '<img src="' + resized + '" alt="Recipe photo"/>' +
-          '<button class="photo-clear" onclick="clearPhoto()">×</button>' +
-        '</div>';
-    };
-    img.src = dataUrl;
-  };
-  reader.onerror = function(e) {
-    alert('FileReader error: ' + (reader.error ? reader.error.name + ' - ' + reader.error.message : 'unknown'));
-    showRecipeError('Could not read that image. Try a different file.');
-  };
-  reader.readAsDataURL(file);
-}
-
-function clearPhoto() {
-  recipePhotoBase64 = null;
-  document.getElementById('photo-file-input').value = '';
-  switchRecipeTab('photo');
-}
-
-async function runRecipeExtraction() {
-  if (recipeLoading) return;
-
-  // If we already have results shown, this is the "Add to list" phase
-  if (extractedIngredients.length) { addExtractedToList(); return; }
-
-  recipeLoading = true;
-  setGoBtnLoading();
-  document.getElementById('recipe-result-area').innerHTML = '';
-
-  var messages;
-
-  if (recipeTab === 'photo') {
-    if (!recipePhotoBase64) { alert('Choose a photo first.'); recipeLoading = false; resetGoBtn(); return; }
-    messages = [{
-      role: 'user',
-      content: [
-        {
-          type: 'image',
-          source: { type: 'base64', media_type: recipePhotoMime, data: recipePhotoBase64 }
-        },
-        {
-          type: 'text',
-          text: 'This is a photo of a recipe. Extract only the ingredient names. Return ONLY a JSON array of strings — clean grocery store names, no quantities, no measurements, no prep notes. Example: ["Flour","Butter","Eggs","Garlic"]. If you cannot find any ingredients, return [].'
-        }
-      ]
-    }];
-  } else if (recipeTab === 'inspire') {
-    var inspireInput = (document.getElementById('inspire-text') || {}).value || '';
-    inspireInput = inspireInput.trim();
-    if (!inspireInput) { alert('Tell us what you\'re in the mood for first.'); recipeLoading = false; resetGoBtn(); return; }
-    messages = [{ role: 'user', content: inspireInput }];
-  } else {
-    var input = '';
-    if (recipeTab === 'paste') {
-      input = (document.getElementById('recipe-text') || {}).value || '';
-      input = input.trim();
-      if (!input) { alert('Paste some recipe text first.'); recipeLoading = false; resetGoBtn(); return; }
-    } else {
-      var url = (document.getElementById('recipe-url') || {}).value || '';
-      url = url.trim();
-      if (!url) { alert('Enter a URL first.'); recipeLoading = false; resetGoBtn(); return; }
-      input = 'Recipe URL: ' + url;
-    }
-
-    var prompt = recipeTab === 'paste'
-      ? 'Extract only the ingredient names from this recipe. Return ONLY a JSON array of strings — clean, simple grocery store names with no quantities, no measurements, no prep notes. Example: ["Flour","Butter","Eggs","Garlic"]. Recipe:\n\n' + input
-      : 'The user wants to import a recipe from this URL: ' + input.replace('Recipe URL: ', '') + '\n\nYou cannot fetch URLs, so respond with a JSON object: {"error": "url_unsupported"}. Do not attempt to guess or fabricate ingredients.';
-
-    messages = [{ role: 'user', content: prompt }];
-  }
-
-  try {
-    var systemPrompt = recipeTab === 'inspire'
-      ? 'You are a meal planning assistant. When given a craving, dish name, or dietary goal, pick one specific simple meal that fits and return ONLY a JSON array of grocery store ingredient names needed to make it. No quantities, no measurements, no prep notes, no explanation, no markdown. Just the raw JSON array. Example output: ["Chicken Breast","Garlic","Olive Oil","Lemon","Rosemary"]'
-      : 'You are a grocery list assistant. When asked to extract ingredients, return ONLY a raw JSON array of strings. No markdown, no explanation, no backticks. Just the array.';
-    var response = await fetch('https://listalert.serbronn93.workers.dev/?target=anthropic', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: messages
-      })
-    });
-
-    var data = await response.json();
-
-    
-
-    if (data.error) {
-      showRecipeError('API said: ' + data.error.type + ' — ' + data.error.message);
-      recipeLoading = false;
-      resetGoBtn();
-      return;
-    }
-    var raw = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text.trim() : '';
-
-    // Strip any accidental markdown fences
-    raw = raw.replace(/```json|```/g, '').trim();
-
-    // Check for url_unsupported error object
-    if (raw.indexOf('"url_unsupported"') !== -1) {
-      showRecipeError('This URL couldn\'t be fetched automatically. Please open the recipe page, select all the text, copy it, and paste it using the "Paste text" tab instead.');
-      recipeLoading = false;
-      resetGoBtn();
-      return;
-    }
-
-    var parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed) || !parsed.length) throw new Error('empty');
-
-    // Deduplicate and clean
-    var seen = {};
-    extractedIngredients = parsed
-      .filter(function(name) {
-        var k = name.toLowerCase();
-        if (seen[k]) return false;
-        seen[k] = true;
-        return typeof name === 'string' && name.trim();
-      })
-      .map(function(name) { return { name: name.trim(), selected: true }; });
-
-    showRecipeResults();
-
-  } catch(e) {
-    var errMsg = recipeTab === 'photo'
-      ? 'API error: ' + (e && e.message ? e.message : JSON.stringify(e))
-      : recipeTab === 'inspire'
-      ? 'Couldn\'t generate a list for that. Try being more specific — like "chicken tacos," "high protein breakfast," or "low carb dinner."'
-      : 'Couldn\'t parse the ingredients. Try pasting more of the recipe text, or make sure it includes a clear ingredient list.';
-    showRecipeError(errMsg);
-    resetGoBtn();
-  }
-
-  recipeLoading = false;
-}
-
-function showRecipeResults() {
-  var area = document.getElementById('recipe-result-area');
-  var rows = extractedIngredients.map(function(ing, i) {
-    return '<div class="recipe-item-row">' +
-      '<div class="recipe-item-check sel" id="rchk-' + i + '" onclick="toggleIngredient(' + i + ')">' +
-        '<svg width="10" height="7" viewBox="0 0 10 7" fill="none"><path d="M1 3L3.5 5.5L9 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-      '</div>' +
-      '<span class="recipe-item-name">' + ing.name + '</span>' +
-    '</div>';
-  }).join('');
-
-  area.innerHTML = '<div class="recipe-preview">' +
-    '<div class="recipe-preview-title">' + extractedIngredients.length + ' ingredients found — tap to deselect</div>' +
-    '<div class="recipe-items">' + rows + '</div>' +
-  '</div>';
-
-  // Change the Go button to "Add to list"
-  var btn = document.getElementById('recipe-go-btn');
-  btn.disabled = false;
-  btn.innerHTML = '<span id="recipe-go-label">Add to list</span>';
-}
-
-function toggleIngredient(i) {
-  extractedIngredients[i].selected = !extractedIngredients[i].selected;
-  var chk = document.getElementById('rchk-' + i);
-  chk.classList.toggle('sel', extractedIngredients[i].selected);
-}
-
-function addExtractedToList() {
-  var toAdd = extractedIngredients.filter(function(i) { return i.selected; });
-  if (!toAdd.length) { alert('Select at least one ingredient.'); return; }
-  toAdd.forEach(function(ing) {
-    items.push({ id: nid++, name: ing.name, store: null, done: false });
-  });
-  persist();
-  renderList();
-  closeRecipeModal();
-}
-
-function showRecipeError(msg) {
-  document.getElementById('recipe-result-area').innerHTML =
-    '<div class="recipe-error"><div class="recipe-error-box">' + msg + '</div></div>';
-}
+if (!localStorage.getItem('la_emoji_v2')) {stores.forEach(function(s){s.emoji=getStoreEmoji(s.name);});persist();localStorage.setItem('la_emoji_v2','1');}
+function persist(){localStorage.setItem('la_stores',JSON.stringify(stores));localStorage.setItem('la_items',JSON.stringify(items));localStorage.setItem('la_radius',radius);localStorage.setItem('la_nid',nid);}
+function show(t){curTab=t;['list','stores','organize'].forEach(function(n){document.getElementById('tab-'+n).classList.toggle('active',n===t);document.getElementById('view-'+n).classList.toggle('active',n===t);});document.getElementById('add-bar').style.display=t==='list'?'flex':'none';if(t==='list'){renderList();renderNearby();}if(t==='stores')renderStores();if(t==='organize')renderOrganize();}
+function startGPS(){if(!navigator.geolocation){setGPS('off','No GPS');return;}setGPS('wait','Locating...');navigator.geolocation.getCurrentPosition(function(p){lat=p.coords.latitude;lng=p.coords.longitude;setGPS('on','GPS active');if(!watchId)watchId=navigator.geolocation.watchPosition(function(p){lat=p.coords.latitude;lng=p.coords.longitude;checkFences();},null,{enableHighAccuracy:true,maximumAge:10000});checkFences();if(window.Notification&&Notification.permission==='default')Notification.requestPermission();},function(){setGPS('off','GPS denied');},{enableHighAccuracy:true,timeout:15000});}
+function setGPS(state,txt){document.getElementById('gpsbtn').className='gps-btn '+state;document.getElementById('gpsdot').className='dot '+state;document.getElementById('gpstxt').textContent=txt;}
+function dist(a,b,c,d){var R=6371000,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180;var x=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+function checkFences(){if(lat===null)return;stores.forEach(function(s){if(!s.geo||s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var pending=items.filter(function(i){return i.store===s.id&&!i.done;});var st=ss[s.id]||(ss[s.id]={inside:false,alerted:false});if(d<=radius){if(!st.inside){st.inside=true;if(pending.length&&!st.alerted){st.alerted=true;fireAlert(s,pending);}}}else if(d>radius*1.5){st.inside=false;st.alerted=false;}});if(curTab==='list')renderNearby();}
+function renderNearby(){var el=document.getElementById('nearby-area');if(!el)return;if(lat===null){el.innerHTML='<div class="nearby-wrap"><div class="nearby-gps-prompt" onclick="startGPS()"><span>📍 Enable GPS to see nearby stores</span><span style="color:var(--amber);font-size:13px;font-weight:700">Enable →</span></div></div>';return;}var nearbyStores=[];stores.forEach(function(s){if(s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var nearThreshold=Math.max(radius*3,2000);if(d>nearThreshold)return;var pending=items.filter(function(i){return i.store===s.id&&!i.done;});if(!pending.length)return;nearbyStores.push({store:s,pending:pending.length,dist:d});});if(!nearbyStores.length){el.innerHTML='';return;}nearbyStores.sort(function(a,b){return a.dist-b.dist;});var html='<div class="nearby-wrap"><div class="nearby-label">Near you now</div>';nearbyStores.forEach(function(n){var distStr=n.dist<1000?Math.round(n.dist)+'m away':(n.dist/1000).toFixed(1)+'km away';html+='<div class="nearby-row" onclick="setFilter('+n.store.id+');document.getElementById(\'view-list\').scrollTop=200"><div class="nearby-ico">'+n.store.emoji+'</div><div class="nearby-info"><div class="nearby-name">'+n.store.name+'</div><div class="nearby-meta">'+distStr+'</div></div><div class="nearby-count">'+n.pending+' item'+(n.pending!==1?'s':'')+'</div></div>';});html+='</div>';el.innerHTML=html;}
+function fireAlert(store,pending){var names=pending.map(function(i){return i.name;}).join(', ');showBanner(store,names);if(window.Notification&&Notification.permission==='granted'){var n=new Notification('Near '+store.name,{body:'Still need: '+names,tag:'la-'+store.id,requireInteraction:true});n.onclick=function(){gotIt(store.id);};}}
+function gotIt(sid){if(ss[sid])ss[sid].alerted=true;document.getElementById('notif-area').innerHTML='';show('list');}
+function notNow(sid){if(ss[sid]){ss[sid].alerted=false;ss[sid].inside=false;}document.getElementById('notif-area').innerHTML='';}
+function showBanner(store,names){document.getElementById('notif-area').innerHTML='<div class="notif"><span class="notif-ico">'+store.emoji+'</span><div style="flex:1"><div class="notif-title">You are near '+store.name+'</div><div class="notif-body">Still need: '+names+'</div><div class="notif-btns"><button class="nbtn p" onclick="gotIt('+store.id+')">Got it</button><button class="nbtn" onclick="notNow('+store.id+')">Not this time</button></div></div></div>';}
+function zipToLatLng(zip){return fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&postalcode='+encodeURIComponent(zip),{headers:{'Accept-Language':'en'}}).then(function(r){return r.json();}).then(function(data){if(!data.length)throw new Error('zip_not_found');return{lat:parseFloat(data[0].lat),lng:parseFloat(data[0].lon)};});}
+function searchStores(storeName,centerLat,centerLng){var delta=0.09;var bbox=(centerLat-delta)+','+(centerLng-delta)+','+(centerLat+delta)+','+(centerLng+delta);var query='[out:json][timeout:10];(node["name"~"'+storeName+'",i]["shop"~"supermarket|convenience|department_store|general|wholesale|grocery"]('+bbox+');way["name"~"'+storeName+'",i]["shop"~"supermarket|convenience|department_store|general|wholesale|grocery"]('+bbox+');node["name"~"'+storeName+'",i]["shop"]('+bbox+');way["name"~"'+storeName+'",i]["shop"]('+bbox+'););out center 8;';return fetch('https://listalert.serbronn93.workers.dev/?target=overpass',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(query)}).then(function(r){if(!r.ok)throw new Error('overpass_error');return r.json();}).then(function(data){if(!data.elements||!data.elements.length)return[];return data.elements.map(function(el){var elLat=el.lat||(el.center&&el.center.lat);var elLng=el.lon||(el.center&&el.center.lon);var tags=el.tags||{};var addr=[tags['addr:housenumber'],tags['addr:street'],tags['addr:city'],tags['addr:state']].filter(Boolean).join(' ');if(!addr)addr=tags['addr:full']||'';var d=dist(centerLat,centerLng,elLat,elLng);return{name:tags.name||storeName,addr:addr,lat:elLat,lng:elLng,dist:d};}).filter(function(r){return r.lat&&r.lng;}).sort(function(a,b){return a.dist-b.dist;}).slice(0,6);});}
+function doSearch(){var name=document.getElementById('sname').value.trim();var zip=document.getElementById('szip').value.trim();if(!name){alert('Enter a store name.');return;}var res=document.getElementById('search-results');res.innerHTML='<div class="empty">Searching...</div>';var locationPromise;if(zip){locationPromise=zipToLatLng(zip).catch(function(){res.innerHTML='<div class="empty" style="color:var(--red)">Zip code not found. Try again.</div>';throw new Error('stop');});}else if(lat!==null){locationPromise=Promise.resolve({lat:lat,lng:lng});}else{res.innerHTML='<div class="empty">Enter a zip code or enable GPS to search.</div>';return;}locationPromise.then(function(center){return searchStores(name,center.lat,center.lng);}).then(function(results){searchResults=results;if(!results.length){res.innerHTML='<div class="empty">No results nearby. Try a different name or zip.</div>';return;}var html='';results.forEach(function(r,i){var distStr=r.dist<1000?Math.round(r.dist)+'m':(r.dist/1000).toFixed(1)+'km';html+='<div class="result-card" onclick="addResult('+i+')">';html+='<div style="flex:1"><div class="result-name">'+r.name+'</div>';html+='<div class="result-addr">'+(r.addr||'Tap to add')+' <span style="color:var(--text3)">· '+distStr+'</span></div></div>';html+='<span class="add-lbl">+ Add</span></div>';});res.innerHTML=html;}).catch(function(e){if(e.message!=='stop'){res.innerHTML='<div class="empty" style="color:var(--red)">Search failed. Check connection and try again.</div>';}});}
+function useMyLocation(){var res=document.getElementById('search-results');if(lat!==null){document.getElementById('szip').value='';document.getElementById('szip').placeholder='Using your location';res.innerHTML='<div class="empty" style="color:var(--green)">📍 Using your current location — enter a store name and search.</div>';}else{res.innerHTML='<div class="empty" style="color:var(--amber)">Enable GPS first using the button at the top of the screen.</div>';startGPS();}}
+function addResult(idx){var r=searchResults[idx];if(!r)return;var exists=stores.find(function(s){return s.name===r.name&&s.addr===r.addr;});if(exists){alert(r.name+' is already saved.');return;}stores.push({id:nid++,name:r.name,addr:r.addr,emoji:getStoreEmoji(r.name),geo:true,fav:false,lat:r.lat,lng:r.lng});persist();document.getElementById('search-results').innerHTML='';document.getElementById('sname').value='';document.getElementById('szip').value='';document.getElementById('szip').placeholder='Zip code (e.g. 75075)';renderStores();var nudge=document.createElement('div');nudge.style.cssText='margin:10px 16px 0;padding:12px 14px;background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:14px;font-size:13px;color:var(--amber);font-weight:600;line-height:1.5';nudge.innerHTML='📍 <b>'+r.name+'</b> added! Now tap <b>Save location</b> on the card below while you\'re near this store — this is what enables alerts.';var storesList=document.getElementById('stores-list');storesList.parentNode.insertBefore(nudge,storesList);setTimeout(function(){if(nudge.parentNode)nudge.parentNode.removeChild(nudge);},6000);}
+function renderStores(){var el=document.getElementById('stores-list');if(!stores.length){el.innerHTML='<div class="empty"><b>No stores yet</b>Search above to add your first store. ListAlert will alert you when you\'re nearby.</div>';return;}var sorted=stores.slice().sort(function(a,b){return(b.fav?1:0)-(a.fav?1:0);});el.innerHTML=sorted.map(function(s){var pending=items.filter(function(i){return i.store===s.id&&!i.done;}).length;var needsLocation=s.lat===null;return'<div class="store-card'+(s.fav?' fav':'')+(needsLocation?' needs-loc':'')+'"><div class="store-ico">'+s.emoji+(s.fav?'<span class="store-star">⭐</span>':'')+'</div><div class="store-info"><div class="store-name">'+s.name+'</div><div class="store-addr">'+(s.addr||'')+'</div>'+(needsLocation?'<div class="loc-nudge">⚠️ Save your location to enable alerts</div>':'')+'<div class="store-tags"><span class="stag '+(s.geo?'aon':'aoff')+'">'+(s.geo?'Alerts on':'Alerts off')+'</span><button class="stag '+(s.fav?'fon':'foff')+'" onclick="toggleFav('+s.id+')">'+(s.fav?'★ Fav':'☆ Fav')+'</button>'+(needsLocation?'<button class="stag loc-needed" onclick="pinHere('+s.id+')">📍 Save location</button>':'<span class="stag lon">✓ Location saved</span>')+'</div></div><div class="store-right"><button class="toggle '+(s.geo?'on':'off')+'" onclick="toggleGeo('+s.id+')"></button><button class="sdel" onclick="delStore('+s.id+')">×</button></div></div>';}).join('');}
+function toggleGeo(id){var s=stores.find(function(s){return s.id===id;});if(s){s.geo=!s.geo;persist();renderStores();}}
+function toggleFav(id){var s=stores.find(function(s){return s.id===id;});if(s){s.fav=!s.fav;persist();renderStores();}}
+function delStore(id){if(!confirm('Remove this store?'))return;stores=stores.filter(function(s){return s.id!==id;});items.forEach(function(i){if(i.store===id)i.store=null;});persist();renderStores();}
+function pinHere(id){if(lat===null){alert('Enable GPS first using the button at the top, then tap Save location.');return;}var s=stores.find(function(s){return s.id===id;});if(s){s.lat=lat;s.lng=lng;persist();renderStores();}}
+function setRadius(v){radius=parseInt(v);document.getElementById('radius-lbl').textContent=v+'m';persist();}
+var listFilter=null;
+function renderList(){var el=document.getElementById('list-body');if(!items.length){el.innerHTML='<div class="empty"><b>Your list is empty</b>Add items below, or tap 🍳 to import from a recipe.</div>';return;}var sm={};stores.forEach(function(s){sm[s.id]=s;});var sorted=items.slice().sort(function(a,b){return(a.done?1:0)-(b.done?1:0);});var filtered=listFilter?sorted.filter(function(it){return it.store===listFilter;}):sorted;var filterBar='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id&&!i.done;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'</button>';});filterBar+='</div>';var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var badge=s?s.emoji+' '+s.name:'';return'<div class="item-row"><div class="chk'+(it.done?' done':'')+'" onclick="toggleItem('+it.id+')"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-info"><div class="item-name'+(it.done?' done':'')+'">'+it.name+'</div>'+(badge&&!listFilter?'<div class="item-tag">'+badge+'</div>':'')+'</div><button class="del" onclick="delItem('+it.id+')">×</button></div>';}).join('')+'</div>':'<div class="empty">No items for this store yet.<br>Add some on the List tab or assign them in <b>Assign</b>.</div>';el.innerHTML=filterBar+listHtml;}
+function setFilter(storeId){listFilter=storeId;renderList();}
+function addItem(){var input=document.getElementById('item-input');var name=input.value.trim();if(!name)return;items.push({id:nid++,name:name,store:null,done:false});input.value='';persist();renderList();input.focus();}
+function toggleItem(id){var it=items.find(function(i){return i.id===id;});if(it){it.done=!it.done;persist();renderList();}}
+function delItem(id){items=items.filter(function(i){return i.id!==id;});persist();renderList();}
+function renderOrganize(){var el=document.getElementById('org-body');if(!items.length){el.innerHTML='<div class="empty"><b>Nothing to assign</b>Add items on the List tab first.</div>';return;}var grouped={};stores.forEach(function(s){grouped[s.id]=[];});var unassigned=[];items.forEach(function(it){if(it.store&&grouped[it.store]!==undefined)grouped[it.store].push(it);else unassigned.push(it);});var html='';if(unassigned.length){html+='<div class="sec-label">Not assigned</div><div class="org-group">'+unassigned.map(function(it){return orgRow(it);}).join('')+'</div>';}stores.forEach(function(s){var its=grouped[s.id]||[];if(!its.length)return;var left=its.filter(function(i){return!i.done;}).length;html+='<div class="org-group"><div class="org-hdr"><span class="org-hdr-ico">'+s.emoji+'</span><span class="org-hdr-name">'+s.name+'</span><span class="org-hdr-count">'+left+' left</span></div>'+its.map(function(it){return orgRow(it);}).join('')+'</div>';});el.innerHTML=html;}
+function orgRow(it){var opts='<option value="">No store</option>'+stores.map(function(s){return'<option value="'+s.id+'"'+(it.store===s.id?' selected':'')+'>'+s.emoji+' '+s.name+'</option>';}).join('');return'<div class="org-row"><span class="org-name">'+it.name+'</span><select class="org-sel" onchange="assign('+it.id+',this.value)">'+opts+'</select></div>';}
+function assign(itemId,storeId){var it=items.find(function(i){return i.id===itemId;});if(it){it.store=storeId?parseInt(storeId):null;persist();renderOrganize();renderList();}}
+var recipeTab='paste',extractedIngredients=[],recipeLoading=false,recipePhotoBase64=null,recipePhotoMime='image/jpeg';
+function openRecipeModal(){recipeTab='paste';extractedIngredients=[];recipePhotoBase64=null;document.getElementById('recipe-result-area').innerHTML='';document.getElementById('recipe-modal').classList.add('open');switchRecipeTab('paste');resetGoBtn();}
+function closeRecipeModal(){document.getElementById('recipe-modal').classList.remove('open');}
+function closeRecipeModalBackdrop(e){if(e.target===document.getElementById('recipe-modal'))closeRecipeModal();}
+function switchRecipeTab(tab){recipeTab=tab;document.getElementById('rtab-paste').classList.toggle('active',tab==='paste');document.getElementById('rtab-url').classList.toggle('active',tab==='url');document.getElementById('rtab-photo').classList.toggle('active',tab==='photo');document.getElementById('rtab-inspire').classList.toggle('active',tab==='inspire');document.getElementById('recipe-result-area').innerHTML='';extractedIngredients=[];recipePhotoBase64=null;resetGoBtn();var area=document.getElementById('recipe-input-area');if(tab==='paste'){area.innerHTML='<textarea class="modal-textarea" id="recipe-text" placeholder="Paste your recipe here — ingredients, steps, anything. Claude will find the ingredients."></textarea>';}else if(tab==='url'){area.innerHTML='<input class="modal-url" id="recipe-url" type="url" placeholder="https://www.allrecipes.com/recipe/..."/><div class="modal-url-note">⚠️ Some recipe sites block outside requests. If it fails, paste the text instead.</div>';}else if(tab==='inspire'){area.innerHTML='<textarea class="modal-textarea" id="inspire-text" placeholder="What are you in the mood for?\n\nTry: &quot;pepperoni pizza&quot;, &quot;high protein breakfast&quot;, &quot;low carb dinner&quot;, &quot;something my kids will eat&quot;, &quot;pre-workout meal&quot;..." style="min-height:100px"></textarea><div class="modal-url-note" style="color:var(--violet);opacity:0.8">✨ Claude will suggest a meal and build your shopping list automatically.</div>';}else{area.innerHTML='<div class="photo-drop" id="photo-drop-zone" onclick="document.getElementById(\'photo-file-input\').click()"><div class="photo-drop-ico">📷</div><div class="photo-drop-label">Tap to take or choose a photo</div><div class="photo-drop-sub">Recipe card, cookbook page, screenshot — anything with ingredients</div></div>';}}
+function resetGoBtn(){var btn=document.getElementById('recipe-go-btn');if(!btn)return;btn.disabled=false;btn.innerHTML='<span id="recipe-go-label">'+(recipeTab==='inspire'?'Inspire my list ✨':'Extract ingredients')+'</span>';}
+function setGoBtnLoading(){var btn=document.getElementById('recipe-go-btn');btn.disabled=true;btn.innerHTML='<div class="spinner"></div><span>Extracting...</span>';}
+function handlePhotoSelect(input){var file=input.files&&input.files[0];if(!file)return;recipePhotoMime=file.type&&file.type.startsWith('image/')?file.type:'image/jpeg';var reader=new FileReader();reader.onload=function(e){var dataUrl=e.target.result;var img=new Image();img.onload=function(){var maxDim=1120;var w=img.width,h=img.height;if(w>maxDim||h>maxDim){if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}else{w=Math.round(w*maxDim/h);h=maxDim;}}var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);var resized=canvas.toDataURL('image/jpeg',0.85);recipePhotoBase64=resized.split(',')[1];recipePhotoMime='image/jpeg';var area=document.getElementById('recipe-input-area');area.innerHTML='<div class="photo-preview-wrap"><img src="'+resized+'" alt="Recipe photo"/><button class="photo-clear" onclick="clearPhoto()">×</button></div>';};img.src=dataUrl;};reader.onerror=function(e){alert('FileReader error: '+(reader.error?reader.error.name+' - '+reader.error.message:'unknown'));showRecipeError('Could not read that image. Try a different file.');};reader.readAsDataURL(file);}
+function clearPhoto(){recipePhotoBase64=null;document.getElementById('photo-file-input').value='';switchRecipeTab('photo');}
+async function runRecipeExtraction(){if(recipeLoading)return;if(extractedIngredients.length){addExtractedToList();return;}recipeLoading=true;setGoBtnLoading();document.getElementById('recipe-result-area').innerHTML='';var messages;if(recipeTab==='photo'){if(!recipePhotoBase64){alert('Choose a photo first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:[{type:'image',source:{type:'base64',media_type:recipePhotoMime,data:recipePhotoBase64}},{type:'text',text:'This is a photo of a recipe. Extract only the ingredient names. Return ONLY a JSON array of strings — clean grocery store names, no quantities, no measurements, no prep notes. Example: ["Flour","Butter","Eggs","Garlic"]. If you cannot find any ingredients, return [].'}]}];}else if(recipeTab==='inspire'){var inspireInput=(document.getElementById('inspire-text')||{}).value||'';inspireInput=inspireInput.trim();if(!inspireInput){alert('Tell us what you\'re in the mood for first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:inspireInput}];}else{var input='';if(recipeTab==='paste'){input=(document.getElementById('recipe-text')||{}).value||'';input=input.trim();if(!input){alert('Paste some recipe text first.');recipeLoading=false;resetGoBtn();return;}}else{var url=(document.getElementById('recipe-url')||{}).value||'';url=url.trim();if(!url){alert('Enter a URL first.');recipeLoading=false;resetGoBtn();return;}input='Recipe URL: '+url;}var prompt=recipeTab==='paste'?'Extract only the ingredient names from this recipe. Return ONLY a JSON array of strings — clean, simple grocery store names with no quantities, no measurements, no prep notes. Example: ["Flour","Butter","Eggs","Garlic"]. Recipe:\n\n'+input:'The user wants to import a recipe from this URL: '+input.replace('Recipe URL: ','')+'\n\nYou cannot fetch URLs, so respond with a JSON object: {"error": "url_unsupported"}. Do not attempt to guess or fabricate ingredients.';messages=[{role:'user',content:prompt}];}try{var systemPrompt=recipeTab==='inspire'?'You are a meal planning assistant. When given a craving, dish name, or dietary goal, pick one specific simple meal that fits and return ONLY a JSON array of grocery store ingredient names needed to make it. No quantities, no measurements, no prep notes, no explanation, no markdown. Just the raw JSON array. Example output: ["Chicken Breast","Garlic","Olive Oil","Lemon","Rosemary"]':'You are a grocery list assistant. When asked to extract ingredients, return ONLY a raw JSON array of strings. No markdown, no explanation, no backticks. Just the array.';var response=await fetch('https://listalert.serbronn93.workers.dev/?target=anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,system:systemPrompt,messages:messages})});var data=await response.json();if(data.error){showRecipeError('API said: '+data.error.type+' — '+data.error.message);recipeLoading=false;resetGoBtn();return;}var raw=(data.content&&data.content[0]&&data.content[0].text)?data.content[0].text.trim():'';raw=raw.replace(/```json|```/g,'').trim();if(raw.indexOf('"url_unsupported"')!==-1){showRecipeError('This URL couldn\'t be fetched automatically. Please open the recipe page, select all the text, copy it, and paste it using the "Paste text" tab instead.');recipeLoading=false;resetGoBtn();return;}var parsed=JSON.parse(raw);if(!Array.isArray(parsed)||!parsed.length)throw new Error('empty');var seen={};extractedIngredients=parsed.filter(function(name){var k=name.toLowerCase();if(seen[k])return false;seen[k]=true;return typeof name==='string'&&name.trim();}).map(function(name){return{name:name.trim(),selected:true};});showRecipeResults();}catch(e){var errMsg=recipeTab==='photo'?'API error: '+(e&&e.message?e.message:JSON.stringify(e)):recipeTab==='inspire'?'Couldn\'t generate a list for that. Try being more specific — like "chicken tacos," "high protein breakfast," or "low carb dinner."':'Couldn\'t parse the ingredients. Try pasting more of the recipe text, or make sure it includes a clear ingredient list.';showRecipeError(errMsg);resetGoBtn();}recipeLoading=false;}
+function showRecipeResults(){var area=document.getElementById('recipe-result-area');var rows=extractedIngredients.map(function(ing,i){return'<div class="recipe-item-row"><div class="recipe-item-check sel" id="rchk-'+i+'" onclick="toggleIngredient('+i+')"><svg width="10" height="7" viewBox="0 0 10 7" fill="none"><path d="M1 3L3.5 5.5L9 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="recipe-item-name">'+ing.name+'</span></div>';}).join('');area.innerHTML='<div class="recipe-preview"><div class="recipe-preview-title">'+extractedIngredients.length+' ingredients found — tap to deselect</div><div class="recipe-items">'+rows+'</div></div>';var btn=document.getElementById('recipe-go-btn');btn.disabled=false;btn.innerHTML='<span id="recipe-go-label">Add to list</span>';}
+function toggleIngredient(i){extractedIngredients[i].selected=!extractedIngredients[i].selected;var chk=document.getElementById('rchk-'+i);chk.classList.toggle('sel',extractedIngredients[i].selected);}
+function addExtractedToList(){var toAdd=extractedIngredients.filter(function(i){return i.selected;});if(!toAdd.length){alert('Select at least one ingredient.');return;}toAdd.forEach(function(ing){items.push({id:nid++,name:ing.name,store:null,done:false});});persist();renderList();closeRecipeModal();}
+function showRecipeError(msg){document.getElementById('recipe-result-area').innerHTML='<div class="recipe-error"><div class="recipe-error-box">'+msg+'</div></div>';}
 
 // ── Demo Mode ──────────────────────────────────────────────────
 var demoStep = 0;
 var demoTimer = null;
 
-var DEMO_STEPS = [
-  {
-    duration: 2000,
-    caption: 'Welcome to ListAlert — a smarter shopping list that alerts you when you\'re near a store that has your items.',
-    html: function() { return demoScreen('list', [], [], 'wait', ''); }
-  },
-  {
-    duration: 2000,
-    caption: 'New users see a quick setup guide. Tap "Get started" to add your stores.',
-    html: function() { return demoOnboarding(); }
-  },
-  {
-    duration: 1000,
-    caption: 'Enable GPS so ListAlert knows when you\'re nearby a store.',
-    html: function() { return demoScreen('stores', [], [], 'on', ''); }
-  },
-  {
-    duration: 3000,
-    caption: 'Search for Whole Foods near you — results show distance so you pick the right location.',
-    html: function() { return demoScreen('stores', [], [], 'on', 'search-wf'); }
-  },
-  {
-    duration: 3000,
-    caption: 'Add Kroger the same way. Now you have two stores — each will alert you independently.',
-    html: function() { return demoScreen('stores', [{name:'Whole Foods Market',emoji:'🌿',saved:true}], [], 'on', 'search-kr'); }
-  },
-  {
-    duration: 2000,
-    caption: 'Both stores saved with their locations. Mark your favorite for quick access.',
-    html: function() { return demoScreen('stores', [{name:'Whole Foods Market',emoji:'🌿',saved:true,fav:true},{name:'Kroger',emoji:'🛒',saved:true}], [], 'on', ''); }
-  },
-  {
-    duration: 2000,
-    caption: 'Tap the 🍳 button to import ingredients directly from a recipe photo.',
-    html: function() { return demoScreen('list', [{name:'Whole Foods Market',emoji:'🌿',saved:true,fav:true},{name:'Kroger',emoji:'🛒',saved:true}], [], 'on', 'recipe-btn'); }
-  },
-  {
-    duration: 3000,
-    caption: 'Choose a photo from your library — a recipe card, cookbook page, or screenshot.',
-    html: function() { return demoRecipePhoto(); }
-  },
-  {
-    duration: 3000,
-    caption: 'Claude reads the photo and extracts every ingredient automatically.',
-    html: function() { return demoRecipeExtracting(); }
-  },
-  {
-    duration: 3000,
-    caption: 'Ingredients land on your list instantly. Deselect anything you already have.',
-    html: function() { return demoRecipeResults(); }
-  },
-  {
-    duration: 2000,
-    caption: 'Add any extra items manually — cleaning supplies, medicine, whatever you need.',
-    html: function() { return demoScreen('list', [{name:'Whole Foods Market',emoji:'🌿',saved:true,fav:true},{name:'Kroger',emoji:'🛒',saved:true}], demoItems(), 'on', 'add-item'); }
-  },
-  {
-    duration: 3000,
-    caption: 'Use the Assign tab to split items between stores — Whole Foods for fresh, Kroger for staples.',
-    html: function() { return demoAssign(); }
-  },
-  {
-    duration: 2000,
-    caption: 'Enable push notifications so alerts reach you even when the app is closed.',
-    html: function() { return demoNotifPrompt(); }
-  },
-  {
-    duration: 3000,
-    caption: 'When you\'re near Kroger, ListAlert reminds you exactly what you need there. Tap "Got it" to open your list.',
-    html: function() { return demoNotification(); }
-  }
-];
-
-function demoItems() {
-  return [
-    {name:'Salmon',store:'Whole Foods Market',done:false},
-    {name:'Spinach',store:'Whole Foods Market',done:false},
-    {name:'Avocado',store:'Whole Foods Market',done:false},
-    {name:'Milk',store:'Kroger',done:false},
-    {name:'Eggs',store:'Kroger',done:false},
-    {name:'Butter',store:'Kroger',done:false},
-    {name:'Dish soap',store:'Kroger',done:false},
-  ];
-}
-
 function demoHeader(gpsState) {
   var cls = gpsState === 'on' ? 'on' : gpsState === 'wait' ? 'wait' : 'off';
   var txt = gpsState === 'on' ? 'GPS active' : 'Enable GPS';
-  return '<div class="header"><h1>List<em>Alert</em></h1>' +
-    '<button class="gps-btn ' + cls + '" style="pointer-events:none">' +
-    '<span class="dot ' + cls + '"></span><span>' + txt + '</span></button></div>';
+  return '<div class="header"><h1>List<em>Alert</em></h1><button class="gps-btn ' + cls + '" style="pointer-events:none"><span class="dot ' + cls + '"></span><span>' + txt + '</span></button></div>';
 }
-
 function demoTabs(active) {
-  return '<div class="tabs">' +
-    ['list','stores','organize'].map(function(t) {
-      var label = t === 'organize' ? 'Assign' : t.charAt(0).toUpperCase() + t.slice(1);
-      return '<div class="tab' + (t===active?' active':'') + '">' + label + '</div>';
-    }).join('') + '</div>';
+  return '<div class="tabs">' + ['list','stores','organize'].map(function(t){var label=t==='organize'?'Assign':t.charAt(0).toUpperCase()+t.slice(1);return '<div class="tab'+(t===active?' active':'')+'">'+label+'</div>';}).join('') + '</div>';
+}
+function demoAddBar(highlight) {
+  var rs = highlight==='recipe' ? 'box-shadow:0 0 0 3px var(--violet),0 0 20px rgba(167,139,250,0.5);' : '';
+  return '<div style="display:flex;gap:8px;padding:10px 16px 12px;border-top:1px solid var(--border);background:var(--bg)"><div style="flex:1;height:46px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2)"></div><div style="height:46px;padding:0 12px;background:var(--violet-dim);border:1px solid var(--violet-border);border-radius:10px;color:var(--violet);font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px;'+rs+'">🍳 Recipe</div><div style="height:46px;padding:0 18px;background:var(--green);border-radius:10px;color:#0A0A0A;font-size:15px;font-weight:700;display:flex;align-items:center">Add</div></div>';
+}
+function demoStep1_scan() {
+  return demoHeader('wait')+demoTabs('list')+'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column"><div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 20px"><div style="width:100%;background:var(--bg2);border-radius:20px;overflow:hidden;border:1px solid var(--violet-border);box-shadow:0 0 0 3px rgba(167,139,250,0.2)"><div style="padding:16px 18px;border-bottom:1px solid var(--border)"><div style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px"><span style="color:var(--violet)">🍳</span> Build Your List</div><div style="font-size:12px;color:var(--text3);margin-top:3px">Scan a recipe photo — Claude extracts every ingredient</div></div><div style="display:flex;gap:3px;padding:10px 14px"><div style="flex:1;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text3)">Paste text</div><div style="flex:1;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text3)">URL</div><div style="flex:1;height:32px;border-radius:8px;border:1px solid var(--violet-border);background:var(--violet-dim);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--violet)">📷 Photo</div><div style="flex:1;height:32px;border-radius:8px;border:1px solid var(--violet-border);background:var(--violet-dim);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--violet)">✨</div></div><div style="padding:0 14px 14px"><div style="border:1.5px dashed var(--violet-border);border-radius:10px;padding:22px 16px;background:rgba(167,139,250,0.08);text-align:center;box-shadow:0 0 0 3px var(--violet),0 0 24px rgba(167,139,250,0.3)"><div style="font-size:28px">📷</div><div style="font-size:13px;font-weight:600;color:var(--violet);margin-top:6px">Tap to photograph your recipe</div><div style="font-size:11px;color:var(--text3);margin-top:3px">Recipe card, cookbook, screenshot</div></div></div></div></div>'+demoAddBar('recipe')+'</div>';
+}
+function demoStep1b_extracting() {
+  return demoHeader('wait')+demoTabs('list')+'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column"><div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 20px"><div style="width:100%;background:var(--bg2);border-radius:20px;overflow:hidden;border:1px solid var(--violet-border)"><div style="padding:16px 18px;border-bottom:1px solid var(--border)"><div style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px"><span style="color:var(--violet)">🍳</span> Build Your List</div></div><div style="padding:14px 18px"><div style="border-radius:10px;overflow:hidden;border:1px solid var(--violet-border);margin-bottom:12px"><div style="background:#111827;padding:12px 14px;font-size:12px;color:#9CA3AF;font-family:monospace;line-height:1.8"><div style="color:#fff;font-weight:700;margin-bottom:4px">Chicken Tikka Masala</div><div>2 lbs chicken thighs</div><div>1 cup plain yogurt</div><div>2 tbsp garam masala</div><div>1 can crushed tomatoes...</div></div></div><div style="display:flex;gap:8px"><div style="flex:1;height:44px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;font-weight:600">Cancel</div><div style="flex:2;height:44px;background:var(--violet);border-radius:10px;display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.8"><div style="width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite"></div><span style="color:#fff;font-size:13px;font-weight:700">Extracting...</span></div></div></div></div></div>'+demoAddBar('')+'</div>';
+}
+function demoStep1c_results() {
+  var ings=['Chicken Thighs','Plain Yogurt','Garam Masala','Crushed Tomatoes','Heavy Cream','Garlic','Ginger','Basmati Rice'];
+  return demoHeader('wait')+demoTabs('list')+'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column"><div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 20px"><div style="width:100%;background:var(--bg2);border-radius:20px;overflow:hidden;border:1px solid var(--violet-border)"><div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase">'+ings.length+' ingredients found</div><div style="font-size:12px;color:var(--violet)">tap to deselect</div></div><div style="max-height:200px;overflow:hidden">'+ings.map(function(n){return'<div style="display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid var(--border)"><div style="width:18px;height:18px;border-radius:50%;background:var(--violet);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="9" height="7" viewBox="0 0 10 7" fill="none"><path d="M1 3L3.5 5.5L9 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="font-size:13px;font-weight:500;color:var(--text)">'+n+'</span></div>';}).join('')+'</div><div style="padding:12px 18px;display:flex;gap:8px"><div style="flex:1;height:44px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;font-weight:600">Cancel</div><div style="flex:2;height:44px;background:var(--violet);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px rgba(167,139,250,0.5)"><span style="color:#fff;font-size:14px;font-weight:700">Add all to list ✓</span></div></div></div></div>'+demoAddBar('')+'</div>';
+}
+function demoStep2_insights() {
+  var its=[{icon:'💡',color:'var(--violet)',label:'Smart suggestion',text:'You often buy Garlic and Olive Oil together — both added from this recipe.'},{icon:'🔁',color:'var(--blue)',label:'Repeat ingredient',text:'Chicken Thighs appear in 3 of your saved recipes. Buy in bulk?'},{icon:'📊',color:'var(--amber)',label:'Budget tip',text:'This recipe costs ~$18 at Whole Foods vs ~$12 at Kroger.'}];
+  return demoHeader('on')+demoTabs('list')+'<div style="flex:1;overflow-y:auto;padding:10px 16px 0"><div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">✨ Insights for this recipe</div>'+its.map(function(i){return'<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--bg2);border-radius:12px;border:1px solid var(--border);margin-bottom:8px"><div style="font-size:20px;flex-shrink:0">'+i.icon+'</div><div><div style="font-size:12px;font-weight:700;color:'+i.color+';margin-bottom:3px">'+i.label+'</div><div style="font-size:13px;color:var(--text2);line-height:1.4">'+i.text+'</div></div></div>';}).join('')+'<div style="margin-top:4px;padding:10px 14px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:12px;font-size:13px;color:var(--green);font-weight:600">✅ 8 items added to your list</div></div>'+demoAddBar('');
+}
+function demoStep3_saveRecipe() {
+  return demoHeader('on')+demoTabs('list')+'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column"><div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 20px"><div style="width:100%;background:var(--bg2);border-radius:20px;overflow:hidden;border:1px solid var(--amber-border);box-shadow:0 0 0 3px rgba(251,191,36,0.15)"><div style="padding:14px 18px;border-bottom:1px solid var(--border)"><div style="font-size:15px;font-weight:700">📖 Save this recipe?</div><div style="font-size:12px;color:var(--text3);margin-top:3px">Chicken Tikka Masala · 8 ingredients</div></div><div style="padding:14px 18px"><div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Recipe name</div><div style="height:40px;background:var(--bg3);border:1px solid var(--amber-border);border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;color:var(--text)">Chicken Tikka Masala</div></div><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Tags</div><div style="display:flex;gap:6px;flex-wrap:wrap"><div style="padding:4px 10px;border-radius:20px;background:var(--violet-dim);border:1px solid var(--violet-border);font-size:11px;font-weight:600;color:var(--violet)">Dinner</div><div style="padding:4px 10px;border-radius:20px;background:var(--blue-dim);border:1px solid var(--blue-border);font-size:11px;font-weight:600;color:var(--blue)">Indian</div><div style="padding:4px 10px;border-radius:20px;background:var(--bg4);border:1px solid var(--border2);font-size:11px;font-weight:600;color:var(--text3)">+ Add tag</div></div></div><div style="display:flex;gap:8px"><div style="flex:1;height:44px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:13px;font-weight:600">Skip</div><div style="flex:2;height:44px;background:var(--amber);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(251,191,36,0.3)"><span style="color:#0A0A0A;font-size:14px;font-weight:700">Save recipe ★</span></div></div></div></div></div>'+demoAddBar('')+'</div>';
+}
+function demoStep3b_library() {
+  var recipes=[{name:'Chicken Tikka Masala',count:8,tags:['Dinner','Indian'],star:true},{name:'Avocado Toast',count:4,tags:['Breakfast'],star:false},{name:'Spaghetti Bolognese',count:11,tags:['Dinner','Italian'],star:true},{name:'Acai Bowl',count:5,tags:['Breakfast','Healthy'],star:false}];
+  return demoHeader('on')+demoTabs('list')+'<div style="flex:1;overflow-y:auto;padding:10px 16px 0"><div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">📖 Saved Recipes</div>'+recipes.map(function(r){return'<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border-radius:12px;border:1px solid '+(r.star?'var(--amber-border)':'var(--border)')+';margin-bottom:8px"><div style="font-size:24px">'+(r.star?'⭐':'🍽️')+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:var(--text)">'+r.name+'</div><div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">'+r.tags.map(function(t){return'<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--bg3);color:var(--text3)">'+t+'</span>';}).join('')+'<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--bg3);color:var(--text3)">'+r.count+' items</span></div></div><div style="font-size:13px;font-weight:700;color:var(--green)">Add →</div></div>';}).join('')+'</div>'+demoAddBar('recipe');
+}
+function demoStep4_grouping() {
+  var wf=['Chicken Thighs','Plain Yogurt','Heavy Cream','Garam Masala'],kr=['Basmati Rice','Crushed Tomatoes','Garlic','Ginger'];
+  return demoHeader('on')+demoTabs('organize')+'<div style="flex:1;overflow-y:auto;padding:10px 16px 0"><div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">Items split across your stores</div><div style="border:1px solid var(--amber-border);border-radius:14px;overflow:hidden;margin-bottom:10px"><div style="display:flex;align-items:center;padding:10px 14px;gap:9px;background:rgba(251,191,36,0.1);border-bottom:1px solid var(--amber-border)"><span style="font-size:18px">🌿</span><span style="font-size:14px;font-weight:700;color:var(--text);flex:1">Whole Foods Market</span><span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border)">★ Fav · '+wf.length+' items</span></div>'+wf.map(function(n){return'<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(251,191,36,0.08);background:var(--bg2)"><div style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--amber-border);flex-shrink:0"></div><span style="font-size:13px;font-weight:500;color:var(--text);flex:1">'+n+'</span><span style="font-size:11px;color:var(--amber)">🌿</span></div>';}).join('')+'</div><div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px"><div style="display:flex;align-items:center;padding:10px 14px;gap:9px;background:var(--bg3);border-bottom:1px solid var(--border)"><span style="font-size:18px">🛒</span><span style="font-size:14px;font-weight:700;color:var(--text);flex:1">Kroger</span><span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--bg4);color:var(--text2)">'+kr.length+' items</span></div>'+kr.map(function(n){return'<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2)"><div style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0"></div><span style="font-size:13px;font-weight:500;color:var(--text);flex:1">'+n+'</span><span style="font-size:11px;color:var(--text3)">🛒</span></div>';}).join('')+'</div></div>';
+}
+function demoStep5_alerts() {
+  return demoHeader('on')+demoTabs('list')+'<div style="flex:1;overflow-y:auto"><div style="margin:10px 16px 8px;padding:14px 16px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:14px"><div style="display:flex;align-items:flex-start;gap:11px"><span style="font-size:22px">🌿</span><div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--green)">You\'re near Whole Foods!</div><div style="font-size:13px;color:rgba(74,222,128,0.7);margin-top:2px;line-height:1.4">4 items on your list here — Chicken Thighs, Yogurt, Heavy Cream, Garam Masala</div><div style="display:flex;gap:8px;margin-top:10px"><div style="height:32px;padding:0 14px;border-radius:8px;background:var(--green);color:#0A0A0A;font-size:13px;font-weight:700;display:flex;align-items:center">Open list</div><div style="height:32px;padding:0 14px;border-radius:8px;border:1px solid var(--green-border);color:var(--green);font-size:13px;font-weight:600;display:flex;align-items:center">Not now</div></div></div></div></div><div style="margin:0 16px 8px;padding:14px 16px;background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:14px"><div style="display:flex;align-items:flex-start;gap:11px"><span style="font-size:22px">🏷️</span><div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--amber)">Sale alert at Kroger</div><div style="font-size:13px;color:rgba(251,191,36,0.7);margin-top:2px;line-height:1.4">Basmati Rice is on sale this week — 20% off. It\'s on your list!</div><div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--amber)">Valid through Sunday · 0.8km away</div></div></div></div><div style="margin:0 16px;padding:14px 16px;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:14px"><div style="display:flex;align-items:flex-start;gap:11px"><span style="font-size:22px">📍</span><div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--blue)">Kroger is 0.8km away</div><div style="font-size:13px;color:rgba(96,165,250,0.7);margin-top:2px;line-height:1.4">You have 4 items there — Garlic, Ginger, Rice, Tomatoes. On your route?</div></div></div></div></div>'+demoAddBar('');
+}
+function demoStep6_share() {
+  return demoHeader('on')+demoTabs('list')+'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column"><div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 20px"><div style="width:100%;background:var(--bg2);border-radius:20px;overflow:hidden;border:1px solid var(--blue-border);box-shadow:0 0 0 3px rgba(96,165,250,0.15)"><div style="padding:14px 18px;border-bottom:1px solid var(--border)"><div style="font-size:15px;font-weight:700">🤝 Share your list</div><div style="font-size:12px;color:var(--text3);margin-top:3px">Shop together — anyone with the link can view or edit</div></div><div style="padding:14px 18px"><div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Share with</div><div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:10px;border:1px solid var(--border)"><div style="width:32px;height:32px;border-radius:50%;background:var(--violet-dim);border:1px solid var(--violet-border);display:flex;align-items:center;justify-content:center;font-size:14px">S</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">Sarah</div><div style="font-size:11px;color:var(--text3)">Can edit</div></div><div style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--green-dim);color:var(--green)">Active</div></div><div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:10px;border:1px solid var(--border)"><div style="width:32px;height:32px;border-radius:50%;background:var(--blue-dim);border:1px solid var(--blue-border);display:flex;align-items:center;justify-content:center;font-size:14px">M</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">Mike</div><div style="font-size:11px;color:var(--text3)">Can view</div></div><div style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--bg4);color:var(--text3)">Invited</div></div></div></div><div style="margin-bottom:12px;padding:10px 12px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;gap:8px"><div style="font-size:12px;color:var(--text3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">listalert.app/list/tikka-masala-3x7k</div><div style="font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0">Copy</div></div><div style="display:flex;gap:8px"><div style="flex:1;height:44px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:13px;font-weight:600">Close</div><div style="flex:2;height:44px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(96,165,250,0.3)"><span style="color:#fff;font-size:14px;font-weight:700">Invite friend +</span></div></div></div></div></div>'+demoAddBar('')+'</div>';
 }
 
-function demoScreen(tab, stores, items, gps, highlight) {
-  var content = '';
-  if (tab === 'list') {
-    var listHtml = items.length
-      ? '<div class="card-list" style="margin:12px 16px 0">' + items.map(function(it) {
-          return '<div class="item-row"><div class="chk"></div>' +
-            '<div class="item-info"><div class="item-name">' + it.name + '</div>' +
-            (it.store ? '<div class="item-tag">' + it.store + '</div>' : '') +
-            '</div></div>';
-        }).join('') + '</div>'
-      : '<div class="empty"><b>Your list is empty</b>Add items below, or tap 🍳 to import from a recipe.</div>';
-    content = '<div style="flex:1;overflow:hidden">' + listHtml + '</div>' +
-      '<div class="add-bar" style="position:relative;transform:none;border-top:1px solid var(--border)">' +
-        (highlight === 'recipe-btn'
-          ? '<input style="flex:1;height:46px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text3);padding:0 14px;font-family:Outfit,sans-serif" placeholder="Add an item..." disabled/>' +
-            '<button class="recipe-btn" style="box-shadow:0 0 0 3px var(--violet),0 0 20px var(--violet)">🍳</button>' +
-            '<button style="height:46px;padding:0 18px;background:var(--green);border:none;border-radius:10px;color:#0A0A0A;font-size:15px;font-weight:700;font-family:Outfit,sans-serif">Add</button>'
-          : '<input style="flex:1;height:46px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text3);padding:0 14px;font-family:Outfit,sans-serif" placeholder="Add an item..." disabled/>' +
-            '<button class="recipe-btn">🍳</button>' +
-            '<button style="height:46px;padding:0 18px;background:var(--green);border:none;border-radius:10px;color:#0A0A0A;font-size:15px;font-weight:700;font-family:Outfit,sans-serif">Add</button>') +
-      '</div>';
-  } else if (tab === 'stores') {
-    var storeCards = stores.map(function(s) {
-      return '<div class="store-card' + (s.fav?' fav':'') + '" style="margin-bottom:10px">' +
-        '<div class="store-ico">' + s.emoji + (s.fav?'<span class="store-star">⭐</span>':'') + '</div>' +
-        '<div class="store-info"><div class="store-name">' + s.name + '</div>' +
-        '<div class="store-tags"><span class="stag aon">Alerts on</span>' +
-        (s.fav?'<span class="stag fon">★ Fav</span>':'') +
-        '<span class="stag lon">✓ Location saved</span></div></div>' +
-        '<div class="store-right"><button class="toggle on" style="pointer-events:none"></button></div></div>';
-    }).join('');
-    var searchHtml = '';
-    if (highlight === 'search-wf') {
-      searchHtml = '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:8px">' +
-        '<div class="result-card" style="border:none;box-shadow:0 0 0 2px var(--green)">' +
-        '<div style="flex:1"><div class="result-name">Whole Foods Market</div>' +
-        '<div class="result-addr">Preston Rd, Plano TX · 1.2km</div></div>' +
-        '<span class="add-lbl">+ Add</span></div>' +
-        '<div class="result-card" style="border:none"><div style="flex:1"><div class="result-name">Whole Foods Market</div>' +
-        '<div class="result-addr">Greenville Ave, Dallas TX · 8.4km</div></div>' +
-        '<span class="add-lbl">+ Add</span></div></div>';
-    } else if (highlight === 'search-kr') {
-      searchHtml = '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:8px">' +
-        '<div class="result-card" style="border:none;box-shadow:0 0 0 2px var(--green)">' +
-        '<div style="flex:1"><div class="result-name">Kroger</div>' +
-        '<div class="result-addr">Legacy Dr, Plano TX · 0.8km</div></div>' +
-        '<span class="add-lbl">+ Add</span></div>' +
-        '<div class="result-card" style="border:none"><div style="flex:1"><div class="result-name">Kroger</div>' +
-        '<div class="result-addr">Parker Rd, Plano TX · 3.1km</div></div>' +
-        '<span class="add-lbl">+ Add</span></div></div>';
-    }
-    content = '<div style="flex:1;overflow:hidden;padding:12px 16px 0">' + searchHtml + storeCards + '</div>';
-  }
-  return demoHeader(gps) + demoTabs(tab === 'organize' ? 'organize' : tab) +
-    '<div style="display:flex;flex-direction:column;flex:1;overflow:hidden">' + content + '</div>';
-}
+var DEMO_STEPS = [
+  {duration:2500, caption:'📷 Snap a photo of any recipe — a cookbook page, recipe card, or screenshot. Claude reads it and pulls out every ingredient instantly.', html:demoStep1_scan},
+  {duration:2000, caption:'Claude scans the photo and extracts a clean ingredient list in seconds — no typing needed.', html:demoStep1b_extracting},
+  {duration:2500, caption:'Every ingredient lands on your list, ready to shop. Tap any item to deselect things you already have at home.', html:demoStep1c_results},
+  {duration:2500, caption:'✨ Insights surface smart suggestions, repeated ingredients across recipes, and which store gets you the best price.', html:demoStep2_insights},
+  {duration:2500, caption:'📖 Save the recipe for later — tag it, name it, and re-add all its ingredients in one tap next time you cook it.', html:demoStep3_saveRecipe},
+  {duration:2500, caption:'Your saved recipes build into a personal cookbook. Tap any recipe to instantly rebuild your shopping list.', html:demoStep3b_library},
+  {duration:2500, caption:'🏪 Items are grouped by your favourite store automatically — each trip is focused and nothing gets missed.', html:demoStep4_grouping},
+  {duration:3000, caption:'📍 When you\'re near a store, ListAlert reminds you what\'s on your list there. Sale alerts fire when items you need are discounted this week.', html:demoStep5_alerts},
+  {duration:2500, caption:'🤝 Shopping with someone? Share your list and they can check off items in real time as they shop.', html:demoStep6_share}
+];
 
-function demoOnboarding() {
-  return demoHeader('wait') + demoTabs('list') +
-    '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:flex-end;z-index:10">' +
-    '<div style="width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding:32px 24px 32px">' +
-    '<div class="ob-logo">List<em>Alert</em></div>' +
-    '<div class="ob-tagline">A smarter shopping list that alerts you when you\'re near a store.</div>' +
-    '<div class="ob-steps">' +
-    '<div class="ob-step"><div class="ob-step-ico g">🏪</div><div><div class="ob-step-title">Add your stores</div><div class="ob-step-body">Search for the stores you shop at.</div></div></div>' +
-    '<div class="ob-step"><div class="ob-step-ico a">📍</div><div><div class="ob-step-title">Enable location</div><div class="ob-step-body">ListAlert watches your location in the background.</div></div></div>' +
-    '<div class="ob-step"><div class="ob-step-ico v">🛒</div><div><div class="ob-step-title">Get alerted automatically</div><div class="ob-step-body">Get reminded when you\'re near a store with items.</div></div></div>' +
-    '</div>' +
-    '<button class="ob-btn" style="box-shadow:0 0 0 3px var(--green),0 0 20px rgba(74,222,128,0.4)">Get started — add a store</button>' +
-    '<button class="ob-skip">I\'ll explore on my own</button>' +
-    '</div></div>';
-}
+function watchDemo(){document.getElementById('demo-prompt').classList.remove('open');document.getElementById('demo-prompt').style.display='none';startDemo();}
+function skipDemo(){localStorage.setItem('la_demo_seen','1');document.getElementById('demo-prompt').classList.remove('open');document.getElementById('demo-prompt').style.display='none';if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}}
+function startDemo(){demoStep=0;document.getElementById('demo-backdrop').style.display='flex';renderDemoStep();}
+function renderDemoStep(){if(demoStep>=DEMO_STEPS.length){endDemo();return;}var step=DEMO_STEPS[demoStep];var isLast=demoStep===DEMO_STEPS.length-1;var nb=document.getElementById('demo-next-btn');if(nb)nb.textContent=isLast?'Get started →':'Next →';document.getElementById('demo-progress').innerHTML=DEMO_STEPS.map(function(_,i){return'<div class="demo-pip'+(i<demoStep?' done':i===demoStep?' active':'')+'"></div>';}).join('');document.getElementById('demo-caption').textContent=step.caption;document.getElementById('demo-frame').innerHTML=step.html();if(demoTimer)clearTimeout(demoTimer);demoTimer=setTimeout(function(){demoStep++;renderDemoStep();},step.duration);}
+function demoNext(){if(demoTimer)clearTimeout(demoTimer);demoStep++;renderDemoStep();}
+function endDemo(){if(demoTimer)clearTimeout(demoTimer);localStorage.setItem('la_demo_seen','1');document.getElementById('demo-backdrop').style.display='none';if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}}
 
-function demoRecipePhoto() {
-  return demoHeader('on') + demoTabs('list') +
-    '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:flex-end;z-index:10">' +
-    '<div style="width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 24px">' +
-    '<div style="width:36px;height:4px;border-radius:2px;background:var(--bg4);margin:12px auto 0"></div>' +
-    '<div style="font-size:17px;font-weight:700;padding:16px 20px 0;display:flex;align-items:center;gap:8px"><span style="color:var(--violet)">🍳</span> From a Recipe</div>' +
-    '<div style="display:flex;gap:4px;padding:14px 20px 0">' +
-    '<button class="modal-tab">Paste text</button><button class="modal-tab">URL</button>' +
-    '<button class="modal-tab active" style="background:var(--violet-dim);color:var(--violet);border-color:var(--violet-border)">📷 Photo</button></div>' +
-    '<div style="padding:14px 20px 0">' +
-    '<div style="border:1.5px dashed var(--violet-border);border-radius:10px;padding:28px 16px;background:var(--violet-dim);text-align:center;box-shadow:0 0 0 3px var(--violet),0 0 20px rgba(167,139,250,0.3)">' +
-    '<div style="font-size:32px">📷</div>' +
-    '<div style="font-size:14px;font-weight:600;color:var(--violet);margin-top:8px">Tap to take or choose a photo</div>' +
-    '<div style="font-size:12px;color:var(--text3);margin-top:4px">Recipe card, cookbook page, screenshot</div>' +
-    '</div></div>' +
-    '<div style="padding:16px 20px 0;display:flex;gap:8px">' +
-    '<button class="modal-cancel">Cancel</button>' +
-    '<button class="modal-go"><span>Extract ingredients</span></button></div>' +
-    '</div></div>';
-}
+function finishOnboarding(goToStores){localStorage.setItem('la_onboarded','1');document.getElementById('ob-modal').style.display='none';if(goToStores){show('stores');}else{show('list');setTimeout(function(){openRecipeModal();},300);}if(!localStorage.getItem('la_homescreen')){setTimeout(function(){var p=document.getElementById('homescreen-prompt');p.style.display='flex';setTimeout(function(){p.classList.add('open');},10);},goToStores?1000:4000);}}
+function dismissHomescreen(){localStorage.setItem('la_homescreen','1');var p=document.getElementById('homescreen-prompt');p.classList.remove('open');setTimeout(function(){p.style.display='none';},300);}
 
-function demoRecipeExtracting() {
-  return demoHeader('on') + demoTabs('list') +
-    '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:flex-end;z-index:10">' +
-    '<div style="width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 24px">' +
-    '<div style="width:36px;height:4px;border-radius:2px;background:var(--bg4);margin:12px auto 0"></div>' +
-    '<div style="font-size:17px;font-weight:700;padding:16px 20px 0;display:flex;align-items:center;gap:8px"><span style="color:var(--violet)">🍳</span> From a Recipe</div>' +
-    '<div style="padding:14px 20px 0">' +
-    '<div style="border-radius:10px;overflow:hidden;border:1px solid var(--violet-border)">' +
-    '<div style="background:#1a1a2e;padding:16px;font-size:13px;color:#aaa;font-family:monospace;line-height:1.8">' +
-    '<div><b style="color:#fff">INGREDIENTS</b></div>' +
-    '<div>6 frozen boneless chicken breasts</div>' +
-    '<div>2 jars red salsa</div>' +
-    '<div>1 can refried beans</div>' +
-    '<div>¼ cup taco seasoning</div>' +
-    '<div>Tortilla chips...</div>' +
-    '</div></div></div>' +
-    '<div style="padding:14px 20px 0;display:flex;gap:8px">' +
-    '<button class="modal-cancel">Cancel</button>' +
-    '<button class="modal-go" style="opacity:0.7"><div class="spinner"></div><span>Extracting...</span></button></div>' +
-    '</div></div>';
-}
-
-function demoRecipeResults() {
-  var ingredients = ['Chicken Breasts','Red Salsa','Refried Beans','Taco Seasoning','Tortilla Chips','Kosher Salt'];
-  return demoHeader('on') + demoTabs('list') +
-    '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:flex-end;z-index:10">' +
-    '<div style="width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 24px">' +
-    '<div style="width:36px;height:4px;border-radius:2px;background:var(--bg4);margin:12px auto 0"></div>' +
-    '<div style="font-size:17px;font-weight:700;padding:16px 20px 0;display:flex;align-items:center;gap:8px"><span style="color:var(--violet)">🍳</span> From a Recipe</div>' +
-    '<div style="padding:14px 20px 0">' +
-    '<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">' + ingredients.length + ' ingredients found — tap to deselect</div>' +
-    '<div style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow:hidden">' +
-    ingredients.map(function(name) {
-      return '<div class="recipe-item-row"><div class="recipe-item-check sel">' +
-        '<svg width="10" height="7" viewBox="0 0 10 7" fill="none"><path d="M1 3L3.5 5.5L9 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-        '</div><span class="recipe-item-name">' + name + '</span></div>';
-    }).join('') +
-    '</div></div>' +
-    '<div style="padding:16px 20px 0;display:flex;gap:8px">' +
-    '<button class="modal-cancel">Cancel</button>' +
-    '<button class="modal-go" style="box-shadow:0 0 0 2px var(--violet)"><span>Add to list</span></button></div>' +
-    '</div></div>';
-}
-
-function demoAssign() {
-  var wfItems = ['Chicken Breasts','Red Salsa','Salmon','Spinach','Avocado'];
-  var krItems = ['Milk','Eggs','Butter','Dish Soap','Taco Seasoning'];
-  return demoHeader('on') + demoTabs('organize') +
-    '<div style="flex:1;overflow:hidden;padding:12px 16px 0">' +
-    '<div class="org-group" style="margin-bottom:12px">' +
-    '<div class="org-hdr"><span class="org-hdr-ico">🌿</span><span class="org-hdr-name">Whole Foods Market</span><span class="org-hdr-count">' + wfItems.length + ' left</span></div>' +
-    wfItems.map(function(n) {
-      return '<div class="org-row"><span class="org-name">' + n + '</span>' +
-        '<select class="org-sel" style="pointer-events:none"><option>🌿 Whole Foods</option></select></div>';
-    }).join('') + '</div>' +
-    '<div class="org-group">' +
-    '<div class="org-hdr"><span class="org-hdr-ico">🛒</span><span class="org-hdr-name">Kroger</span><span class="org-hdr-count">' + krItems.length + ' left</span></div>' +
-    krItems.map(function(n) {
-      return '<div class="org-row"><span class="org-name">' + n + '</span>' +
-        '<select class="org-sel" style="pointer-events:none"><option>🛒 Kroger</option></select></div>';
-    }).join('') + '</div></div>';
-}
-
-function demoNotifPrompt() {
-  return demoHeader('on') + demoTabs('list') +
-    '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:10;padding:20px">' +
-    '<div style="background:var(--bg2);border-radius:16px;padding:24px;width:100%;max-width:320px;text-align:center">' +
-    '<div style="font-size:36px;margin-bottom:12px">🔔</div>' +
-    '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px">Enable Notifications</div>' +
-    '<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:20px">Allow ListAlert to send alerts when you\'re near a store with items on your list.</div>' +
-    '<button style="width:100%;height:46px;background:var(--green);border:none;border-radius:10px;color:#0A0A0A;font-size:15px;font-weight:700;font-family:Outfit,sans-serif;box-shadow:0 0 0 3px var(--green),0 0 20px rgba(74,222,128,0.3)">Allow Notifications</button>' +
-    '<button style="width:100%;height:36px;background:none;border:none;color:var(--text3);font-size:13px;font-family:Outfit,sans-serif;margin-top:8px">Not now</button>' +
-    '</div></div>';
-}
-
-function demoNotification() {
-  return demoHeader('on') + demoTabs('list') +
-    '<div style="flex:1;overflow:hidden">' +
-    '<div class="notif" style="margin:10px 16px 4px">' +
-    '<span class="notif-ico">🛒</span>' +
-    '<div style="flex:1">' +
-    '<div class="notif-title">You are near Kroger</div>' +
-    '<div class="notif-body">Still need: Milk, Eggs, Butter, Dish Soap, Taco Seasoning</div>' +
-    '<div class="notif-btns">' +
-    '<button class="nbtn p" style="box-shadow:0 0 0 2px var(--green)">Got it</button>' +
-    '<button class="nbtn">Not this time</button>' +
-    '</div></div></div>' +
-    '<div class="card-list" style="margin:8px 16px 0">' +
-    ['Milk','Eggs','Butter','Dish Soap','Taco Seasoning'].map(function(n) {
-      return '<div class="item-row"><div class="chk"></div>' +
-        '<div class="item-info"><div class="item-name">' + n + '</div>' +
-        '<div class="item-tag">🛒 Kroger</div></div></div>';
-    }).join('') + '</div></div>' +
-    '<div class="add-bar" style="position:relative;transform:none;border-top:1px solid var(--border)">' +
-    '<input style="flex:1;height:46px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text3);padding:0 14px;font-family:Outfit,sans-serif" placeholder="Add an item..." disabled/>' +
-    '<button class="recipe-btn">🍳</button>' +
-    '<button style="height:46px;padding:0 18px;background:var(--green);border:none;border-radius:10px;color:#0A0A0A;font-size:15px;font-weight:700;font-family:Outfit,sans-serif">Add</button></div>';
-}
-
-function watchDemo() {
-  document.getElementById('demo-prompt').classList.remove('open');
-  document.getElementById('demo-prompt').style.display = 'none';
-  startDemo();
-}
-
-function skipDemo() {
-  localStorage.setItem('la_demo_seen', '1');
-  document.getElementById('demo-prompt').classList.remove('open');
-  document.getElementById('demo-prompt').style.display = 'none';
-  if (!localStorage.getItem('la_onboarded')) {
-    document.getElementById('ob-modal').style.display = 'flex';
-  }
-}
-
-function startDemo() {
-  demoStep = 0;
-  document.getElementById('demo-backdrop').style.display = 'flex';
-  renderDemoStep();
-}
-
-function renderDemoStep() {
-  if (demoStep >= DEMO_STEPS.length) { endDemo(); return; }
-  var step = DEMO_STEPS[demoStep];
-
-  // Progress pips
-  var pips = DEMO_STEPS.map(function(_, i) {
-    return '<div class="demo-pip' + (i < demoStep ? ' done' : i === demoStep ? ' active' : '') + '"></div>';
-  }).join('');
-  document.getElementById('demo-progress').innerHTML = pips;
-  document.getElementById('demo-caption').textContent = step.caption;
-  document.getElementById('demo-frame').innerHTML = step.html();
-
-  if (demoTimer) clearTimeout(demoTimer);
-  demoTimer = setTimeout(function() { demoStep++; renderDemoStep(); }, step.duration);
-}
-
-function demoNext() {
-  if (demoTimer) clearTimeout(demoTimer);
-  demoStep++;
-  renderDemoStep();
-}
-
-function endDemo() {
-  if (demoTimer) clearTimeout(demoTimer);
-  localStorage.setItem('la_demo_seen', '1');
-  document.getElementById('demo-backdrop').style.display = 'none';
-  if (!localStorage.getItem('la_onboarded')) {
-    document.getElementById('ob-modal').style.display = 'flex';
-  }
-}
-function finishOnboarding(goToStores) {
-  localStorage.setItem('la_onboarded', '1');
-  document.getElementById('ob-modal').style.display = 'none';
-  if (goToStores) {
-    show('stores');
-  } else {
-    show('list');
-    setTimeout(function() { openRecipeModal(); }, 300);
-  }
-  // Show home screen prompt once
-  if (!localStorage.getItem('la_homescreen')) {
-    setTimeout(function() {
-      var p = document.getElementById('homescreen-prompt');
-      p.style.display = 'flex';
-      setTimeout(function() { p.classList.add('open'); }, 10);
-    }, goToStores ? 1000 : 4000);
-  }
-}
-
-function dismissHomescreen() {
-  localStorage.setItem('la_homescreen', '1');
-  var p = document.getElementById('homescreen-prompt');
-  p.classList.remove('open');
-  setTimeout(function() { p.style.display = 'none'; }, 300);
-}
-
-// ── Init ───────────────────────────────────────────────────────
 renderList();
 renderNearby();
 show('list');
-if (!localStorage.getItem('la_demo_seen')) {
-  var dp = document.getElementById('demo-prompt');
-  dp.style.display = 'flex';
-  setTimeout(function() { dp.classList.add('open'); }, 10);
-} else if (!localStorage.getItem('la_onboarded')) {
-  document.getElementById('ob-modal').style.display = 'flex';
-}
+if(!localStorage.getItem('la_demo_seen')){var dp=document.getElementById('demo-prompt');dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}else if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}
 </script>
 </body>
 </html>
