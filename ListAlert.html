@@ -291,6 +291,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .email-banner-input:focus{border-color:var(--violet)}
 .email-banner-send{height:36px;padding:0 14px;background:var(--violet);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif}
 .email-banner-skip{font-size:12px;color:var(--text3);cursor:pointer;background:none;border:none;font-family:"Outfit",sans-serif;margin-top:6px;padding:0;text-decoration:underline}
+.store-picker-row{background:var(--bg2);border-top:1px solid var(--border);padding:8px 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.store-pill{height:28px;padding:0 10px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;transition:all .15s}
+.store-pill.selected{background:var(--green-dim);border-color:var(--green-border);color:var(--green)}
 </style>
 </head>
 <body>
@@ -298,10 +301,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 
   <div class="header">
     <h1>List<em>Alert</em></h1>
-    <button class="gps-btn wait" id="gpsbtn" onclick="startGPS()">
-      <span class="dot wait" id="gpsdot"></span>
-      <span id="gpstxt">Enable GPS</span>
-    </button>
+    <div id="gpsbtn" style="display:none"><span class="dot wait" id="gpsdot"></span><span id="gpstxt"></span></div>
   </div>
 
   <div class="tabs">
@@ -314,15 +314,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
     <div id="email-banner-area"></div>
     <div id="notif-area"></div>
     <div id="nearby-area"></div>
+    <div id="order-bar" style="display:none;padding:10px 16px 4px">
+      <button id="share-list-btn" onclick="shareList()" style="width:100%;height:48px;background:var(--green);border:none;border-radius:14px;color:#0A0A0A;font-size:15px;font-weight:800;cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px"><span>🛒</span> Order for delivery</button>
+    </div>
     <div id="list-body"></div>
   </div>
 
   <div class="view" id="view-stores">
-    <div class="radius-bar">
-      <label>Alert radius</label>
-      <input type="range" id="radius-range" min="200" max="2000" step="100" value="800" oninput="setRadius(this.value)"/>
-      <span id="radius-lbl">800m</span>
-    </div>
+
     <div style="margin:8px 16px 0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
       <div class="settings-row">
         <div><div class="settings-label">Auto-clear checked items</div><div class="settings-sub">Delete items when you check them off</div></div>
@@ -494,7 +493,7 @@ var EMOJI_MAP = [
   {emoji:'🔨', keywords:['home depot','lowe\'s','lowes','ace hardware','hardware','menards','true value']},
 ];
 function getStoreEmoji(name){var lower=name.toLowerCase();for(var i=0;i<EMOJI_MAP.length;i++){for(var j=0;j<EMOJI_MAP[i].keywords.length;j++){if(lower.indexOf(EMOJI_MAP[i].keywords[j])!==-1){return EMOJI_MAP[i].emoji;}}}return '🛍️';}
-document.getElementById('radius-range').value = radius;
+var rr2=document.getElementById('radius-range');if(rr2)rr2.value=radius;
 document.getElementById('radius-lbl').textContent = radius + 'm';
 if (!localStorage.getItem('la_emoji_v2')) {stores.forEach(function(s){s.emoji=getStoreEmoji(s.name);});persist();localStorage.setItem('la_emoji_v2','1');}
 function persist(){localStorage.setItem('la_stores',JSON.stringify(stores));localStorage.setItem('la_items',JSON.stringify(items));localStorage.setItem('la_radius',radius);localStorage.setItem('la_nid',nid);localStorage.setItem('la_saved_recipes',JSON.stringify(savedRecipes));localStorage.setItem('la_autoclear',autoclear?'1':'0');}
@@ -663,10 +662,10 @@ function persistSettings(){
 function toggleAutoclear(){autoclear=!autoclear;var btn=document.getElementById('autoclear-toggle');if(btn){btn.classList.toggle('on',autoclear);btn.classList.toggle('off',!autoclear);}persistSettings();}
 function show(t){curTab=t;['list','stores','organize'].forEach(function(n){document.getElementById('tab-'+n).classList.toggle('active',n===t);document.getElementById('view-'+n).classList.toggle('active',n===t);});document.getElementById('add-bar').style.display=t==='list'?'flex':'none';if(t==='list'){renderList();renderNearby();}if(t==='stores')renderStores();if(t==='organize')renderOrganize();}
 function startGPS(){if(!navigator.geolocation){setGPS('off','No GPS');return;}setGPS('wait','Locating...');navigator.geolocation.getCurrentPosition(function(p){lat=p.coords.latitude;lng=p.coords.longitude;setGPS('on','GPS active');if(!watchId)watchId=navigator.geolocation.watchPosition(function(p){lat=p.coords.latitude;lng=p.coords.longitude;checkFences();},null,{enableHighAccuracy:true,maximumAge:10000});checkFences();if(window.Notification&&Notification.permission==='default')Notification.requestPermission();},function(){setGPS('off','GPS denied');},{enableHighAccuracy:true,timeout:15000});}
-function setGPS(state,txt){document.getElementById('gpsbtn').className='gps-btn '+state;document.getElementById('gpsdot').className='dot '+state;document.getElementById('gpstxt').textContent=txt;}
+function setGPS(state,txt){var btn=document.getElementById('gpsbtn');if(btn)btn.style.display='none';var dot=document.getElementById('gpsdot');if(dot)dot.className='dot '+state;var t=document.getElementById('gpstxt');if(t)t.textContent=txt;renderNearby();}
 function dist(a,b,c,d){var R=6371000,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180;var x=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 function checkFences(){if(lat===null)return;stores.forEach(function(s){if(!s.geo||s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var pending=items.filter(function(i){return i.store===s.id&&!i.done;});var st=ss[s.id]||(ss[s.id]={inside:false,alerted:false});if(d<=radius){if(!st.inside){st.inside=true;if(pending.length&&!st.alerted){st.alerted=true;fireAlert(s,pending);}}}else if(d>radius*1.5){st.inside=false;st.alerted=false;}});if(curTab==='list')renderNearby();}
-function renderNearby(){var el=document.getElementById('nearby-area');if(!el)return;if(lat===null){if(!stores.length)return;el.innerHTML='<div class="nearby-wrap"><div class="nearby-gps-prompt" onclick="startGPS()"><span>📍 Enable GPS to see nearby stores</span><span style="color:var(--amber);font-size:13px;font-weight:700">Enable →</span></div></div>';return;}var nearbyStores=[];stores.forEach(function(s){if(s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var nearThreshold=Math.max(radius*3,2000);if(d>nearThreshold)return;var pending=items.filter(function(i){return i.store===s.id&&!i.done;});if(!pending.length)return;nearbyStores.push({store:s,pending:pending.length,dist:d});});if(!nearbyStores.length){el.innerHTML='';return;}nearbyStores.sort(function(a,b){return a.dist-b.dist;});var html='<div class="nearby-wrap"><div class="nearby-label">Near you now</div>';nearbyStores.forEach(function(n){var distStr=n.dist<1000?Math.round(n.dist)+'m away':(n.dist/1000).toFixed(1)+'km away';html+='<div class="nearby-row" onclick="setFilter('+n.store.id+');document.getElementById(\'view-list\').scrollTop=200"><div class="nearby-ico">'+n.store.emoji+'</div><div class="nearby-info"><div class="nearby-name">'+n.store.name+'</div><div class="nearby-meta">'+distStr+'</div></div><div class="nearby-count">'+n.pending+' item'+(n.pending!==1?'s':'')+'</div></div>';});html+='</div>';el.innerHTML=html;}
+function renderNearby(){var el=document.getElementById('nearby-area');if(!el)return;if(lat===null){if(!stores.length)return;el.innerHTML='<div style="margin:8px 16px;background:var(--bg2);border:1px solid var(--amber-border);border-radius:12px;padding:14px 16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:var(--text)">📍 Get alerted near your stores</div><button onclick="startGPS()" style="height:32px;padding:0 14px;background:var(--amber);border:none;border-radius:8px;color:#0A0A0A;font-size:12px;font-weight:800;cursor:pointer;font-family:Outfit,sans-serif">Enable</button></div><div style="display:flex;align-items:center;gap:10px"><span style="font-size:11px;font-weight:600;color:var(--text3);white-space:nowrap">Alert radius</span><input type="range" id="radius-range" min="200" max="2000" step="100" value="'+radius+'" oninput="setRadius(this.value)" style="flex:1;accent-color:var(--amber)"/><span id="radius-lbl" style="font-size:12px;font-weight:700;color:var(--amber);min-width:44px;text-align:right">'+radius+'m</span></div></div>';return;}var nearbyStores=[];stores.forEach(function(s){if(s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var nearThreshold=Math.max(radius*3,2000);if(d>nearThreshold)return;var pending=items.filter(function(i){return i.store===s.id&&!i.done;});if(!pending.length)return;nearbyStores.push({store:s,pending:pending.length,dist:d});});if(!nearbyStores.length){el.innerHTML='';return;}nearbyStores.sort(function(a,b){return a.dist-b.dist;});var html='<div class="nearby-wrap"><div class="nearby-label">Near you now</div>';nearbyStores.forEach(function(n){var distStr=n.dist<1000?Math.round(n.dist)+'m away':(n.dist/1000).toFixed(1)+'km away';html+='<div class="nearby-row" onclick="setFilter('+n.store.id+');document.getElementById(\'view-list\').scrollTop=200"><div class="nearby-ico">'+n.store.emoji+'</div><div class="nearby-info"><div class="nearby-name">'+n.store.name+'</div><div class="nearby-meta">'+distStr+'</div></div><div class="nearby-count">'+n.pending+' item'+(n.pending!==1?'s':'')+'</div></div>';});html+='</div>';el.innerHTML=html;}
 function fireAlert(store,pending){var names=pending.map(function(i){return i.name;}).join(', ');showBanner(store,names);if(window.Notification&&Notification.permission==='granted'){var n=new Notification('Near '+store.name,{body:'Still need: '+names,tag:'la-'+store.id,requireInteraction:true});n.onclick=function(){gotIt(store.id);};}}
 function gotIt(sid){if(ss[sid])ss[sid].alerted=true;document.getElementById('notif-area').innerHTML='';show('list');}
 function notNow(sid){if(ss[sid]){ss[sid].alerted=false;ss[sid].inside=false;}document.getElementById('notif-area').innerHTML='';}
@@ -683,7 +682,56 @@ function delStore(id){if(!confirm('Remove this store?'))return;persistStoreDelet
 function pinHere(id){if(lat===null){alert('Enable GPS first using the button at the top, then tap Save location.');return;}var s=stores.find(function(s){return s.id===id;});if(s){s.lat=lat;s.lng=lng;persistStoreWrite(s);renderStores();}}
 function setRadius(v){radius=parseInt(v);document.getElementById('radius-lbl').textContent=v+'m';persistSettings();}
 var listFilter=null;
-function renderList(){var el=document.getElementById('list-body');if(!items.length){el.innerHTML='<div class="empty"><b>Your list is empty</b>Tap <b style="color:var(--violet)">🍳 Recipe</b> to scan a photo or try: <span style="color:var(--text2)">"chicken tacos"</span>, <span style="color:var(--text2)">"high protein breakfast"</span>, or any craving.</div>';return;}var sm={};stores.forEach(function(s){sm[s.id]=s;});var sorted=items.slice().sort(function(a,b){var av=(a.done||a.skipped)?1:0,bv=(b.done||b.skipped)?1:0;return av-bv;});var filtered=listFilter?sorted.filter(function(it){return it.store===listFilter;}):sorted;var filterBar='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id&&!i.done&&!i.skipped;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'</button>';});filterBar+='</div>';var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var badge=s?s.emoji+' '+s.name:'';var recurBadge=it.recurring?'<span class="recur-badge">↻ '+it.recurLabel+'</span>':'';var sourceNote=it.sources&&it.sources.length>1?'<div class="item-tag" style="color:var(--blue)">shared by '+it.sources.length+' recipes</div>':'';return'<div class="item-row'+(it.skipped?' skipped':'')+'"><div class="chk'+(it.done?' done':'')+'" onclick="toggleItem('+it.id+')"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-info"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+it.name+recurBadge+'</div>'+(badge&&!listFilter?'<div class="item-tag">'+badge+'</div>':'')+sourceNote+'</div><button class="skip-btn" onclick="toggleSkip('+it.id+')" title="'+(it.skipped?'Restore to list':'Skip this trip')+'" style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:'+(it.skipped?'var(--green)':'var(--text3)')+'">'+( it.skipped?'Restore':'Skip')+'</button><button class="del" onclick="delItem('+it.id+')" style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid rgba(248,113,113,0.3);background:var(--red-dim);color:var(--red);margin-left:4px">Delete</button></div>';}).join('')+'</div>':'<div class="empty">No items for this store yet.<br>Add some on the List tab or assign them in <b>Assign</b>.</div>';el.innerHTML=filterBar+listHtml;}
+// ── Share list for delivery ────────────────────────────────────
+function shareList(){
+  var active=items.filter(function(i){return !i.done&&!i.skipped;});
+  if(!active.length){alert('Your list is empty.');return;}
+  var sm={};stores.forEach(function(s){sm[s.id]=s;});
+  var grouped={};var unassigned=[];
+  stores.forEach(function(s){grouped[s.id]=[];});
+  active.forEach(function(it){
+    if(it.store&&grouped[it.store]){grouped[it.store].push(it.name);}
+    else{unassigned.push(it.name);}
+  });
+  var lines=['My Shopping List',''];
+  stores.forEach(function(s){
+    var its=grouped[s.id];
+    if(!its.length)return;
+    lines.push(s.emoji+' '+s.name+':');
+    its.forEach(function(n){lines.push('  - '+n);});
+    lines.push('');
+  });
+  if(unassigned.length){
+    lines.push('Items:');
+    unassigned.forEach(function(n){lines.push('  - '+n);});
+  }
+  var text=lines.join('\n');
+  if(navigator.share){
+    navigator.share({title:'My Shopping List',text:text}).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text).then(function(){
+      var btn=document.getElementById('share-list-btn');
+      if(btn){var orig=btn.innerHTML;btn.innerHTML='Copied to clipboard!';setTimeout(function(){btn.innerHTML=orig;},2000);}
+    }).catch(function(){alert(text);});
+  }
+}
+
+// ── Inline store picker ────────────────────────────────────────
+var openPickerId=null;
+function toggleStorePicker(itemId){
+  openPickerId=(openPickerId===itemId)?null:itemId;
+  renderList();
+  if(openPickerId){setTimeout(function(){var el=document.getElementById('spick-'+itemId);if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});},50);}
+}
+function assignFromPicker(itemId,storeId){
+  var it=items.find(function(i){return i.id===itemId;});
+  if(it){it.store=storeId?parseInt(storeId):null;persistItemWrite(it);}
+  openPickerId=null;renderList();renderOrganize();
+}
+
+function renderList(){var el=document.getElementById('list-body');if(!items.length){var ob=document.getElementById('order-bar');if(ob)ob.style.display='none';
+  el.innerHTML='<div class="empty"><b>Your list is empty</b>Tap <b style="color:var(--violet)">🍳 Recipe</b> to scan a photo or try: <span style="color:var(--text2)">"chicken tacos"</span>, <span style="color:var(--text2)">"high protein breakfast"</span>, or any craving.</div>';return;}var sm={};stores.forEach(function(s){sm[s.id]=s;});var sorted=items.slice().sort(function(a,b){var av=(a.done||a.skipped)?1:0,bv=(b.done||b.skipped)?1:0;return av-bv;});var filtered=listFilter?sorted.filter(function(it){return it.store===listFilter;}):sorted;var filterBar='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id&&!i.done&&!i.skipped;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'</button>';});filterBar+='</div>';var ob2=document.getElementById('order-bar');if(ob2)ob2.style.display=items.filter(function(i){return!i.done&&!i.skipped;}).length?'block':'none';
+  var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var badge=s?s.emoji+' '+s.name:'+ store';var recurBadge=it.recurring?'<span class="recur-badge">↻ '+it.recurLabel+'</span>':'';var sourceNote=it.sources&&it.sources.length>1?'<div class="item-tag" style="color:var(--blue)">shared by '+it.sources.length+' recipes</div>':'';return'<div class="item-row'+(it.skipped?' skipped':'')+'"><div class="chk'+(it.done?' done':'')+'" onclick="toggleItem('+it.id+')"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-info"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+it.name+recurBadge+'</div>'+'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>'+sourceNote+'</div><button class="skip-btn" onclick="toggleSkip('+it.id+')" title="'+(it.skipped?'Restore to list':'Skip this trip')+'" style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:'+(it.skipped?'var(--green)':'var(--text3)')+'">'+( it.skipped?'Restore':'Skip')+'</button><button class="del" onclick="delItem('+it.id+')" style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid rgba(248,113,113,0.3);background:var(--red-dim);color:var(--red);margin-left:4px">Delete</button></div>'+(openPickerId===it.id?'<div class="store-picker-row" id="spick-'+it.id+'"><span style="font-size:11px;font-weight:700;color:var(--text3);flex-shrink:0">Store:</span><button class="store-pill'+(it.store===null?' selected':'')+'" onclick="assignFromPicker('+it.id+',null)">None</button>'+stores.map(function(ps){return'<button class="store-pill'+(it.store===ps.id?' selected':'')+'" onclick="assignFromPicker('+it.id+','+ps.id+')">'+ps.emoji+' '+ps.name+'</button>';}).join('')+'</div>':'')+'</div>';}).join('')+'</div>':'<div class="empty">No items for this store yet.<br>Add some on the List tab or assign them in <b>Assign</b>.</div>';el.innerHTML=filterBar+listHtml;}
 function setFilter(storeId){listFilter=storeId;renderList();}
 function addItem(){var input=document.getElementById('item-input');var name=input.value.trim();if(!name)return;var newItem={id:nid++,name:name,store:null,done:false};items.push(newItem);input.value='';persistItemWrite(newItem);renderList();input.focus();}
 function toggleItem(id){var it=items.find(function(i){return i.id===id;});if(!it)return;if(autoclear&&!it.done){persistItemDelete(id);items=items.filter(function(i){return i.id!==id;});persist();renderList();return;}if(it.recurring&&!it.done){it.done=true;it.lastReset=Date.now();}else{it.done=!it.done;}persistItemWrite(it);renderList();}
@@ -721,7 +769,12 @@ function showSaveRecipePrompt(ingredientNames,sourceName,mergeNote){var tagBtns=
 function toggleSaveTag(el,tag){var on=el.classList.toggle('on');if(on){if(saveRecipeTags.indexOf(tag)===-1)saveRecipeTags.push(tag);}else{saveRecipeTags=saveRecipeTags.filter(function(t){return t!==tag;});}}
 function doSaveRecipe(ingredients){var name=(document.getElementById('save-recipe-name').value||'').trim();if(!name){document.getElementById('save-recipe-name').focus();document.getElementById('save-recipe-name').style.borderColor='var(--red)';return;}var newRecipe={id:Date.now(),name:name,tags:saveRecipeTags.slice(),items:ingredients,savedAt:new Date().toISOString()};savedRecipes.unshift(newRecipe);items.forEach(function(it){if(it.sources){var idx=it.sources.indexOf(pendingRecipeName);if(idx!==-1)it.sources[idx]=name;}});persistRecipeWrite(newRecipe);persist();closeRecipeModal();}
 
-function renderSavedRecipesInModal(){var area=document.getElementById('recipe-input-area');if(!savedRecipes.length){area.innerHTML='<div style="padding:24px 20px;text-align:center;color:var(--text3);font-size:14px;line-height:1.8"><b style="color:var(--text2);display:block;font-size:16px;margin-bottom:6px">No saved recipes yet</b>After scanning or generating a recipe, tap "Save recipe" to build your cookbook.</div>';return;}var html='<div style="padding:12px 20px 0">';html+=savedRecipes.map(function(r){var tags=r.tags&&r.tags.length?r.tags.map(function(t){return'<span class="saved-recipe-chip">'+t+'</span>';}).join(''):'';var count='<span class="saved-recipe-chip">'+r.items.length+' items</span>';var onList=items.some(function(it){return it.sources&&it.sources.indexOf(r.name)!==-1;});return'<div class="saved-recipe-card'+(onList?' starred':'')+'" id="src-'+r.id+'"><div class="saved-recipe-ico">'+(onList?'✓':'🍽️')+'</div><div class="saved-recipe-info"><div class="saved-recipe-name">'+r.name+'</div><div class="saved-recipe-meta">'+tags+count+(onList?'<span class="saved-recipe-chip" style="color:var(--green);background:var(--green-dim)">On this trip</span>':'')+'</div></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'+(onList?'<button class="saved-recipe-add" style="color:var(--red);font-size:12px" onclick="removeRecipeFromList(\''+r.name+'\')">Remove</button>':'<button class="saved-recipe-add" onclick="loadSavedRecipe('+r.id+')">Add →</button>')+'<button class="saved-recipe-del" onclick="deleteSavedRecipe('+r.id+',event)">🗑</button></div></div>';}).join('');html+='</div>';area.innerHTML=html;}
+var savedRecipeFilter=null;
+function setSavedFilter(tag){savedRecipeFilter=(savedRecipeFilter===tag)?null:tag;renderSavedRecipesInModal();}
+function renderSavedRecipesInModal(){var area=document.getElementById('recipe-input-area');if(!savedRecipes.length){area.innerHTML='<div style="padding:24px 20px;text-align:center;color:var(--text3);font-size:14px;line-height:1.8"><b style="color:var(--text2);display:block;font-size:16px;margin-bottom:6px">No saved recipes yet</b>After scanning or generating a recipe, tap "Save recipe" to build your cookbook.</div>';return;}var allTags=[];savedRecipes.forEach(function(r){(r.tags||[]).forEach(function(t){if(allTags.indexOf(t)===-1)allTags.push(t);});});
+  var filterChips=allTags.length?'<div style="display:flex;gap:6px;flex-wrap:wrap;padding:10px 20px 0;overflow-x:auto">'+allTags.map(function(t){var on=savedRecipeFilter===t;return'<button onclick="setSavedFilter(\''+t+'\')" style="height:28px;padding:0 12px;border-radius:20px;border:1px solid '+(on?'var(--violet-border)':'var(--border2)')+';background:'+(on?'var(--violet-dim)':'var(--bg3)')+';color:'+(on?'var(--violet)':'var(--text3)')+';font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">'+t+'</button>';}).join('')+'</div>':'';
+  var filtered2=savedRecipeFilter?savedRecipes.filter(function(r){return r.tags&&r.tags.indexOf(savedRecipeFilter)!==-1;}):savedRecipes;
+  var html='<div>'+filterChips+'<div style="padding:12px 20px 0">';html+=filtered2.map(function(r){var tags=r.tags&&r.tags.length?r.tags.map(function(t){return'<span class="saved-recipe-chip">'+t+'</span>';}).join(''):'';var count='<span class="saved-recipe-chip">'+r.items.length+' items</span>';var onList=items.some(function(it){return it.sources&&it.sources.indexOf(r.name)!==-1;});return'<div class="saved-recipe-card'+(onList?' starred':'')+'" id="src-'+r.id+'"><div class="saved-recipe-ico">'+(onList?'✓':'🍽️')+'</div><div class="saved-recipe-info"><div class="saved-recipe-name">'+r.name+'</div><div class="saved-recipe-meta">'+tags+count+(onList?'<span class="saved-recipe-chip" style="color:var(--green);background:var(--green-dim)">On this trip</span>':'')+'</div></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'+(onList?'<button class="saved-recipe-add" style="color:var(--red);font-size:12px" onclick="removeRecipeFromList(\''+r.name+'\')">Remove</button>':'<button class="saved-recipe-add" onclick="loadSavedRecipe('+r.id+')">Add →</button>')+'<button class="saved-recipe-del" onclick="deleteSavedRecipe('+r.id+',event)">🗑</button></div></div>';}).join('');html+='</div></div>';area.innerHTML=html;}
 function removeRecipeFromList(recipeName){items=items.filter(function(it){if(!it.sources)return true;it.sources=it.sources.filter(function(s){return s!==recipeName;});if(it.sources.length===0){persistItemDelete(it.id);return false;}persistItemWrite(it);return true;});persist();renderList();renderSavedRecipesInModal();}
 function loadSavedRecipe(id){var recipe=savedRecipes.find(function(r){return r.id===id;});if(!recipe)return;extractedIngredients=recipe.items.map(function(name){return{name:name,selected:true};});recipeTab='paste';switchRecipeTab('paste');showRecipeResults();var sub=document.querySelector('#recipe-modal .modal-subtitle');if(sub)sub.textContent=recipe.name+' — '+recipe.items.length+' ingredients';pendingRecipeName=recipe.name;}
 function deleteSavedRecipe(id,e){e.stopPropagation();if(!confirm('Delete this saved recipe?'))return;persistRecipeDelete(id);savedRecipes=savedRecipes.filter(function(r){return r.id!==id;});persist();renderSavedRecipesInModal();}
