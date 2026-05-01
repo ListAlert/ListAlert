@@ -341,8 +341,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
       <div id="search-results"></div>
       <div id="stores-list"></div>
       <div style="text-align:center;padding:20px 16px 8px;display:flex;justify-content:center;gap:20px">
-        <button onclick="localStorage.removeItem('la_demo_seen');localStorage.removeItem('la_onboarded');location.reload();" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;font-family:'Outfit',sans-serif;text-decoration:underline">Replay demo</button>
-        <button onclick="localStorage.setItem('la_demo_seen','1');localStorage.removeItem('la_onboarded');location.reload();" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;font-family:'Outfit',sans-serif;text-decoration:underline">Skip to app</button>
+        <button onclick="replayDemo();" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;font-family:'Outfit',sans-serif;text-decoration:underline">Replay demo</button>
+        <button onclick="skipToApp();" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;font-family:'Outfit',sans-serif;text-decoration:underline">Skip to app</button>
       </div>
     </div>
   </div>
@@ -897,8 +897,29 @@ var DEMO_STEPS = [
   {duration:5000, caption:"Done for the week. Prefer shopping in person? ListAlert has you covered there too.", html:demoStep9_done}
 ];
 
-function watchDemo(){document.getElementById('demo-prompt').classList.remove('open');document.getElementById('demo-prompt').style.display='none';startDemo();}
-function skipDemo(){localStorage.setItem('la_demo_seen','1');document.getElementById('demo-prompt').classList.remove('open');document.getElementById('demo-prompt').style.display='none';if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}}
+function watchDemo(){localStorage.setItem('la_demo_seen','1');sessionStorage.setItem('la_demo_seen','1');document.getElementById('demo-prompt').classList.remove('open');document.getElementById('demo-prompt').style.display='none';startDemo();}
+function replayDemo(){
+  localStorage.removeItem('la_demo_seen');
+  sessionStorage.removeItem('la_demo_seen');
+  localStorage.removeItem('la_onboarded');
+  demoStep=0;
+  if(demoTimer)clearTimeout(demoTimer);
+  var backdrop=document.getElementById('demo-backdrop');
+  if(backdrop)backdrop.style.display='none';
+  var dp=document.getElementById('demo-prompt');
+  if(dp){dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}
+  show('list');
+}
+function skipToApp(){
+  localStorage.setItem('la_demo_seen','1');
+  sessionStorage.setItem('la_demo_seen','1');
+  localStorage.removeItem('la_onboarded');
+  var dp=document.getElementById('demo-prompt');
+  if(dp){dp.classList.remove('open');setTimeout(function(){dp.style.display='none';},300);}
+  show('list');
+}
+
+function skipDemo(){localStorage.setItem('la_demo_seen','1');sessionStorage.setItem('la_demo_seen','1');document.getElementById('demo-prompt').classList.remove('open');document.getElementById('demo-prompt').style.display='none';if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}}
 function startDemo(){demoStep=0;document.getElementById('demo-backdrop').style.display='flex';renderDemoStep();}
 function renderDemoStep(){if(demoStep>=DEMO_STEPS.length){endDemo();return;}var step=DEMO_STEPS[demoStep];var isLast=demoStep===DEMO_STEPS.length-1;var nb=document.getElementById('demo-next-btn');if(nb)nb.textContent=isLast?'Get started →':'Next →';document.getElementById('demo-progress').innerHTML=DEMO_STEPS.map(function(_,i){return'<div class="demo-pip'+(i<demoStep?' done':i===demoStep?' active':'')+'"></div>';}).join('');document.getElementById('demo-caption').textContent=step.caption;document.getElementById('demo-frame').innerHTML=step.html();if(demoTimer)clearTimeout(demoTimer);demoTimer=setTimeout(function(){demoStep++;renderDemoStep();},step.duration);}
 function demoNext(){if(demoTimer)clearTimeout(demoTimer);demoStep++;renderDemoStep();}
@@ -914,7 +935,7 @@ show('list');
 checkRecurring();
 if(_vc>=1)setTimeout(maybeShowEmailPrompt,3000);
 if(autoclear){var at=document.getElementById('autoclear-toggle');if(at){at.classList.add('on');at.classList.remove('off');}}
-if(!localStorage.getItem('la_demo_seen')){var dp=document.getElementById('demo-prompt');dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}else if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}
+if(!sessionStorage.getItem('la_demo_seen')&&!localStorage.getItem('la_demo_seen')){var dp=document.getElementById('demo-prompt');dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}else if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}
 initSupabase().then(function(){ loadFromSupabase(); });
 
 </script>
