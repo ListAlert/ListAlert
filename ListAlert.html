@@ -856,7 +856,7 @@ function renderList(){var el=document.getElementById('list-body');var _ob=docume
   // Use recipe trip view if any saved recipe has items on the list
   var hasRecipeItems=filtered.some(function(it){return it.sources&&it.sources.some(function(s){return s&&s!=='Manual add';});});
   if(hasRecipeItems&&!listFilter){renderTripView(el,filtered,sm);return;}
-  var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var badge=s?s.emoji+' '+s.name:'+ store';var recurBadge=it.recurring?'<span class="recur-badge">↻ '+it.recurLabel+'</span>':'';var mainSrc=it.sources&&it.sources.length?it.sources.find(function(s){return s!=='Manual add';}):null;sourceNote=it.sources&&it.sources.length>1?'<div class="item-tag" style="color:var(--blue)">shared · '+it.sources.filter(function(s){return s!=='Manual add';}).join(', ')+'</div>':mainSrc?'<div class="item-tag" style="color:var(--text3);font-size:10px;opacity:0.7">'+mainSrc+'</div>':'';var actionOpen=openActionItem===it.id;var statusHint=it.done?'<span style="font-size:10px;color:var(--text3);margin-left:4px">tap to undo</span>':it.skipped?'<span style="font-size:10px;color:var(--amber);margin-left:4px">skipped</span>':'';return'<div class="item-row'+(it.skipped?' skipped':'')+(actionOpen?' selected':'')+'"><div class="chk'+(it.done?' done':'')+'" onclick="itemUncheck('+it.id+')" style="'+(it.done?'':'display:none ')+'flex-shrink:0"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+(it.done?'':'<div style="width:22px;height:22px;border-radius:50%;border:1.5px solid '+(it.skipped?'var(--amber-border)':'var(--border2)')+';flex-shrink:0;cursor:pointer;" onclick="openItemAction('+it.id+')"></div>')+'<div class="item-info" onclick="'+(it.done?'itemUncheck('+it.id+')':'openItemAction('+it.id+')')+'" style="cursor:pointer"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+it.name+recurBadge+statusHint+'</div>'+'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>'+sourceNote+'</div></div>'+(actionOpen?buildActionSheet(it):'')+buildPickerPanel(it);}).join('')+'</div>':'<div class="empty">No items for this store yet.<\/div>';el.innerHTML=filterBar+listHtml;}
+  var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var hasStores=stores.length>0;var badge=s?s.emoji+' '+s.name:(hasStores?'+ store':'');var showBadge=!!(s||hasStores);var recurBadge=it.recurring?'<span class="recur-badge">↻ '+it.recurLabel+'</span>':'';var mainSrc=it.sources&&it.sources.length?it.sources.find(function(s){return s!=='Manual add';}):null;sourceNote=it.sources&&it.sources.length>1?'<div class="item-tag" style="color:var(--blue)">shared · '+it.sources.filter(function(s){return s!=='Manual add';}).join(', ')+'</div>':mainSrc?'<div class="item-tag" style="color:var(--text3);font-size:10px;opacity:0.7">'+mainSrc+'</div>':'';var actionOpen=openActionItem===it.id;var statusHint=it.done?'<span style="font-size:10px;color:var(--text3);margin-left:4px">tap to undo</span>':it.skipped?'<span style="font-size:10px;color:var(--amber);margin-left:4px">skipped</span>':'';var circleStyle='width:22px;height:22px;border-radius:50%;border:1.5px dashed '+(it.skipped?'var(--amber-border)':'var(--border2)')+';cursor:pointer;display:flex;align-items:center;justify-content:center';var circleInner='<svg width="7" height="7" viewBox="0 0 7 7" fill="none"><line x1="3.5" y1="1" x2="3.5" y2="6" stroke="'+(it.skipped?'var(--amber)':'var(--text3)')+'" stroke-width="1.2" stroke-linecap="round"/><line x1="1" y1="3.5" x2="6" y2="3.5" stroke="'+(it.skipped?'var(--amber)':'var(--text3)')+'" stroke-width="1.2" stroke-linecap="round"/><\/svg>';return'<div class="item-row'+(it.skipped?' skipped':'')+(actionOpen?' selected':'')+'"><div class="chk'+(it.done?' done':'')+'" onclick="itemUncheck('+it.id+')" style="'+(it.done?'':'display:none ')+'flex-shrink:0"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+(it.done?'':'<div style="'+circleStyle+'" onclick="openItemAction('+it.id+')">'+circleInner+'</div>')+'<div class="item-info" onclick="'+(it.done?'itemUncheck('+it.id+')':'openItemAction('+it.id+')')+'" style="cursor:pointer"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+it.name+recurBadge+statusHint+'</div>'+(showBadge?'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>':'')+sourceNote+'</div></div>'+(actionOpen?buildActionSheet(it):'')+buildPickerPanel(it);}).join('')+'</div>':'<div class="empty">No items for this store yet.<\/div>';el.innerHTML=filterBar+listHtml;}
 function setFilter(storeId){listFilter=storeId;renderList();}
 function addItem(){var input=document.getElementById('item-input');var name=input.value.trim();if(!name)return;var newItem={id:nid++,name:name,store:null,done:false};items.push(newItem);input.value='';persistItemWrite(newItem);renderList();input.focus();}
 function openItemAction(id){
@@ -867,7 +867,8 @@ function closeItemAction(){openActionItem=null;renderList();}
 function itemAlreadyHaveIt(id){
   var it=items.find(function(i){return i.id===id;});
   if(!it)return;
-  it.skipped=true;it.done=false;
+  if(autoclear){persistItemDelete(id);items=items.filter(function(i){return i.id!==id;});persist();openActionItem=null;renderList();return;}
+  it.done=true;it.skipped=false;
   openActionItem=null;
   persistItemWrite(it);renderList();
 }
@@ -892,21 +893,33 @@ function itemUncheck(id){
   it.done=false;it.skipped=false;
   persistItemWrite(it);renderList();
 }
+function showRemoveOptions(id){
+  var el=document.getElementById('remove-opts-'+id);
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+}
 function buildActionSheet(it){
   var savedSources=(it.sources||[]).filter(function(s){return s&&s!=='Manual add'&&savedRecipes.find(function(r){return r.name===s;});});
   var hasSavedRecipe=savedSources.length>0;
-  var neverBtns='';
+  var srcName=hasSavedRecipe?savedSources[0]:'';
+  var safeSrc=srcName.replace(/"/g,'&quot;');
+  var removeOpts='';
   if(hasSavedRecipe){
-    var srcName=savedSources[0];
-    var safeId='aas-'+it.id;
-    neverBtns='<button class=\"action-btn red\" onclick=\"showAllergyExpand('+it.id+')\">🚫 Never in this recipe</button>'
-      +'<div id=\"'+safeId+'\" style=\"display:none\"><div class=\"action-allergy\"><div class=\"action-allergy-row\"><span class=\"action-allergy-label\">Specific allergy or intolerance? Remove across <b>all</b> saved recipes.</span><button class=\"toggle off\" id=\"atog-'+it.id+'\" onclick=\"toggleAllergyTog('+it.id+')\"></button></div></div>'
-      +'<button class=\"action-btn red\" style=\"margin-top:4px\" data-iid=\"'+it.id+'\" data-src=\"'+srcName.replace(/\"/g,'&quot;')+'\" onclick=\"confirmNeverInRecipe(parseInt(this.dataset.iid),this.dataset.src)\">Confirm remove</button></div>';
+    removeOpts='<div id=\"remove-opts-'+it.id+'\" style=\"display:none\">'
+      +'<div style=\"padding:4px 0 2px;display:flex;flex-direction:column;gap:4px\">'
+      +'<button class=\"action-btn red\" onclick=\"itemSkipTrip('+it.id+')\">🗑 Just this time</button>'
+      +'<button class=\"action-btn red\" onclick=\"showAllergyExpand('+it.id+')\">🚫 Always skip in '+safeSrc+'</button>'
+      +'<div id=\"aas-'+it.id+'\" style=\"display:none\"><div class=\"action-allergy\"><div class=\"action-allergy-row\"><span class=\"action-allergy-label\">Allergy or intolerance? Remove from <b>all</b> saved recipes too.</span><button class=\"toggle off\" id=\"atog-'+it.id+'\" onclick=\"toggleAllergyTog('+it.id+')\"></button></div></div>'
+      +'<button class=\"action-btn red\" style=\"margin-top:4px\" data-iid=\"'+it.id+'\" data-src=\"'+safeSrc+'\" onclick=\"confirmNeverInRecipe(parseInt(this.dataset.iid),this.dataset.src)\">Confirm</button></div>'
+      +'</div></div>';
+  } else {
+    removeOpts='<div id=\"remove-opts-'+it.id+'\" style=\"display:none\">'
+      +'<button class=\"action-btn red\" onclick=\"itemSkipTrip('+it.id+')\">🗑 Remove this time</button>'
+      +'</div>';
   }
   return '<div class=\"action-sheet\">'
-    +'<button class=\"action-btn green\" onclick=\"itemAlreadyHaveIt('+it.id+')\">✓ Already have it</button>'
-    +'<button class=\"action-btn amber\" onclick=\"itemSkipTrip('+it.id+')\">⏭ Skip this trip</button>'
-    +neverBtns
+    +'<button class=\"action-btn green\" onclick=\"itemAlreadyHaveIt('+it.id+')\">✓ Have it</button>'
+    +'<button class=\"action-btn red\" onclick=\"showRemoveOptions('+it.id+')\">🗑 Remove</button>'
+    +removeOpts
     +'<button class=\"action-btn ghost\" onclick=\"closeItemAction()\">Cancel</button>'
     +'</div>';
 }
