@@ -774,13 +774,19 @@ function renderTripView(el, filtered, sm){
   var looseItems=[];
   var placed={};
 
-  // For each saved recipe that has items on the list, create a group
-  savedRecipes.forEach(function(r){
-    var recipeItems=filtered.filter(function(it){
-      return it.sources&&it.sources.indexOf(r.name)!==-1;
+  // Build groups from item sources (works even if recipe isn't formally saved)
+  var sourceNames=[];
+  filtered.forEach(function(it){
+    (it.sources||[]).forEach(function(s){
+      if(s&&s!=='Manual add'&&sourceNames.indexOf(s)===-1)sourceNames.push(s);
     });
+  });
+  sourceNames.forEach(function(sName){
+    var recipeItems=filtered.filter(function(it){return it.sources&&it.sources.indexOf(sName)!==-1;});
     if(!recipeItems.length)return;
-    recipeGroups.push({recipe:r,items:recipeItems});
+    // Use saved recipe if available for tags, else minimal object
+    var saved=savedRecipes.find(function(r){return r.name===sName;})||{name:sName,tags:[],items:[]};
+    recipeGroups.push({recipe:saved,items:recipeItems});
     recipeItems.forEach(function(it){placed[it.id]=true;});
   });
 
@@ -824,7 +830,7 @@ function renderList(){var el=document.getElementById('list-body');var _ob=docume
   if(!items.length){el.innerHTML='<div class="empty"><b>Your list is empty</b>Tap <b style="color:var(--violet)">🍳 Recipe</b> to scan a photo or try: <span style="color:var(--text2)">"chicken tacos"<\/span>, <span style="color:var(--text2)">"high protein breakfast"<\/span>, or any craving.</div>';return;}var sm={};stores.forEach(function(s){sm[s.id]=s;});var sorted=items.slice().sort(function(a,b){var av=(a.done||a.skipped)?1:0,bv=(b.done||b.skipped)?1:0;return av-bv;});var filtered=listFilter?sorted.filter(function(it){return it.store===listFilter;}):sorted;var filterBar='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id&&!i.done&&!i.skipped;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'</button>';});filterBar+='<button class="filter-chip" onclick="openRecipeModal()" style="background:var(--violet-dim);border-color:var(--violet-border);color:var(--violet);font-weight:700">🍳 + Recipe</button>';filterBar+='</div>';var _ob2=document.getElementById('order-bar');var _activeCount=items.filter(function(i){return!i.done&&!i.skipped;}).length;if(_ob2)_ob2.style.display=_activeCount?'block':'none';var _readyBanner=document.getElementById('ready-banner');if(_readyBanner)_readyBanner.style.display=(_activeCount&&savedRecipes.length)?'block':'none';
   
   // Use recipe trip view if any saved recipe has items on the list
-  var hasRecipeItems=savedRecipes.some(function(r){return filtered.some(function(it){return it.sources&&it.sources.indexOf(r.name)!==-1;});});
+  var hasRecipeItems=filtered.some(function(it){return it.sources&&it.sources.some(function(s){return s&&s!=='Manual add';});});
   if(hasRecipeItems&&!listFilter){renderTripView(el,filtered,sm);return;}
   var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var badge=s?s.emoji+' '+s.name:'+ store';var recurBadge=it.recurring?'<span class="recur-badge">↻ '+it.recurLabel+'</span>':'';var mainSrc=it.sources&&it.sources.length?it.sources.find(function(s){return s!=='Manual add';}):null;sourceNote=it.sources&&it.sources.length>1?'<div class="item-tag" style="color:var(--blue)">shared · '+it.sources.filter(function(s){return s!=='Manual add';}).join(', ')+'</div>':mainSrc?'<div class="item-tag" style="color:var(--text3);font-size:10px;opacity:0.7">'+mainSrc+'</div>':'';return'<div class="item-row'+(it.skipped?' skipped':'')+'"><div class="chk'+(it.done?' done':'')+'" onclick="toggleItem('+it.id+')"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-info"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+it.name+recurBadge+'</div>'+'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>'+sourceNote+'</div><button class="skip-btn" onclick="toggleSkip('+it.id+')" title="'+(it.skipped?'Restore to list':'Skip this trip')+'" style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:'+(it.skipped?'var(--green)':'var(--text3)')+'">'+( it.skipped?'Restore':'Skip')+'</button><button class="del" onclick="delItem('+it.id+')" style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid rgba(248,113,113,0.3);background:var(--red-dim);color:var(--red);margin-left:4px">Delete</button></div>'+buildPickerPanel(it)+'</div>';}).join('')+'</div>':'<div class="empty">No items for this store yet.<br>Add some on the List tab or assign them in <b>Assign</b>.</div>';el.innerHTML=filterBar+listHtml;}
 function setFilter(storeId){listFilter=storeId;renderList();}
