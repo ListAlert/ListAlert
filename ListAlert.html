@@ -305,7 +305,17 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .recipe-trip-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border2)}
 .recipe-trip-item:last-child{border-bottom:none}
 .recipe-trip-done{text-decoration:line-through;opacity:0.45}
+.recipe-trip-skipped{opacity:0.45;color:var(--amber)}
 .loose-items-section{margin:8px 16px 0;background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.action-sheet{background:var(--bg3);border-top:1px solid var(--border);padding:6px 10px 8px;display:flex;flex-direction:column;gap:4px}
+.action-btn{width:100%;height:40px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;display:flex;align-items:center;gap:9px;padding:0 12px;text-align:left;transition:background .1s}
+.action-btn.green{background:var(--green-dim);color:var(--green)}
+.action-btn.amber{background:var(--amber-dim);color:var(--amber)}
+.action-btn.red{background:var(--red-dim);color:var(--red)}
+.action-btn.ghost{background:transparent;color:var(--text3);border:1px solid var(--border)}
+.action-allergy{margin-top:2px;padding:8px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)}
+.action-allergy-row{display:flex;align-items:center;gap:8px}
+.action-allergy-label{flex:1;font-size:12px;color:var(--text3);line-height:1.4}
 </style>
 </head>
 <body>
@@ -327,7 +337,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
     <div id="nearby-area"></div>
     <div id="ready-banner" style="display:none;padding:8px 16px 2px"><div style="font-size:12px;color:var(--text3);text-align:center;padding:4px 0">Your list is ready — tap below to order for delivery</div></div>
     <div id="order-bar" style="display:none;padding:6px 16px 4px">
-      <button id="share-list-btn" onclick="shareList()" style="width:100%;height:48px;background:var(--green);border:none;border-radius:14px;color:#0A0A0A;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span>🛒</span> Order for delivery</button>
+      <button id="share-list-btn" onclick="shareList()" style="width:100%;height:48px;background:var(--green);border:none;border-radius:14px;color:#0A0A0A;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span>🛒</span> Order for delivery <span style="font-size:11px;font-weight:600;opacity:0.6;margin-left:2px">(coming soon)</span></button>
     </div>
     <div id="list-body"></div>
   </div>
@@ -731,6 +741,7 @@ function pinHere(id){if(lat===null){alert('Enable GPS first using the button at 
 function setRadius(v){radius=parseInt(v);document.getElementById('radius-lbl').textContent=v+'m';persistSettings();}
 var listFilter=null;
 var openPickerId=null;
+var openActionItem=null;
 function buildPickerPanel(it){
   if(openPickerId!==it.id)return'';
   if(!stores.length){
@@ -818,7 +829,9 @@ function renderTripView(el, filtered, sm){
       itemRows='<div class="recipe-trip-items">'+its.map(function(it){
         var s=sm[it.store];
         var storeTag=s?'<span style="font-size:10px;color:var(--text3);margin-left:auto">'+s.emoji+' '+s.name+'</span>':'';
-        return'<div class="recipe-trip-item"><div class="chk'+(it.done?' done':'')+'" onclick="toggleTripItem('+it.id+')" style="width:18px;height:18px;flex-shrink:0"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="'+(it.done?'recipe-trip-done':'')+'" style="font-size:13px;flex:1">'+it.name+'</span>'+storeTag+'</div>';
+        var statusHint=it.done?'<span style="font-size:10px;color:var(--text3);margin-left:4px">tap to undo</span>':it.skipped?'<span style="font-size:10px;color:var(--amber);margin-left:4px">skipped</span>':'';
+        var actionOpen=openActionItem===it.id;
+        return'<div><div class="recipe-trip-item" onclick="'+(it.done?'itemUncheck('+it.id+')':'openItemAction('+it.id+')')+'" style="cursor:pointer"><div class="chk'+(it.done?' done':'')+'" style="width:18px;height:18px;flex-shrink:0;'+(it.done?'':'border:1.5px solid '+(it.skipped?'var(--amber-border)':'var(--border2)')+';border-radius:50%;')+'"><svg width="11" height="8" viewBox="0 0 11 8" fill="none" style="'+(it.done?'':'display:none')+'"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="'+(it.done?'recipe-trip-done':it.skipped?'recipe-trip-skipped':'')+'" style="font-size:13px;flex:1">'+it.name+statusHint+'</span>'+storeTag+'</div>'+(actionOpen?buildActionSheet(it):'')+'</div>';
       }).join('')+'</div>';
     }
     html+='<div class="recipe-trip-card"><div class="recipe-trip-header" data-rname="'+r.name.replace(/"/g,'&quot;')+'" onclick="toggleRecipeExpand(this.dataset.rname)"><div class="recipe-trip-name">'+r.name+'</div>'+tags+'<span class="recipe-trip-count">'+doneCount+'/'+its.length+'</span><span class="recipe-trip-chevron'+(isOpen?' open':'')+'">\u25bc</span></div>'+itemRows+'</div>';
@@ -827,7 +840,9 @@ function renderTripView(el, filtered, sm){
   // Loose items section
   if(looseItems.length){
     var looseRows=looseItems.map(function(it){
-      return'<div class="recipe-trip-item"><div class="chk'+(it.done?' done':'')+'" onclick="toggleTripItem('+it.id+')" style="width:18px;height:18px;flex-shrink:0"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="'+(it.done?'recipe-trip-done':'')+'" style="font-size:13px;flex:1">'+it.name+'</span></div>';
+      var statusHint=it.done?'<span style="font-size:10px;color:var(--text3);margin-left:4px">tap to undo</span>':it.skipped?'<span style="font-size:10px;color:var(--amber);margin-left:4px">skipped</span>':'';
+      var actionOpen=openActionItem===it.id;
+      return'<div><div class="recipe-trip-item" onclick="'+(it.done?'itemUncheck('+it.id+')':'openItemAction('+it.id+')')+'" style="cursor:pointer"><div class="chk'+(it.done?' done':'')+'" style="width:18px;height:18px;flex-shrink:0;'+(it.done?'':'border:1.5px solid var(--border2);border-radius:50%;')+'"><svg width="11" height="8" viewBox="0 0 11 8" fill="none" style="'+(it.done?'':'display:none')+'"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="'+(it.done?'recipe-trip-done':it.skipped?'recipe-trip-skipped':'')+'" style="font-size:13px;flex:1">'+it.name+statusHint+'</span></div>'+(actionOpen?buildActionSheet(it):'')+'</div>';
     }).join('');
     html+='<div class="loose-items-section"><div style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Other items</div><div class="recipe-trip-items">'+looseRows+'</div></div>';
   }
@@ -841,11 +856,98 @@ function renderList(){var el=document.getElementById('list-body');var _ob=docume
   // Use recipe trip view if any saved recipe has items on the list
   var hasRecipeItems=filtered.some(function(it){return it.sources&&it.sources.some(function(s){return s&&s!=='Manual add';});});
   if(hasRecipeItems&&!listFilter){renderTripView(el,filtered,sm);return;}
-  var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var badge=s?s.emoji+' '+s.name:'+ store';var recurBadge=it.recurring?'<span class="recur-badge">↻ '+it.recurLabel+'</span>':'';var mainSrc=it.sources&&it.sources.length?it.sources.find(function(s){return s!=='Manual add';}):null;sourceNote=it.sources&&it.sources.length>1?'<div class="item-tag" style="color:var(--blue)">shared · '+it.sources.filter(function(s){return s!=='Manual add';}).join(', ')+'</div>':mainSrc?'<div class="item-tag" style="color:var(--text3);font-size:10px;opacity:0.7">'+mainSrc+'</div>':'';return'<div class="item-row'+(it.skipped?' skipped':'')+'"><div class="chk'+(it.done?' done':'')+'" onclick="toggleItem('+it.id+')"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-info"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+it.name+recurBadge+'</div>'+'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>'+sourceNote+'</div><button class="skip-btn" onclick="toggleSkip('+it.id+')" title="'+(it.skipped?'Restore to list':'Skip this trip')+'" style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:'+(it.skipped?'var(--green)':'var(--text3)')+'">'+( it.skipped?'Restore':'Skip')+'</button><button class="del" onclick="delItem('+it.id+')" style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid rgba(248,113,113,0.3);background:var(--red-dim);color:var(--red);margin-left:4px">Delete</button></div>'+buildPickerPanel(it)+'</div>';}).join('')+'</div>':'<div class="empty">No items for this store yet.<br>Add some on the List tab or assign them in <b>Assign</b>.</div>';el.innerHTML=filterBar+listHtml;}
+  var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var badge=s?s.emoji+' '+s.name:'+ store';var recurBadge=it.recurring?'<span class="recur-badge">↻ '+it.recurLabel+'</span>':'';var mainSrc=it.sources&&it.sources.length?it.sources.find(function(s){return s!=='Manual add';}):null;sourceNote=it.sources&&it.sources.length>1?'<div class="item-tag" style="color:var(--blue)">shared · '+it.sources.filter(function(s){return s!=='Manual add';}).join(', ')+'</div>':mainSrc?'<div class="item-tag" style="color:var(--text3);font-size:10px;opacity:0.7">'+mainSrc+'</div>':'';var actionOpen=openActionItem===it.id;var statusHint=it.done?'<span style="font-size:10px;color:var(--text3);margin-left:4px">tap to undo</span>':it.skipped?'<span style="font-size:10px;color:var(--amber);margin-left:4px">skipped</span>':'';return'<div class="item-row'+(it.skipped?' skipped':'')+(actionOpen?' selected':'')+'"><div class="chk'+(it.done?' done':'')+'" onclick="itemUncheck('+it.id+')" style="'+(it.done?'':'display:none ')+'flex-shrink:0"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+(it.done?'':'<div style="width:22px;height:22px;border-radius:50%;border:1.5px solid '+(it.skipped?'var(--amber-border)':'var(--border2)')+';flex-shrink:0;cursor:pointer;" onclick="openItemAction('+it.id+')"></div>')+'<div class="item-info" onclick="'+(it.done?'itemUncheck('+it.id+')':'openItemAction('+it.id+')')+'" style="cursor:pointer"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+it.name+recurBadge+statusHint+'</div>'+'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>'+sourceNote+'</div></div>'+(actionOpen?buildActionSheet(it):'')+buildPickerPanel(it);}).join('')+'</div>':'<div class="empty">No items for this store yet.<\/div>';el.innerHTML=filterBar+listHtml;}
 function setFilter(storeId){listFilter=storeId;renderList();}
 function addItem(){var input=document.getElementById('item-input');var name=input.value.trim();if(!name)return;var newItem={id:nid++,name:name,store:null,done:false};items.push(newItem);input.value='';persistItemWrite(newItem);renderList();input.focus();}
-function toggleItem(id){var it=items.find(function(i){return i.id===id;});if(!it)return;if(autoclear&&!it.done){persistItemDelete(id);items=items.filter(function(i){return i.id!==id;});persist();renderList();return;}if(it.recurring&&!it.done){it.done=true;it.lastReset=Date.now();}else{it.done=!it.done;}persistItemWrite(it);renderList();}
-function toggleSkip(id){var it=items.find(function(i){return i.id===id;});if(it){it.skipped=!it.skipped;if(it.skipped)it.done=false;persistItemWrite(it);renderList();}}
+function openItemAction(id){
+  if(openActionItem===id){openActionItem=null;}else{openActionItem=id;}
+  renderList();
+}
+function closeItemAction(){openActionItem=null;renderList();}
+function itemAlreadyHaveIt(id){
+  var it=items.find(function(i){return i.id===id;});
+  if(!it)return;
+  it.skipped=true;it.done=false;
+  openActionItem=null;
+  persistItemWrite(it);renderList();
+}
+function itemSkipTrip(id){
+  var it=items.find(function(i){return i.id===id;});
+  if(!it)return;
+  it.skipped=true;it.done=false;
+  openActionItem=null;
+  persistItemWrite(it);renderList();
+}
+function itemGotIt(id){
+  var it=items.find(function(i){return i.id===id;});
+  if(!it)return;
+  if(autoclear){persistItemDelete(id);items=items.filter(function(i){return i.id!==id;});persist();openActionItem=null;renderList();return;}
+  it.done=true;it.skipped=false;
+  openActionItem=null;
+  persistItemWrite(it);renderList();
+}
+function itemUncheck(id){
+  var it=items.find(function(i){return i.id===id;});
+  if(!it)return;
+  it.done=false;it.skipped=false;
+  persistItemWrite(it);renderList();
+}
+function buildActionSheet(it){
+  var savedSources=(it.sources||[]).filter(function(s){return s&&s!=='Manual add'&&savedRecipes.find(function(r){return r.name===s;});});
+  var hasSavedRecipe=savedSources.length>0;
+  var neverBtns='';
+  if(hasSavedRecipe){
+    var srcName=savedSources[0];
+    var safeId='aas-'+it.id;
+    neverBtns='<button class=\"action-btn red\" onclick=\"showAllergyExpand('+it.id+')\">🚫 Never in this recipe</button>'
+      +'<div id=\"'+safeId+'\" style=\"display:none\"><div class=\"action-allergy\"><div class=\"action-allergy-row\"><span class=\"action-allergy-label\">Specific allergy or intolerance? Remove across <b>all</b> saved recipes.</span><button class=\"toggle off\" id=\"atog-'+it.id+'\" onclick=\"toggleAllergyTog('+it.id+')\"></button></div></div>'
+      +'<button class=\"action-btn red\" style=\"margin-top:4px\" data-iid=\"'+it.id+'\" data-src=\"'+srcName.replace(/\"/g,'&quot;')+'\" onclick=\"confirmNeverInRecipe(parseInt(this.dataset.iid),this.dataset.src)\">Confirm remove</button></div>';
+  }
+  return '<div class=\"action-sheet\">'
+    +'<button class=\"action-btn green\" onclick=\"itemAlreadyHaveIt('+it.id+')\">✓ Already have it</button>'
+    +'<button class=\"action-btn amber\" onclick=\"itemSkipTrip('+it.id+')\">⏭ Skip this trip</button>'
+    +neverBtns
+    +'<button class=\"action-btn ghost\" onclick=\"closeItemAction()\">Cancel</button>'
+    +'</div>';
+}
+function showAllergyExpand(id){
+  var el=document.getElementById('aas-'+id);
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+}
+function toggleAllergyTog(id){
+  var btn=document.getElementById('atog-'+id);
+  if(btn){btn.classList.toggle('on');btn.classList.toggle('off');}
+}
+function confirmNeverInRecipe(itemId,recipeName){
+  var it=items.find(function(i){return i.id===itemId;});
+  if(!it)return;
+  var allergyTog=document.getElementById('atog-'+itemId);
+  var removeAll=allergyTog&&allergyTog.classList.contains('on');
+  var ingName=it.name;
+  // Remove from this recipe
+  var recipe=savedRecipes.find(function(r){return r.name===recipeName;});
+  if(recipe){
+    recipe.items=recipe.items.filter(function(n){return n.toLowerCase()!==ingName.toLowerCase();});
+    persistRecipeWrite(recipe);
+  }
+  // Remove from all saved recipes if allergy toggle on
+  if(removeAll){
+    savedRecipes.forEach(function(r){
+      var before=r.items.length;
+      r.items=r.items.filter(function(n){return n.toLowerCase()!==ingName.toLowerCase();});
+      if(r.items.length!==before)persistRecipeWrite(r);
+    });
+  }
+  // Remove from current trip
+  persistItemDelete(itemId);
+  items=items.filter(function(i){return i.id!==itemId;});
+  persist();
+  openActionItem=null;
+  renderList();
+}
+function toggleItem(id){var it=items.find(function(i){return i.id===id;});if(!it)return;if(it.done){itemUncheck(id);return;}openItemAction(id);}
+function toggleTripItem(id){var it=items.find(function(i){return i.id===id;});if(!it)return;if(it.done){itemUncheck(id);return;}openItemAction(id);}
+
 function toggleRecurring(id){var it=items.find(function(i){return i.id===id;});if(!it)return;if(it.recurring){it.recurring=false;it.recurDays=null;it.recurLabel=null;}else{var days=prompt('Repeat every how many days?\n(e.g. 7 for weekly, 30 for monthly, 1 for daily)','30');if(!days||isNaN(parseInt(days)))return;var d=parseInt(days);var label=d===1?'daily':d===7?'weekly':d===30?'monthly':d+'d';it.recurring=true;it.recurDays=d;it.recurLabel=label;it.lastReset=it.lastReset||Date.now();}persistItemWrite(it);renderList();}
 function checkRecurring(){var now=Date.now();var changed=false;items.forEach(function(it){if(it.recurring&&it.done&&it.lastReset&&it.recurDays){var elapsed=(now-it.lastReset)/(1000*60*60*24);if(elapsed>=it.recurDays){it.done=false;it.skipped=false;it.lastReset=now;changed=true;}}});if(changed){persist();renderList();}}
 function delItem(id){persistItemDelete(id);items=items.filter(function(i){return i.id!==id;});persist();renderList();}
