@@ -62,8 +62,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .add-bar .recipe-btn:active{background:var(--violet);color:#fff}
 
 .card-list{margin:12px 16px 0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.item-row{display:flex;align-items:center;padding:13px 15px;gap:12px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.item-row{display:flex;align-items:center;padding:13px 15px;gap:12px;background:var(--bg2);border-bottom:1px solid var(--border);position:relative;transition:transform .2s ease;will-change:transform;overflow:hidden}
 .item-row:last-child{border-bottom:none}
+.item-row-swipe-bg{position:absolute;right:0;top:0;bottom:0;width:90px;background:var(--red-dim);display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;color:var(--red);border-left:1px solid rgba(248,113,113,0.2)}
 .chk{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;transition:all .2s}
 .chk.done{background:var(--green);border-color:var(--green)}
 .chk svg{display:none}
@@ -856,7 +857,7 @@ function renderList(){var el=document.getElementById('list-body');var _ob=docume
   // Use recipe trip view if any saved recipe has items on the list
   var hasRecipeItems=filtered.some(function(it){return it.sources&&it.sources.some(function(s){return s&&s!=='Manual add';});});
   if(hasRecipeItems&&!listFilter){renderTripView(el,filtered,sm);return;}
-  var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var hasStores=stores.length>0;var badge=s?s.emoji+' '+s.name:(hasStores?'+ store':'');var showBadge=!!(s||hasStores);var recurBadge=it.recurring?'<span class="recur-badge">↻ '+it.recurLabel+'</span>':'';var mainSrc=it.sources&&it.sources.length?it.sources.find(function(s){return s!=='Manual add';}):null;sourceNote=it.sources&&it.sources.length>1?'<div class="item-tag" style="color:var(--blue)">shared · '+it.sources.filter(function(s){return s!=='Manual add';}).join(', ')+'</div>':mainSrc?'<div class="item-tag" style="color:var(--text3);font-size:10px;opacity:0.7">'+mainSrc+'</div>':'';var actionOpen=openActionItem===it.id;var statusHint=it.done?'<span style="font-size:10px;color:var(--text3);margin-left:4px">tap to undo</span>':it.skipped?'<span style="font-size:10px;color:var(--amber);margin-left:4px">skipped</span>':'';var circleStyle='width:22px;height:22px;border-radius:50%;border:1.5px dashed '+(it.skipped?'var(--amber-border)':'var(--border2)')+';cursor:pointer;display:flex;align-items:center;justify-content:center';var circleInner='<svg width="7" height="7" viewBox="0 0 7 7" fill="none"><line x1="3.5" y1="1" x2="3.5" y2="6" stroke="'+(it.skipped?'var(--amber)':'var(--text3)')+'" stroke-width="1.2" stroke-linecap="round"/><line x1="1" y1="3.5" x2="6" y2="3.5" stroke="'+(it.skipped?'var(--amber)':'var(--text3)')+'" stroke-width="1.2" stroke-linecap="round"/><\/svg>';return'<div class="item-row'+(it.skipped?' skipped':'')+(actionOpen?' selected':'')+'"><div class="chk'+(it.done?' done':'')+'" onclick="itemUncheck('+it.id+')" style="'+(it.done?'':'display:none ')+'flex-shrink:0"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+(it.done?'':'<div style="'+circleStyle+'" onclick="openItemAction('+it.id+')">'+circleInner+'</div>')+'<div class="item-info" onclick="'+(it.done?'itemUncheck('+it.id+')':'openItemAction('+it.id+')')+'" style="cursor:pointer"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+it.name+recurBadge+statusHint+'</div>'+(showBadge?'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>':'')+sourceNote+'</div></div>'+(actionOpen?buildActionSheet(it):'')+buildPickerPanel(it);}).join('')+'</div>':'<div class="empty">No items for this store yet.<\/div>';el.innerHTML=filterBar+listHtml;}
+  var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var hasStores=stores.length>0;var badge=s?s.emoji+' '+s.name:(hasStores?'+ store':'');var showBadge=!!(s||hasStores);var recurBadge=it.recurring?'<span class="recur-badge">↻ '+it.recurLabel+'</span>':'';var mainSrc=it.sources&&it.sources.length?it.sources.find(function(s){return s!=='Manual add';}):null;sourceNote=it.sources&&it.sources.length>1?'<div class="item-tag" style="color:var(--blue)">shared · '+it.sources.filter(function(s){return s!=='Manual add';}).join(', ')+'</div>':mainSrc?'<div class="item-tag" style="color:var(--text3);font-size:10px;opacity:0.7">'+mainSrc+'</div>':'';var actionOpen=openActionItem===it.id;var statusHint=it.done?'<span style="font-size:10px;color:var(--text3);margin-left:4px">tap to undo</span>':it.skipped?'<span style="font-size:10px;color:var(--amber);margin-left:4px">skipped</span>':'';return'<div class="item-row'+(it.skipped?' skipped':'')+(actionOpen?' selected':'')+'" data-iid="'+it.id+'"><div class="item-row-swipe-bg">🗑 Remove?</div><div class="chk'+(it.done?' done':'')+'" onclick="'+(it.done?'itemUncheck('+it.id+')':'openItemAction('+it.id+')')+'"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+'<div class="item-info" onclick="'+(it.done?'itemUncheck('+it.id+')':'openItemAction('+it.id+')')+'" style="cursor:pointer"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+it.name+recurBadge+statusHint+'</div>'+(showBadge?'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>':'')+sourceNote+'</div></div>'+(actionOpen?buildActionSheet(it):'')+buildPickerPanel(it);}).join('')+'</div>':'<div class="empty">No items for this store yet.<\/div>';el.innerHTML=filterBar+listHtml;initSwipeHandlers();}
 function setFilter(storeId){listFilter=storeId;renderList();}
 function addItem(){var input=document.getElementById('item-input');var name=input.value.trim();if(!name)return;var newItem={id:nid++,name:name,store:null,done:false};items.push(newItem);input.value='';persistItemWrite(newItem);renderList();input.focus();}
 function openItemAction(id){
@@ -902,25 +903,23 @@ function buildActionSheet(it){
   var hasSavedRecipe=savedSources.length>0;
   var srcName=hasSavedRecipe?savedSources[0]:'';
   var safeSrc=srcName.replace(/"/g,'&quot;');
-  var removeOpts='';
+  var step2='';
   if(hasSavedRecipe){
-    removeOpts='<div id=\"remove-opts-'+it.id+'\" style=\"display:none\">'
-      +'<div style=\"padding:4px 0 2px;display:flex;flex-direction:column;gap:4px\">'
-      +'<button class=\"action-btn red\" onclick=\"itemSkipTrip('+it.id+')\">🗑 Just this time</button>'
-      +'<button class=\"action-btn red\" onclick=\"showAllergyExpand('+it.id+')\">🚫 Always skip in '+safeSrc+'</button>'
-      +'<div id=\"aas-'+it.id+'\" style=\"display:none\"><div class=\"action-allergy\"><div class=\"action-allergy-row\"><span class=\"action-allergy-label\">Allergy or intolerance? Remove from <b>all</b> saved recipes too.</span><button class=\"toggle off\" id=\"atog-'+it.id+'\" onclick=\"toggleAllergyTog('+it.id+')\"></button></div></div>'
-      +'<button class=\"action-btn red\" style=\"margin-top:4px\" data-iid=\"'+it.id+'\" data-src=\"'+safeSrc+'\" onclick=\"confirmNeverInRecipe(parseInt(this.dataset.iid),this.dataset.src)\">Confirm</button></div>'
-      +'</div></div>';
-  } else {
-    removeOpts='<div id=\"remove-opts-'+it.id+'\" style=\"display:none\">'
-      +'<button class=\"action-btn red\" onclick=\"itemSkipTrip('+it.id+')\">🗑 Remove this time</button>'
+    step2='<div id="remove-opts-'+it.id+'" style="display:none;padding:4px 0 0;display:none;flex-direction:column;gap:4px">'
+      +'<button class="action-btn red" onclick="itemSkipTrip('+it.id+')">Just this time</button>'
+      +'<button class="action-btn red" onclick="showAllergyExpand('+it.id+')">Always skip in <b>'+safeSrc+'</b></button>'
+      +'<div id="aas-'+it.id+'" style="display:none"><div class="action-allergy"><div class="action-allergy-row"><span class="action-allergy-label">Allergy or intolerance? Remove from <b>all</b> saved meals too.</span><button class="toggle off" id="atog-'+it.id+'" onclick="toggleAllergyTog('+it.id+')"></button></div></div>'
+      +'<button class="action-btn red" style="margin-top:4px" data-iid="'+it.id+'" data-src="'+safeSrc+'" onclick="confirmNeverInRecipe(parseInt(this.dataset.iid),this.dataset.src)">Confirm</button></div>'
       +'</div>';
+  } else {
+    step2='<div id="remove-opts-'+it.id+'" style="display:none"><button class="action-btn red" onclick="itemSkipTrip('+it.id+')">Just this time</button></div>';
   }
-  return '<div class=\"action-sheet\">'
-    +'<button class=\"action-btn green\" onclick=\"itemAlreadyHaveIt('+it.id+')\">✓ Have it</button>'
-    +'<button class=\"action-btn red\" onclick=\"showRemoveOptions('+it.id+')\">🗑 Remove</button>'
-    +removeOpts
-    +'<button class=\"action-btn ghost\" onclick=\"closeItemAction()\">Cancel</button>'
+  return '<div class="action-sheet">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:2px 2px 6px">Remove '+it.name+'?</div>'
+    +'<button class="action-btn green" onclick="itemAlreadyHaveIt('+it.id+')">✓ Have it</button>'
+    +'<button class="action-btn red" onclick="showRemoveOptions('+it.id+')">🗑 Remove</button>'
+    +step2
+    +'<button class="action-btn ghost" onclick="closeItemAction()" style="margin-top:2px">Cancel</button>'
     +'</div>';
 }
 function showAllergyExpand(id){
@@ -958,6 +957,54 @@ function confirmNeverInRecipe(itemId,recipeName){
   openActionItem=null;
   renderList();
 }
+function initSwipeHandlers(){
+  var lb=document.getElementById('list-body');
+  if(!lb||lb._swipeInit)return;
+  lb._swipeInit=true;
+  var tx=0,ty=0,target=null,swiped=false;
+  lb.addEventListener('touchstart',function(e){
+    var row=e.target.closest('.item-row');
+    if(!row)return;
+    var t=e.touches[0];
+    tx=t.clientX;ty=t.clientY;target=row;swiped=false;
+  },{passive:true});
+  lb.addEventListener('touchmove',function(e){
+    if(!target)return;
+    var t=e.touches[0];
+    var dx=tx-t.clientX,dy=Math.abs(t.clientY-ty);
+    if(dy>30){target=null;return;}
+    if(dx>40){
+      target.style.transform='translateX(-90px)';
+      swiped=true;
+    } else if(dx<-10&&swiped){
+      target.style.transform='translateX(0)';
+      swiped=false;
+    }
+  },{passive:true});
+  lb.addEventListener('touchend',function(e){
+    if(!target)return;
+    if(swiped){
+      var iid=parseInt(target.dataset.iid);
+      var t=target;
+      target=null;swiped=false;
+      setTimeout(function(){
+        t.style.transform='translateX(0)';
+        openActionItem=iid;
+        renderList();
+      },120);
+    } else {
+      if(target)target.style.transform='translateX(0)';
+      target=null;
+    }
+  },{passive:true});
+  // tap outside closes
+  lb.addEventListener('touchstart',function(e){
+    if(openActionItem!==null&&!e.target.closest('.action-sheet')&&!e.target.closest('.item-row[data-iid="'+openActionItem+'"]')){
+      openActionItem=null;renderList();
+    }
+  },{passive:true});
+}
+
 function toggleItem(id){var it=items.find(function(i){return i.id===id;});if(!it)return;if(it.done){itemUncheck(id);return;}openItemAction(id);}
 function toggleTripItem(id){var it=items.find(function(i){return i.id===id;});if(!it)return;if(it.done){itemUncheck(id);return;}openItemAction(id);}
 
