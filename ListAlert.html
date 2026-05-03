@@ -1811,6 +1811,20 @@ function cbPinnedTap(){
 }
 
 
+function recordFeedback(val){
+  // Track thumbs up/down in localStorage
+  var up=parseInt(localStorage.getItem('la_feedback_up')||'0');
+  var down=parseInt(localStorage.getItem('la_feedback_down')||'0');
+  if(val===1){up++;localStorage.setItem('la_feedback_up',up);}
+  else{down++;localStorage.setItem('la_feedback_down',down);}
+  // Visual confirmation
+  var upBtn=document.getElementById('feedback-up');
+  var downBtn=document.getElementById('feedback-down');
+  var ty=document.getElementById('feedback-thankyou');
+  if(upBtn)upBtn.style.opacity=val===1?'1':'0.3';
+  if(downBtn)downBtn.style.opacity=val===-1?'1':'0.3';
+  if(ty)ty.style.display='block';
+}
 function showOrderNudge(){
   var el=document.getElementById('order-nudge-sheet');
   if(el)el.classList.add('open');
@@ -1941,9 +1955,15 @@ initSupabase().then(function(){ loadFromSupabase(); });
   <div class="cb-meal-sheet" style="padding-bottom:max(32px,env(safe-area-inset-bottom))">
     <div class="modal-handle"></div>
     <div style="text-align:center;padding:24px 8px 8px">
-      <div style="font-size:36px;margin-bottom:12px">🛒</div>
-      <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-0.3px">Delivery is coming soon</div>
-      <div style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:24px">While you wait, check out your Cookbook to customize and tag your recipes, group into favorite meals, and eventually share with your housemates or family.</div>
+      <div style="font-size:36px;margin-bottom:14px">🛒</div>
+      <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:10px;letter-spacing:-0.3px">Thanks for making it this far!</div>
+      <div style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:24px">Keep adding favorites to your Cookbook for when the Instacart connection is live!</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px">How's it going so far?</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-bottom:24px">
+        <button onclick="recordFeedback(1)" id="feedback-up" style="width:72px;height:72px;border-radius:20px;background:var(--green-dim);border:1px solid var(--green-border);font-size:32px;cursor:pointer;transition:all .15s">👍</button>
+        <button onclick="recordFeedback(-1)" id="feedback-down" style="width:72px;height:72px;border-radius:20px;background:var(--red-dim);border:1px solid rgba(248,113,113,0.3);font-size:32px;cursor:pointer;transition:all .15s">👎</button>
+      </div>
+      <div id="feedback-thankyou" style="display:none;font-size:13px;color:var(--green);font-weight:600;margin-bottom:16px">Thanks for the feedback!</div>
       <button onclick="hideOrderNudge();show('cookbook')" style="width:100%;height:50px;background:var(--violet);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;margin-bottom:10px">My Cookbook →</button>
       <button onclick="hideOrderNudge()" style="width:100%;height:36px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif">Got it</button>
     </div>
