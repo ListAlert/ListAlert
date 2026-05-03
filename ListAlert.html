@@ -378,6 +378,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 .cb-new-meal-form{background:var(--bg2);border:1px solid var(--violet-border);border-radius:14px;padding:14px;margin-bottom:8px}
 .cb-input{width:100%;height:42px;border:1px solid var(--border2);border-radius:10px;font-size:14px;font-weight:500;color:var(--text);background:var(--bg3);padding:0 14px;outline:none;font-family:"Outfit",sans-serif;display:block;margin-bottom:8px}
 .cb-input:focus{border-color:var(--violet)}
+.cb-pinned-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:10px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--border);z-index:90}
+.cb-pinned-order-btn{width:100%;height:52px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:"Outfit",sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
+.cb-pinned-order-btn.ready{background:var(--green);color:#0A0A0A}
+.cb-pinned-order-btn.idle{background:var(--bg3);color:var(--text3);border:1px solid var(--border2)}
+.cb-prior-modal{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.cb-prior-modal.open{opacity:1;pointer-events:all}
+.cb-prior-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 max(24px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)}
+.cb-prior-modal.open .cb-prior-sheet{transform:translateY(0)}
 </style>
 </head>
 <body>
@@ -405,8 +413,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
     <div id="list-body"></div>
   </div>
 
-  <div class="view" id="view-cookbook">
+  <div class="view" id="view-cookbook" style="padding-bottom:80px">
     <div class="cookbook-wrap" id="cookbook-body"></div>
+  </div>
+  <div class="cb-pinned-bar" id="cb-pinned-bar" style="display:none">
+    <button class="cb-pinned-order-btn idle" id="cb-pinned-btn" onclick="cbPinnedTap()">🛒 Order for delivery</button>
   </div>
 
   <div class="view" id="view-stores">
@@ -1578,7 +1589,7 @@ function renderCookbookTab(){
       orderRows+='<div class="cb-order-row"><div style="font-size:18px;flex-shrink:0">'+(r.type==='main'?'🍗':r.type==='side'?'🥗':'📦')+'</div><div style="flex:1"><div class="cb-order-name">'+r.name+'</div><div class="cb-order-sub">'+r.items.length+' items</div></div><button class="cb-order-remove" data-rid="'+r.id+'" onclick="removeRecipeFromOrder(parseInt(this.dataset.rid))">×</button></div>';
     });
     html+='<div class="cb-order-section"><div class="cb-order-hdr"><span class="cb-order-title">This order</span><span class="cb-order-count">~'+totalItems+' items</span></div>'+orderRows+'</div>';
-    html+='<div style="padding:0 0 6px"><div class="cb-shared-note">Shared ingredients counted once</div>';
+    html+='<div style="padding:0 0 6px"><div class="cb-shared-note">Shared ingredients are accounted for</div>';
     html+='<button class="cb-order-btn" onclick="shareList()"><span>🛒</span> Order for delivery <span style="font-size:11px;font-weight:600;opacity:0.6">(coming soon)</span></button></div>';
   }
 
@@ -1658,7 +1669,7 @@ function renderCookbookTab(){
     html+='<div class="cb-empty"><div class="cb-empty-icon">📖</div><div class="cb-empty-title">Your cookbook is empty</div><div class="cb-empty-body">Save recipes here and reuse them anytime.</div><button class="cb-empty-btn" onclick="openRecipeModal()">+ Add your first recipe</button></div>';
   } else {
     savedRecipes.forEach(function(r){
-      var typeFilter=(cbFilter==='main'&&r.type!=='main')||(cbFilter==='side'&&r.type!=='side');
+      var inferredType=r.type||(r.tags&&r.tags.indexOf('Side')!==-1?'side':'main');var typeFilter=(cbFilter==='main'&&inferredType!=='main')||(cbFilter==='side'&&inferredType!=='side');
       var tagFilter=cbFilter!=='all'&&cbFilter!=='main'&&cbFilter!=='side'&&(!r.tags||r.tags.indexOf(cbFilter)===-1);
       var hidden=typeFilter||tagFilter;
       var isOn=cbPlanMode&&cbPlanSelected['r-'+r.id];
@@ -1682,7 +1693,7 @@ function renderCookbookTab(){
       html+='<div style="font-size:20px;flex-shrink:0">'+(r.type==='main'?'🍗':r.type==='side'?'🥗':r.type==='stand'?'📦':'🍽️')+'</div>';
       html+='<div class="recipe-info"><div class="cb-recipe-name">'+r.name+'</div>';
       html+='<div class="cb-recipe-tags">'+typeBadge+tagChips+onOrderChip+'<span class="cb-rtag">'+r.items.length+' items</span></div></div>';
-      if(!cbPlanMode){html+='<div style="font-size:12px;font-weight:700;color:'+(onOrder||inMealOnOrder?'var(--green)':'var(--text3)')+';">'+(onOrder||inMealOnOrder?'✓ On order':'+ Add')+'</div>';}
+      if(!cbPlanMode){html+='<div style="font-size:12px;font-weight:700;color:'+(onOrder||inMealOnOrder?'var(--green)':'var(--violet)')+';">'+(onOrder||inMealOnOrder?'✓ Added':'+ Add to order')+'</div>';}
       html+='</div>';
     });
   }
@@ -1710,26 +1721,43 @@ function renderCookbookTab(){
       }
     });
     var selCount2=planMealIds.length+planRecipeIds.length;
-    if(selCount2>1)html+='<div class="cb-shared-note">Shared ingredients counted once</div>';
+    if(selCount2>1)html+='<div class="cb-shared-note">Shared ingredients are accounted for</div>';
     if(selCount2>0){
       html+='<button class="cb-plan-btn active" style="margin-top:4px" onclick="cbConfirmOrder('+JSON.stringify(planMealIds)+','+JSON.stringify(planRecipeIds)+','+JSON.stringify(planExcluded)+')">Build my order — ~'+totalPlanItems+' items →</button>';
     }
   }
 
   el.innerHTML=html;
+  var pb=document.getElementById('cb-pinned-btn');
+  if(pb){
+    var hasOrder=activeTrip&&(activeTrip.mealIds.length||activeTrip.recipeIds.length);
+    if(hasOrder){
+      var totalPinned=0;
+      if(activeTrip)activeTrip.mealIds.forEach(function(mid){var m=meals.find(function(x){return x.id===mid;});if(m)m.recipeIds.forEach(function(rid){if(activeTrip.excludedRecipeIds.indexOf(rid)!==-1)return;var r=savedRecipes.find(function(x){return x.id===rid;});if(r)totalPinned+=r.items.length;});});
+      if(activeTrip)activeTrip.recipeIds.forEach(function(rid){var r=savedRecipes.find(function(x){return x.id===rid;});if(r)totalPinned+=r.items.length;});
+      pb.className='cb-pinned-order-btn ready';
+      pb.innerHTML='<span>🛒</span> Order for delivery — ~'+totalPinned+' items';
+    } else {
+      pb.className='cb-pinned-order-btn idle';
+      pb.innerHTML='🛒 Order for delivery';
+    }
+  }
 }
 
 function cbStartPlan(){
-  // Check for existing trip
   if(activeTrip&&(activeTrip.mealIds.length||activeTrip.recipeIds.length)){
-    if(confirm('You have items from a prior order. Start fresh or continue?\n\nOK = Start fresh\nCancel = Continue current order')){
-      clearActiveTrip(true);
-    } else {
-      return;
-    }
+    cbOpenPriorModal();return;
   }
   cbPlanMode=true;cbPlanSelected={};cbMealExcluded={};cbExpandedMeals={};
   renderCookbookTab();
+}
+function cbOpenPriorModal(){var m=document.getElementById('cb-prior-modal');if(m){m.classList.add('open');}}
+function cbClosePriorModal(){var m=document.getElementById('cb-prior-modal');if(m){m.classList.remove('open');}}
+function cbPriorFresh(){cbClosePriorModal();clearActiveTrip(true);cbPlanMode=true;cbPlanSelected={};cbMealExcluded={};cbExpandedMeals={};renderCookbookTab();}
+function cbPriorContinue(){cbClosePriorModal();}
+function cbPinnedTap(){
+  var hasOrder=activeTrip&&(activeTrip.mealIds.length||activeTrip.recipeIds.length);
+  if(hasOrder){shareList();}else{cbStartPlan();}
 }
 
 function cbCancelPlan(){
@@ -1801,6 +1829,36 @@ if(autoclear){var at=document.getElementById('autoclear-toggle');if(at){at.class
 if(!sessionStorage.getItem('la_demo_seen')&&!localStorage.getItem('la_demo_seen')){var dp=document.getElementById('demo-prompt');dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}else if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}
 initSupabase().then(function(){ loadFromSupabase(); });
 
+
 </script>
+
+<!-- ── Prior Order Modal ─────────────────────────────────────────────────── -->
+<div class="cb-prior-modal" id="cb-prior-modal">
+  <div class="cb-prior-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="margin-top:14px">You have items from a prior order</div>
+    <div class="modal-subtitle" style="padding-bottom:12px">What do you want to do?</div>
+    <div style="border-top:1px solid var(--border)">
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:13px 20px;cursor:pointer;border-bottom:1px solid var(--border)" onclick="cbPriorFresh()">
+        <div style="font-size:20px;flex-shrink:0;margin-top:1px">🗑️</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">Start fresh</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px;line-height:1.4">Clear the current list and build a new order</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:13px 20px;cursor:pointer" onclick="cbPriorContinue()">
+        <div style="font-size:20px;flex-shrink:0;margin-top:1px">↩️</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">Continue current order</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px;line-height:1.4">We'll automatically account for any duplicate items when you add new recipes</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:12px 20px 0">
+      <button onclick="cbClosePriorModal()" style="width:100%;height:44px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif">Cancel</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
