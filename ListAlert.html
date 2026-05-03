@@ -952,6 +952,13 @@ function renderTripView(el, filtered, sm){
     html+='<div class="loose-items-section"><div style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Other items</div><div class="recipe-trip-items">'+looseRows+'</div></div>';
   }
 
+  // Nudge banner
+  var _hasTrip=activeTrip&&(activeTrip.mealIds.length||activeTrip.recipeIds.length);
+  if(_hasTrip){
+    html+='<div style="margin:6px 16px 2px;padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;cursor:pointer" onclick="show(\'cookbook\')"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">Check out your Cookbook</div><div style="font-size:12px;color:var(--text3);line-height:1.5">Customize and tag your recipes, group into favorite meals, and eventually share with your housemates or family. <span style="color:var(--violet);font-weight:700">My Cookbook \u2192</span></div></div>';
+  } else {
+    html+='<div style="margin:6px 16px 2px;padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;cursor:pointer" onclick="show(\'cookbook\')"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">Check out your Cookbook</div><div style="font-size:12px;color:var(--text3);line-height:1.5">Customize and tag your recipes, group into favorite meals, and eventually share with your housemates or family. <span style="color:var(--violet);font-weight:700">My Cookbook \u2192</span></div></div>';
+  }
   el.innerHTML=html;
 }
 
@@ -1800,9 +1807,18 @@ function cbPriorFresh(){cbClosePriorModal();clearActiveTrip(true);cbPlanMode=tru
 function cbPriorContinue(){cbClosePriorModal();}
 function cbPinnedTap(){
   var hasOrder=activeTrip&&(activeTrip.mealIds.length||activeTrip.recipeIds.length);
-  if(hasOrder){shareList();}else{cbStartPlan();}
+  if(hasOrder){showOrderNudge();}else{cbStartPlan();}
 }
 
+
+function showOrderNudge(){
+  var el=document.getElementById('order-nudge-sheet');
+  if(el)el.classList.add('open');
+}
+function hideOrderNudge(){
+  var el=document.getElementById('order-nudge-sheet');
+  if(el)el.classList.remove('open');
+}
 function cbCancelPlan(){
   cbPlanMode=false;cbPlanSelected={};cbMealExcluded={};cbExpandedMeals={};
   renderCookbookTab();
@@ -1917,6 +1933,20 @@ initSupabase().then(function(){ loadFromSupabase(); });
     <div id="cb-meal-recipe-list" style="display:flex;flex-direction:column;gap:7px;max-height:220px;overflow-y:auto;margin-bottom:14px"></div>
     <button onclick="cbSaveMealFromSheet()" style="width:100%;height:50px;background:var(--violet);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;margin-bottom:8px">Save meal</button>
     <button onclick="document.getElementById('cb-meal-sheet-back').classList.remove('open')" style="width:100%;height:36px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif">Cancel</button>
+  </div>
+</div>
+
+<!-- ── Order Nudge Sheet ───────────────────────────────────────────────── -->
+<div class="cb-meal-sheet-back" id="order-nudge-sheet" onclick="hideOrderNudge()">
+  <div class="cb-meal-sheet" style="padding-bottom:max(32px,env(safe-area-inset-bottom))">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;padding:24px 8px 8px">
+      <div style="font-size:36px;margin-bottom:12px">🛒</div>
+      <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-0.3px">Delivery is coming soon</div>
+      <div style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:24px">While you wait, check out your Cookbook to customize and tag your recipes, group into favorite meals, and eventually share with your housemates or family.</div>
+      <button onclick="hideOrderNudge();show('cookbook')" style="width:100%;height:50px;background:var(--violet);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;margin-bottom:10px">My Cookbook →</button>
+      <button onclick="hideOrderNudge()" style="width:100%;height:36px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif">Got it</button>
+    </div>
   </div>
 </div>
 
