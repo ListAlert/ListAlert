@@ -1137,6 +1137,10 @@ if(recipeTab==='inspire'&&Array.isArray(parsed)&&parsed.length&&parsed[0].name&&
   ingredientList=parsed.ingredients;
 } else if(Array.isArray(parsed)){
   ingredientList=parsed;
+} else if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)&&Array.isArray(parsed.ingredients)){
+  // Photo/paste returned {name, ingredients} object
+  ingredientList=parsed.ingredients;
+  if(parsed.name&&parsed.name!=='My Recipe')pendingRecipeName=parsed.name;
 } else {
   throw new Error('empty');
 }
