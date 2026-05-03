@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#F5F0E8"/>
+<title>ListAlert — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital@1&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#F5F0E8;--bg2:#FFFFFF;--bg3:#EDE8DF;--bg4:#DDD8CE;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text:#1A1410;--text2:#6B6560;--text3:#9E9890;
+  --green:#B8701F;--green-dim:rgba(184,112,31,0.1);--green-border:rgba(184,112,31,0.3);
+  --blue:#4A7FA5;--blue-dim:rgba(74,127,165,0.1);--blue-border:rgba(74,127,165,0.3);
+  --red:#C0392B;--red-dim:rgba(192,57,43,0.08);
+  --amber:#C17B2A;--amber-dim:rgba(193,123,42,0.1);--amber-border:rgba(193,123,42,0.3);
+  --violet:#C17B2A;--violet-dim:rgba(193,123,42,0.1);--violet-border:rgba(193,123,42,0.3);
+  --r:14px;--r-sm:10px;
+}
+
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",sans-serif;color:var(--text)}
+#shell{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:430px;margin:0 auto;background:var(--bg);position:relative;overflow:hidden}
+
+/* ── Fake app chrome (behind demo frames) ── */
+.header{padding:max(52px,env(safe-area-inset-top) + 16px) 20px 12px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:26px;font-weight:800;letter-spacing:-0.5px;color:var(--text)}
+.header h1 em{color:var(--amber);font-style:italic;font-family:"Playfair Display",serif;font-weight:400;font-size:27px;letter-spacing:0}
+.gps-btn{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:5px 11px;border-radius:20px;cursor:pointer;border:none;font-family:"Outfit",sans-serif;pointer-events:none}
+.gps-btn.on{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.gps-btn.wait{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border)}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot.on{background:var(--green);animation:pulse 2s infinite}
+.dot.wait{background:var(--amber);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+.tabs{display:flex;gap:2px;flex-shrink:0;background:var(--bg3);border-radius:12px;margin:0 16px 8px;padding:4px}
+.tab{flex:1;padding:9px 4px;text-align:center;font-size:13px;font-weight:600;color:var(--text3);border-radius:8px;border:none;background:none;font-family:"Outfit",sans-serif}
+.tab.active{color:var(--text);background:var(--bg2);box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Welcome card ── */
+.welcome-wrap{
+  position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:400;
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.welcome-wrap.open{opacity:1;pointer-events:all}
+.welcome-sheet{
+  width:100%;max-width:430px;background:var(--bg2);
+  border-radius:20px 20px 0 0;
+  padding:0 0 max(24px,env(safe-area-inset-bottom));
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);
+  box-shadow:0 -4px 24px rgba(0,0,0,0.12);
+}
+.welcome-wrap.open .welcome-sheet{transform:translateY(0)}
+.welcome-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:12px auto 0}
+
+/* ── Demo overlay ── */
+.demo-wrap{
+  position:fixed;inset:0;max-width:430px;margin:0 auto;
+  display:flex;flex-direction:column;background:var(--bg);
+  z-index:500;
+}
+.demo-frame{flex:1;overflow:hidden;position:relative;pointer-events:none;user-select:none;display:flex;flex-direction:column;background:var(--bg)}
+.demo-caption{flex-shrink:0;background:rgba(245,240,232,0.97);border-top:1px solid var(--border);padding:14px 20px max(16px,env(safe-area-inset-bottom))}
+.demo-caption-text{font-size:14px;color:var(--text);line-height:1.5;min-height:42px}
+.demo-progress{display:flex;gap:4px;margin-bottom:10px}
+.demo-pip{flex:1;height:3px;border-radius:2px;background:var(--bg4);transition:background .3s}
+.demo-pip.done{background:var(--amber)}
+.demo-pip.active{background:var(--amber);opacity:0.5}
+.demo-btns{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.demo-skip{background:none;border:none;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer;font-family:"Outfit",sans-serif;padding:0}
+.demo-next{background:var(--amber);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;padding:8px 18px}
+
+/* ── Done card ── */
+.done-wrap{
+  position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:600;
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.done-wrap.open{opacity:1;pointer-events:all}
+.done-sheet{
+  width:100%;max-width:430px;background:var(--bg2);
+  border-radius:20px 20px 0 0;
+  padding:0 0 max(28px,env(safe-area-inset-bottom));
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);
+  box-shadow:0 -4px 24px rgba(0,0,0,0.12);
+}
+.done-wrap.open .done-sheet{transform:translateY(0)}
+
+/* ── Replay button (persistent) ── */
+.replay-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:10px 20px max(14px,env(safe-area-inset-bottom));background:var(--bg2);border-top:1px solid var(--border);display:none;justify-content:center;z-index:200}
+.replay-btn{background:none;border:1px solid var(--border2);border-radius:20px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;padding:7px 18px;font-family:"Outfit",sans-serif}
+</style>
+</head>
+<body>
+
+<!-- Fake app shell visible behind welcome card -->
+<div id="shell">
+  <div class="header"><h1>List<em>Alert</em></h1><button class="gps-btn wait"><span class="dot wait"></span><span>Enable GPS</span></button></div>
+  <div class="tabs">
+    <div class="tab active">List</div>
+    <div class="tab">My Cookbook</div>
+    <div class="tab">My Local Stores</div>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 24px">
+    <div style="text-align:center;color:var(--text3)">
+      <div style="font-size:36px;margin-bottom:12px">🛒</div>
+      <div style="font-size:15px;font-weight:600;color:var(--text2)">Your list is empty</div>
+      <div style="font-size:13px;margin-top:6px;line-height:1.6">Tap 🔍 Recipes to scan a photo<br>or get inspired by ListAlert</div>
+    </div>
+  </div>
+</div>
+
+<!-- Welcome card -->
+<div id="welcome" class="welcome-wrap">
+  <div class="welcome-sheet">
+    <div class="welcome-handle"></div>
+    <div style="padding:20px 20px 0">
+      <div style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:20px;padding:3px 10px;margin-bottom:12px">🧪 Prototype</div>
+      <div style="font-size:22px;font-weight:800;color:var(--text);letter-spacing:-0.4px;margin-bottom:8px">List<em style="color:var(--amber);font-style:italic;font-family:'Playfair Display',serif;font-weight:400">Alert</em></div>
+      <div style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:6px">Scan a recipe, build your grocery list, shop smarter.</div>
+      <div style="font-size:13px;color:var(--text3);line-height:1.5;margin-bottom:20px">This is an early prototype — we'd love your feedback after you give it a try.</div>
+    </div>
+    <div style="display:flex;gap:8px;padding:0 20px">
+      <button onclick="skipWelcome()" style="flex:1;height:46px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif">Skip intro</button>
+      <button onclick="startDemo()" style="flex:2;height:46px;background:var(--amber);border:none;border-radius:var(--r-sm);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">Quick tour →</button>
+    </div>
+    <div style="padding:12px 20px 0;text-align:center">
+      <button onclick="skipWelcome()" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;font-family:'Outfit',sans-serif">Go straight to the app</button>
+    </div>
+  </div>
+</div>
+
+<!-- Demo overlay -->
+<div id="demo" class="demo-wrap" style="display:none">
+  <div class="demo-frame" id="demo-frame"></div>
+  <div class="demo-caption">
+    <div class="demo-progress" id="demo-progress"></div>
+    <div class="demo-caption-text" id="demo-caption-text"></div>
+    <div class="demo-btns">
+      <button class="demo-skip" onclick="endDemo()">Skip</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="demo-back-btn" class="demo-skip" onclick="demoBack()" style="display:none">← Back</button>
+        <button class="demo-next" id="demo-next-btn" onclick="demoNext()">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Done / feedback card -->
+<div id="done" class="done-wrap">
+  <div class="done-sheet">
+    <div class="welcome-handle"></div>
+    <div style="padding:20px 20px 0">
+      <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px">That's the idea 👆</div>
+      <div style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:20px">Now try it for real — scan a recipe, build your list, and let us know what you think.</div>
+      <a href="listalert2.html" style="display:flex;align-items:center;justify-content:center;height:52px;background:var(--amber);border-radius:14px;color:#fff;font-size:16px;font-weight:700;text-decoration:none;margin-bottom:12px">Open the app →</a>
+      <button onclick="replayDemo()" style="width:100%;height:44px;background:none;border:1px solid var(--border2);border-radius:12px;color:var(--text3);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif">Watch again</button>
+    </div>
+  </div>
+</div>
+
+<!-- Replay bar (after done card dismissed) -->
+<div class="replay-bar" id="replay-bar">
+  <button class="replay-btn" onclick="replayDemo()">↩ Watch demo again</button>
+</div>
+
+<script>
+/* ── CSS variables used inside JS-rendered HTML ── */
+// All colours come from :root above — JS strings reference var(--x) so they inherit correctly.
+
+/* ── Demo step renderers ── */
+function demoHeader(gpsState){
+  var cls=gpsState==='on'?'on':'wait';
+  var txt=gpsState==='on'?'Location on':'Enable GPS';
+  return '<div class="header"><h1>List<em>Alert</em></h1><button class="gps-btn '+cls+'"><span class="dot '+cls+'"></span><span>'+txt+'</span></button></div>';
+}
+function demoTabs(active){
+  var tabs=[['list','List'],['cookbook','My Cookbook'],['stores','My Local Stores']];
+  return '<div class="tabs">'+tabs.map(function(t){return'<div class="tab'+(t[0]===active?' active':'')+'" style="pointer-events:none">'+t[1]+'</div>';}).join('')+'</div>';
+}
+function demoAddBar(highlight){
+  var rs=highlight==='recipe'?'box-shadow:0 0 0 3px var(--amber),0 0 20px rgba(193,123,42,0.3);':'';
+  return '<div style="display:flex;gap:8px;padding:10px 16px 12px;border-top:1px solid var(--border);background:var(--bg2)"><div style="flex:1;height:46px;border:1px solid var(--border2);border-radius:10px;background:var(--bg3);display:flex;align-items:center;padding:0 14px;font-size:14px;color:var(--text3)">Add an item...</div><div style="height:46px;padding:0 12px;background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:10px;color:var(--amber);font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px;'+rs+'">🔍 Recipes</div></div>';
+}
+
+var RECIPE_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 210" style="width:100%;display:block"><rect width="340" height="210" fill="#fefefe"/><rect x="0" y="0" width="128" height="210" fill="#f0e8dc"/><ellipse cx="64" cy="85" rx="44" ry="40" fill="#c8794a"/><ellipse cx="64" cy="80" rx="40" ry="35" fill="#d4864f"/><ellipse cx="64" cy="76" rx="36" ry="30" fill="#e09060"/><circle cx="52" cy="68" r="8" fill="#b86030"/><circle cx="72" cy="62" r="6" fill="#c07040"/><circle cx="80" cy="74" r="7" fill="#b86838"/><circle cx="55" cy="80" r="5" fill="#c07848"/><ellipse cx="64" cy="76" rx="20" ry="16" fill="#e8a870" opacity="0.6"/><rect x="8" y="148" width="112" height="6" rx="3" fill="#c8b090"/><rect x="20" y="160" width="88" height="4" rx="2" fill="#d0b898"/><rect x="30" y="170" width="68" height="3" rx="1" fill="#d8c0a0"/><text x="138" y="22" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#111">CHICKEN TIKKA MASALA</text><text x="138" y="34" font-family="Arial,sans-serif" font-size="7.5" fill="#888">PREP: 20 MIN  |  COOK: 30 MIN  |  SERVES: 4</text><rect x="138" y="40" width="185" height="1" fill="#ddd"/><text x="138" y="52" font-family="Arial,sans-serif" font-size="8.5" font-weight="bold" fill="#333" letter-spacing="1">INGREDIENTS</text><text x="140" y="65" font-family="Arial,sans-serif" font-size="8" fill="#444">&#x2022; 2 lbs Chicken Thighs</text><text x="140" y="76" font-family="Arial,sans-serif" font-size="8" fill="#444">&#x2022; 1 cup Plain Yogurt</text><text x="140" y="87" font-family="Arial,sans-serif" font-size="8" fill="#444">&#x2022; 2 tbsp Garam Masala</text><text x="140" y="98" font-family="Arial,sans-serif" font-size="8" fill="#444">&#x2022; 1 can Crushed Tomatoes</text><text x="140" y="109" font-family="Arial,sans-serif" font-size="8" fill="#444">&#x2022; 1 cup Heavy Cream</text><text x="140" y="120" font-family="Arial,sans-serif" font-size="8" fill="#444">&#x2022; 4 cloves Garlic, minced</text><text x="140" y="131" font-family="Arial,sans-serif" font-size="8" fill="#444">&#x2022; 1 tbsp fresh Ginger</text><text x="140" y="142" font-family="Arial,sans-serif" font-size="8" fill="#444">&#x2022; 2 cups Basmati Rice</text><rect x="138" y="152" width="185" height="1" fill="#ddd"/><rect x="138" y="158" width="52" height="14" rx="7" fill="#f5f0ea"/><text x="164" y="168" font-family="Arial,sans-serif" font-size="7" fill="#888" text-anchor="middle">Easy</text><rect x="196" y="158" width="60" height="14" rx="7" fill="#f5f0ea"/><text x="226" y="168" font-family="Arial,sans-serif" font-size="7" fill="#888" text-anchor="middle">Gluten Free</text><rect x="262" y="158" width="55" height="14" rx="7" fill="#f5f0ea"/><text x="289" y="168" font-family="Arial,sans-serif" font-size="7" fill="#888" text-anchor="middle">High Protein</text></svg>';
+
+/* Step 1 — Photo scan */
+function step_scan(){
+  return demoHeader('wait')+demoTabs('list')
+    +'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column">'
+    +'<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 20px">'
+    +'<div style="width:100%;background:var(--bg2);border-radius:20px;overflow:hidden;border:1px solid var(--amber-border);box-shadow:0 2px 12px rgba(0,0,0,0.08)">'
+    +'<div style="padding:14px 18px;border-bottom:1px solid var(--border)">'
+    +'<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px">🔍 Find Ingredients</div>'
+    +'<div style="font-size:12px;color:var(--text3)">Scan a recipe photo — ListAlert extracts every ingredient</div>'
+    +'</div>'
+    +'<div style="display:flex;gap:3px;padding:10px 14px">'
+    +'<div style="flex:1;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text3)">📋 Paste</div>'
+    +'<div style="flex:1;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text3)">✨ Inspire</div>'
+    +'<div style="flex:1;height:32px;border-radius:8px;border:1px solid var(--amber-border);background:var(--amber-dim);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--amber)">📷 Photo</div>'
+    +'<div style="flex:1;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text3)">🔗 URL</div>'
+    +'</div>'
+    +'<div style="padding:0 14px 14px">'
+    +'<div style="border-radius:10px;overflow:hidden;border:2px solid var(--amber);box-shadow:0 0 0 3px var(--amber-dim)">'
+    +RECIPE_SVG
+    +'<div style="padding:6px 12px;background:var(--amber-dim);font-size:11px;font-weight:600;color:var(--amber)">📷 Chicken Tikka Masala — The Complete Indian Cookbook</div>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +demoAddBar('recipe')
+    +'</div>';
+}
+
+/* Step 2 — Ingredients extracted */
+function step_results(){
+  var ings=['Chicken Thighs (2 lbs)','Plain Yogurt (1 cup)','Garam Masala (2 tbsp)','Crushed Tomatoes (canned)','Heavy Cream (1 cup)','Garlic (4 cloves)','Ginger (fresh)','Basmati Rice (2 cups)'];
+  var rows=ings.map(function(n,i){
+    var checked=i<2;
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid var(--border)">'
+      +'<div style="width:20px;height:20px;border-radius:50%;background:'+(checked?'var(--amber)':'var(--bg3)')+';border:1.5px solid '+(checked?'var(--amber)':'var(--border2)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+      +(checked?'<svg width="9" height="7" viewBox="0 0 10 7" fill="none"><path d="M1 3L3.5 5.5L9 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
+      +'</div>'
+      +'<span style="font-size:13px;font-weight:500;color:'+(checked?'var(--text3)':'var(--text)')+';'+(checked?'text-decoration:line-through':'')+'">'+n+'</span>'
+      +'</div>';
+  }).join('');
+  return demoHeader('wait')+demoTabs('list')
+    +'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column">'
+    +'<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 20px">'
+    +'<div style="width:100%;background:var(--bg2);border-radius:20px;overflow:hidden;border:1px solid var(--amber-border);box-shadow:0 2px 12px rgba(0,0,0,0.08)">'
+    +'<div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
+    +'<div style="font-size:13px;font-weight:700;color:var(--text)">'+ings.length+' ingredients found</div>'
+    +'<div style="font-size:12px;color:var(--text3)">tap to deselect</div>'
+    +'</div>'
+    +'<div style="max-height:220px;overflow:hidden">'+rows+'</div>'
+    +'<div style="padding:12px 18px;display:flex;gap:8px">'
+    +'<div style="flex:1;height:44px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;font-weight:600">Cancel</div>'
+    +'<div style="flex:2;height:44px;background:var(--amber);border-radius:10px;display:flex;align-items:center;justify-content:center">'
+    +'<span style="color:#fff;font-size:14px;font-weight:700">Add 6 items to list ✓</span>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +demoAddBar('')
+    +'</div>';
+}
+
+/* Step 3 — Save recipe */
+function step_save(){
+  return demoHeader('on')+demoTabs('list')
+    +'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column">'
+    +'<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 20px">'
+    +'<div style="width:100%;background:var(--bg2);border-radius:20px;overflow:hidden;border:1px solid var(--amber-border);box-shadow:0 0 0 3px var(--amber-dim)">'
+    +'<div style="padding:14px 18px;border-bottom:1px solid var(--border)">'
+    +'<div style="font-size:15px;font-weight:700">📖 Save this recipe?</div>'
+    +'<div style="font-size:12px;color:var(--text3);margin-top:3px">Chicken Tikka Masala · 8 ingredients</div>'
+    +'</div>'
+    +'<div style="padding:14px 18px">'
+    +'<div style="margin-bottom:10px">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Recipe name</div>'
+    +'<div style="height:40px;background:var(--bg3);border:1px solid var(--amber-border);border-radius:8px;padding:0 12px;display:flex;align-items:center;font-size:14px;color:var(--text)">Chicken Tikka Masala</div>'
+    +'</div>'
+    +'<div style="margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Tags</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+    +'<div style="padding:4px 10px;border-radius:20px;background:var(--amber-dim);border:1px solid var(--amber-border);font-size:11px;font-weight:600;color:var(--amber)">Dinner</div>'
+    +'<div style="padding:4px 10px;border-radius:20px;background:var(--blue-dim);border:1px solid var(--blue-border);font-size:11px;font-weight:600;color:var(--blue)">Indian</div>'
+    +'<div style="padding:4px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--border2);font-size:11px;font-weight:600;color:var(--text3)">+ tag</div>'
+    +'</div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<div style="flex:1;height:44px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:13px;font-weight:600">Skip</div>'
+    +'<div style="flex:2;height:44px;background:var(--amber);border-radius:10px;display:flex;align-items:center;justify-content:center">'
+    +'<span style="color:#fff;font-size:14px;font-weight:700">Save recipe ★</span>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +demoAddBar('')
+    +'</div>';
+}
+
+/* Step 4 — Build order from Cookbook */
+function step_order(){
+  var recipes=[
+    {name:'Chicken Tikka Masala',count:8,on:true},
+    {name:'Caesar Salad',count:5,on:true},
+    {name:'Avocado Toast',count:4,on:false},
+    {name:'Pasta Bolognese',count:11,on:false}
+  ];
+  var total=recipes.filter(function(r){return r.on;}).reduce(function(s,r){return s+r.count;},0);
+  var rows=recipes.map(function(r){
+    return '<div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border)">'
+      +'<div style="width:34px;height:34px;border-radius:10px;background:'+(r.on?'var(--amber-dim)':'var(--bg3)')+';border:1.5px solid '+(r.on?'var(--amber)':'var(--border2)')+';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">'+(r.on?'★':'')+'</div>'
+      +'<div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--text)">'+r.name+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+r.count+' ingredients</div></div>'
+      +'<div style="padding:6px 12px;border-radius:8px;background:'+(r.on?'var(--amber)':'var(--bg3)')+';font-size:12px;font-weight:700;color:'+(r.on?'#fff':'var(--text3)')+'">'+(r.on?'On order':'+ Add')+'</div>'
+      +'</div>';
+  }).join('');
+  return demoHeader('on')+demoTabs('cookbook')
+    +'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column">'
+    +'<div style="padding:10px 16px 8px;border-bottom:1px solid var(--border)">'
+    +'<div style="font-size:13px;font-weight:700;color:var(--text)">My Cookbook</div>'
+    +'<div style="font-size:12px;color:var(--text3);margin-top:2px">Pick recipes for this order</div>'
+    +'</div>'
+    +'<div style="flex:1;overflow-y:auto">'+rows+'</div>'
+    +'<div style="padding:10px 16px;border-top:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:space-between">'
+    +'<div style="font-size:13px;color:var(--text2)"><b style="color:var(--text)">'+total+' items</b> across 2 recipes</div>'
+    +'<div style="height:38px;padding:0 18px;background:#1A1410;border-radius:10px;display:flex;align-items:center;font-size:13px;font-weight:700;color:#fff">Build order →</div>'
+    +'</div>'
+    +'</div>';
+}
+
+/* Step 5 — Delivery money shot */
+function step_delivery(){
+  var items=[
+    {name:'Chicken Thighs (2 lbs)',store:'Kroger'},
+    {name:'Plain Yogurt',store:'Kroger'},
+    {name:'Garam Masala',store:'Whole Foods'},
+    {name:'Crushed Tomatoes (canned)',store:'Kroger'},
+    {name:'Heavy Cream',store:'Whole Foods'},
+    {name:'Garlic (4 cloves)',store:'Kroger'},
+    {name:'Romaine Lettuce',store:'Whole Foods'},
+    {name:'Parmesan',store:'Kroger'},
+  ];
+  var rows=items.map(function(it){
+    var wf=it.store==='Whole Foods';
+    return '<div style="display:flex;align-items:center;padding:11px 16px;gap:12px;border-bottom:1px solid var(--border);background:var(--bg2)">'
+      +'<div style="width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;background:var(--bg3)"></div>'
+      +'<div style="flex:1;font-size:14px;font-weight:500;color:var(--text)">'+it.name+'</div>'
+      +'<div style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border);white-space:nowrap">'+(wf?'🌿 ':'🛒 ')+it.store+'</div>'
+      +'</div>';
+  }).join('');
+  return demoHeader('on')+demoTabs('list')
+    +'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column">'
+    +'<div style="margin:10px 16px 0;background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06)">'
+    +rows
+    +'</div>'
+    +'<div style="flex:1"></div>'
+    +'<div style="padding:10px 16px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:var(--bg2);border-top:1px solid var(--border)">'
+    +'<div style="width:100%;height:52px;background:#1A1410;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,0.18)">'
+    +'<span style="font-size:18px">🛒</span>'
+    +'<span style="color:#fff;font-size:16px;font-weight:700">Order for delivery</span>'
+    +'<span style="color:rgba(255,255,255,0.45);font-size:12px;font-weight:500">(coming soon)</span>'
+    +'</div>'
+    +'</div>'
+    +'</div>';
+}
+
+var DEMO_STEPS=[
+  {duration:5000, caption:'📷 Tap "Recipes" and snap a photo of any recipe — a cookbook page, card, or screenshot. ListAlert reads it instantly.', fn:step_scan},
+  {duration:4500, caption:'Every ingredient lands on your list in seconds, with qualifiers like "canned" or "frozen". Deselect anything you have at home — or exclude allergens.', fn:step_results},
+  {duration:4500, caption:'📖 Save the recipe to your Cookbook — one tap next time to rebuild the entire list, no photo needed.', fn:step_save},
+  {duration:5000, caption:'Pick recipes from your Cookbook and ListAlert tallies all the ingredients across both. Ready to shop or order.', fn:step_order},
+  {duration:5500, caption:'🛒 When the delivery connection is live, every item goes straight to your cart — one tap, done. This is where it\'s all headed.', fn:step_delivery}
+];
+
+var stepIdx=0;
+var stepTimer=null;
+
+function startDemo(){
+  stepIdx=0;
+  document.getElementById('demo').style.display='flex';
+  renderStep();
+}
+
+function renderStep(){
+  if(stepIdx>=DEMO_STEPS.length){endDemo();return;}
+  var s=DEMO_STEPS[stepIdx];
+  var isLast=stepIdx===DEMO_STEPS.length-1;
+  document.getElementById('demo-next-btn').textContent=isLast?'Get started →':'Next →';
+  var backBtn=document.getElementById('demo-back-btn');
+  if(backBtn)backBtn.style.display=stepIdx>0?'inline':'none';
+  document.getElementById('demo-progress').innerHTML=DEMO_STEPS.map(function(_,i){
+    return '<div class="demo-pip'+(i<stepIdx?' done':i===stepIdx?' active':'')+'"></div>';
+  }).join('');
+  document.getElementById('demo-caption-text').textContent=s.caption;
+  document.getElementById('demo-frame').innerHTML=s.fn();
+  if(stepTimer)clearTimeout(stepTimer);
+  stepTimer=setTimeout(function(){stepIdx++;renderStep();},s.duration);
+}
+
+function demoNext(){
+  if(stepTimer)clearTimeout(stepTimer);
+  stepIdx++;
+  renderStep();
+}
+
+function demoBack(){
+  if(stepTimer)clearTimeout(stepTimer);
+  if(stepIdx>0)stepIdx--;
+  renderStep();
+}
+
+function endDemo(){
+  if(stepTimer)clearTimeout(stepTimer);
+  document.getElementById('demo').style.display='none';
+  var done=document.getElementById('done');
+  done.style.display='flex';
+  setTimeout(function(){done.classList.add('open');},10);
+}
+
+function skipWelcome(){
+  var w=document.getElementById('welcome');
+  w.classList.remove('open');
+  setTimeout(function(){w.style.display='none';},300);
+  document.getElementById('replay-bar').style.display='flex';
+}
+
+function replayDemo(){
+  // Close done card if open
+  var done=document.getElementById('done');
+  done.classList.remove('open');
+  done.style.display='none';
+  // Hide replay bar
+  document.getElementById('replay-bar').style.display='none';
+  // Restart
+  stepIdx=0;
+  startDemo();
+}
+
+// Init — show welcome on load
+window.addEventListener('DOMContentLoaded',function(){
+  var w=document.getElementById('welcome');
+  w.style.display='flex';
+  setTimeout(function(){w.classList.add('open');},50);
+});
+</script>
+</body>
+</html>
