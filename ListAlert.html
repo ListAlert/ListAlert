@@ -140,7 +140,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-backdrop.open{opacity:1;pointer-events:all}
-.modal-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)}
+.modal-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;max-height:92dvh}
 .modal-backdrop.open .modal-sheet{transform:translateY(0)}
 .modal-handle{width:36px;height:4px;border-radius:2px;background:var(--bg4);margin:12px auto 0}
 .modal-title{font-size:17px;font-weight:700;padding:16px 20px 0;display:flex;align-items:center;gap:8px}
@@ -488,8 +488,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
         <button class="modal-tab" id="rtab-more" onclick="switchRecipeTab('more')" style="flex:1;font-size:13px">··· More</button>
       </div>
     </div>
-    <div class="modal-input-wrap" id="recipe-input-area"></div>
-    <div id="recipe-result-area"></div>
+    <div style="overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;min-height:0" id="recipe-scroll-body"><div class="modal-input-wrap" id="recipe-input-area"></div>
+    <div id="recipe-result-area"></div></div>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeRecipeModal()">Cancel</button>
       <button class="modal-go" id="recipe-go-btn" onclick="runRecipeExtraction()">
@@ -831,9 +831,13 @@ function renderTripView(el, filtered, sm){
         var s=sm[it.store];
         var storeTag=s?'<span style="font-size:10px;color:var(--text3);margin-left:auto">'+s.emoji+' '+s.name+'</span>':'';
         var statusHint=it.done?'<span style="font-size:10px;color:var(--text3);margin-left:4px">tap to undo</span>':it.skipped?'<span style="font-size:10px;color:var(--amber);margin-left:4px">skipped</span>':'';
+        var sharedSrcs=(it.sources||[]).filter(function(ss){return ss!==r.name&&ss!=='Manual add';});
+        var sharedNote=sharedSrcs.length?'<span style="font-size:10px;color:var(--blue);margin-left:6px">also in '+sharedSrcs.join(', ')+'</span>':'';
         var actionOpen=openActionItem===it.id;
-        return'<div><div class="recipe-trip-item" style="cursor:default">'+(it.done?'<div class="chk done" onclick="itemUncheck('+it.id+')" style="width:18px;height:18px;flex-shrink:0"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>':'')+'<span class="'+(it.done?'recipe-trip-done':it.skipped?'recipe-trip-skipped':'')+'" style="font-size:13px;flex:1">'+it.name+statusHint+'</span>'+storeTag+'</div>'+(actionOpen?buildActionSheet(it):'')+'</div>';
-      }).join('')+'</div>';
+        var rowClick=it.done?'':'onclick="openItemAction('+it.id+')"';
+        var chkDone=it.done?'<div class="chk done" onclick="event.stopPropagation();itemUncheck('+it.id+')" style="width:18px;height:18px;flex-shrink:0"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><\/svg><\/div>':'';
+        return'<div><div class="recipe-trip-item" style="cursor:'+(it.done?'default':'pointer')+'" '+rowClick+'>'+chkDone+'<span class="'+(it.done?'recipe-trip-done':it.skipped?'recipe-trip-skipped':'')+'">'+it.name+statusHint+sharedNote+'<\/span>'+storeTag+'<\/div>'+(actionOpen?buildActionSheet(it):'')+'<\/div>';
+      }).join('')+'<\/div>';
     }
     html+='<div class="recipe-trip-card"><div class="recipe-trip-header" data-rname="'+r.name.replace(/"/g,'&quot;')+'" onclick="toggleRecipeExpand(this.dataset.rname)"><div class="recipe-trip-name">'+r.name+'</div>'+tags+'<span class="recipe-trip-count">'+doneCount+'/'+its.length+'</span><span class="recipe-trip-chevron'+(isOpen?' open':'')+'">\u25bc</span></div>'+itemRows+'</div>';
   });
@@ -843,7 +847,9 @@ function renderTripView(el, filtered, sm){
     var looseRows=looseItems.map(function(it){
       var statusHint=it.done?'<span style="font-size:10px;color:var(--text3);margin-left:4px">tap to undo</span>':it.skipped?'<span style="font-size:10px;color:var(--amber);margin-left:4px">skipped</span>':'';
       var actionOpen=openActionItem===it.id;
-      return'<div><div class="recipe-trip-item" style="cursor:default">'+(it.done?'<div class="chk done" onclick="itemUncheck('+it.id+')" style="width:18px;height:18px;flex-shrink:0"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>':'')+'<span class="'+(it.done?'recipe-trip-done':it.skipped?'recipe-trip-skipped':'')+'" style="font-size:13px;flex:1">'+it.name+statusHint+'</span></div>'+(actionOpen?buildActionSheet(it):'')+'</div>';
+      var rowClick=it.done?'':'onclick="openItemAction('+it.id+')"';
+      var chkDone=it.done?'<div class="chk done" onclick="event.stopPropagation();itemUncheck('+it.id+')" style="width:18px;height:18px;flex-shrink:0"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><\/svg><\/div>':'';
+      return'<div><div class="recipe-trip-item" style="cursor:'+(it.done?'default':'pointer')+'" '+rowClick+'>'+chkDone+'<span class="'+(it.done?'recipe-trip-done':it.skipped?'recipe-trip-skipped':'')+'">'+it.name+statusHint+'<\/span><\/div>'+(actionOpen?buildActionSheet(it):'')+'<\/div>';
     }).join('');
     html+='<div class="loose-items-section"><div style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Other items</div><div class="recipe-trip-items">'+looseRows+'</div></div>';
   }
@@ -852,7 +858,7 @@ function renderTripView(el, filtered, sm){
 }
 
 function renderList(){var el=document.getElementById('list-body');var _ob=document.getElementById('order-bar');if(_ob)_ob.style.display='none';
-  if(!items.length){el.innerHTML='<div class="empty"><b>Your list is empty</b>Tap <b style="color:var(--violet)">🍳 Recipe</b> to scan a photo or try: <span style="color:var(--text2)">"chicken tacos"<\/span>, <span style="color:var(--text2)">"high protein breakfast"<\/span>, or any craving.</div>';return;}var sm={};stores.forEach(function(s){sm[s.id]=s;});var sorted=items.slice().sort(function(a,b){var av=(a.done||a.skipped)?1:0,bv=(b.done||b.skipped)?1:0;return av-bv;});var filtered=listFilter?sorted.filter(function(it){return it.store===listFilter;}):sorted;var filterBar='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id&&!i.done&&!i.skipped;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'</button>';});filterBar+='<button class="filter-chip" onclick="openRecipeModal()" style="background:var(--violet-dim);border-color:var(--violet-border);color:var(--violet);font-weight:700">🍳 + Recipe</button>';filterBar+='</div>';var _ob2=document.getElementById('order-bar');var _activeCount=items.filter(function(i){return!i.done&&!i.skipped;}).length;if(_ob2)_ob2.style.display=_activeCount?'block':'none';var _readyBanner=document.getElementById('ready-banner');if(_readyBanner)_readyBanner.style.display=(_activeCount&&savedRecipes.length)?'block':'none';if(items.length>0)localStorage.setItem('la_had_items','1');var _hasCompleted=items.some(function(i){return i.done||i.skipped;});if(_activeCount===0&&_hasCompleted&&localStorage.getItem('la_had_items'))maybeShowHomescreenPrompt();
+  if(!items.length){el.innerHTML='<div class="empty"><b>Your list is empty</b>Tap <b style="color:var(--violet)">🍳 Recipe</b> to scan a photo or try: <span style="color:var(--text2)">"chicken tacos"<\/span>, <span style="color:var(--text2)">"high protein breakfast"<\/span>, or any craving.</div>';return;}var sm={};stores.forEach(function(s){sm[s.id]=s;});var sorted=items.slice().sort(function(a,b){var av=(a.done||a.skipped)?1:0,bv=(b.done||b.skipped)?1:0;return av-bv;});var filtered=listFilter?sorted.filter(function(it){return it.store===listFilter;}):sorted;var filterBar='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id&&!i.done&&!i.skipped;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'</button>';});filterBar+='<button class="filter-chip" onclick="openRecipeModal()" style="background:var(--violet-dim);border-color:var(--violet-border);color:var(--violet);font-weight:700">🍳 + Recipe</button>';filterBar+='<\/div>';var _activeCount=items.filter(function(i){return!i.done&&!i.skipped;}).length;if(_activeCount){filterBar+='<div style="padding:4px 16px 6px"><button onclick="shareList()" style="width:100%;height:44px;background:var(--green);border:none;border-radius:12px;color:#0A0A0A;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span>🛒<\/span> Order for delivery <span style="font-size:11px;font-weight:600;opacity:0.6;margin-left:2px">(coming soon)<\/span><\/button><\/div>';};if(items.length>0)localStorage.setItem('la_had_items','1');var _hasCompleted=items.some(function(i){return i.done||i.skipped;});if(_activeCount===0&&_hasCompleted&&localStorage.getItem('la_had_items'))maybeShowHomescreenPrompt();
   
   // Use recipe trip view if any saved recipe has items on the list
   var hasRecipeItems=filtered.some(function(it){return it.sources&&it.sources.some(function(s){return s&&s!=='Manual add';});});
@@ -1112,24 +1118,38 @@ function openSaveForm(){
   showSaveRecipePrompt(_pendingSaveIngs,_pendingSaveName,'');
 }
 
+var _pendingDishSaveQueue=[];
+var _pendingDishSaveIdx=0;
 function addExtractedToList(recipeName){
   if(pendingMealDishes.length>1){
     pendingMealDishes.forEach(function(dish){
       mergeIngredientsIntoList(dish.ingredients, dish.name);
     });
-    persist();closeRecipeModal();renderList();
+    persist();renderList();
+    _pendingDishSaveQueue=pendingMealDishes.slice();
+    _pendingDishSaveIdx=0;
+    showNextDishSavePrompt();
     return;
   }
   var toAdd=extractedIngredients.filter(function(i){return i.selected;});
   if(!toAdd.length){alert('Select at least one ingredient.');return;}
   var source=recipeName||'Manual add';
   mergeIngredientsIntoList(toAdd.map(function(i){return i.name;}),source);
-  persist();closeRecipeModal();renderList();showSaveRecipeBanner(toAdd.map(function(i){return i.name;}),source);
+  persist();renderList();
+  showSaveRecipePrompt(toAdd.map(function(i){return i.name;}),source,'');
+}
+function showNextDishSavePrompt(){
+  if(_pendingDishSaveIdx>=_pendingDishSaveQueue.length){closeRecipeModal();return;}
+  var dish=_pendingDishSaveQueue[_pendingDishSaveIdx];
+  _pendingDishSaveIdx++;
+  var remaining=_pendingDishSaveQueue.length-_pendingDishSaveIdx;
+  var note=remaining>0?remaining+' more recipe'+(remaining>1?'s':'')+' to save after this':'';
+  showSaveRecipePrompt(dish.ingredients,dish.name,note);
 }
 
 var saveRecipeTags=[];var PRESET_TAGS=['Breakfast','Lunch','Dinner','Snack','Healthy','Quick','Vegetarian','Dessert'];
 var pendingRecipeName='';
-function showSaveRecipePrompt(ingredientNames,sourceName,mergeNote){var tagBtns=PRESET_TAGS.map(function(t){return'<button class="save-recipe-tag" onclick="toggleSaveTag(this,\''+t+'\')">'+t+'</button>';}).join('');saveRecipeTags=[];pendingRecipeName=sourceName||'';var mergeHtml=mergeNote?'<div style="margin:0 14px 8px;padding:8px 12px;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:8px;font-size:12px;color:var(--blue);line-height:1.4">'+mergeNote+'</div>':'';document.getElementById('recipe-result-area').innerHTML='<div class="save-recipe-prompt"><div class="save-recipe-header"><span>📖 Save this recipe?</span></div>'+mergeHtml+'<div class="save-recipe-fields"><input class="save-recipe-input" id="save-recipe-name" placeholder="Recipe name (e.g. Chicken Tikka Masala)" value="'+(sourceName&&sourceName!=='Manual add'?sourceName:'')+'" /><div class="save-recipe-tags" id="save-recipe-tags">'+tagBtns+'</div></div><div class="save-recipe-btns"><button class="save-recipe-skip" onclick="closeRecipeModal()">Skip</button><button class="save-recipe-save" onclick="doSaveRecipe('+JSON.stringify(ingredientNames).replace(/"/g,"'")+')">Save recipe ★</button></div></div>';var btn=document.getElementById('recipe-go-btn');btn.style.display='none';}
+function showSaveRecipePrompt(ingredientNames,sourceName,mergeNote){var tagBtns=PRESET_TAGS.map(function(t){return'<button class="save-recipe-tag" onclick="toggleSaveTag(this,\''+t+'\')">'+t+'</button>';}).join('');saveRecipeTags=[];pendingRecipeName=sourceName||'';var mergeHtml=mergeNote?'<div style="margin:0 14px 8px;padding:8px 12px;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:8px;font-size:12px;color:var(--blue);line-height:1.4">'+mergeNote+'</div>':'';document.getElementById('recipe-result-area').innerHTML='<div class="save-recipe-prompt"><div class="save-recipe-header"><span>📖 Save this recipe?</span></div>'+mergeHtml+'<div class="save-recipe-fields"><input class="save-recipe-input" id="save-recipe-name" placeholder="Recipe name (e.g. Chicken Tikka Masala)" value="'+(sourceName&&sourceName!=='Manual add'?sourceName:'')+'" /><div class="save-recipe-tags" id="save-recipe-tags">'+tagBtns+'</div></div><div class="save-recipe-btns"><button class="save-recipe-skip" onclick="(_pendingDishSaveQueue&&_pendingDishSaveQueue.length>0&&_pendingDishSaveIdx>0)?showNextDishSavePrompt():closeRecipeModal()">Skip</button><button class="save-recipe-save" onclick="doSaveRecipe('+JSON.stringify(ingredientNames).replace(/"/g,"'")+')">Save recipe ★</button></div></div>';var btn=document.getElementById('recipe-go-btn');btn.style.display='none';}
 function toggleSaveTag(el,tag){var on=el.classList.toggle('on');if(on){if(saveRecipeTags.indexOf(tag)===-1)saveRecipeTags.push(tag);}else{saveRecipeTags=saveRecipeTags.filter(function(t){return t!==tag;});}}
 function doSaveRecipe(ingredients){var name=(document.getElementById('save-recipe-name').value||'').trim();if(!name){document.getElementById('save-recipe-name').focus();document.getElementById('save-recipe-name').style.borderColor='var(--red)';return;}var newRecipe={id:Date.now(),name:name,tags:saveRecipeTags.slice(),items:ingredients,savedAt:new Date().toISOString()};savedRecipes.unshift(newRecipe);items.forEach(function(it){if(it.sources){var idx=it.sources.indexOf(pendingRecipeName);if(idx!==-1)it.sources[idx]=name;}});persistRecipeWrite(newRecipe);persist();closeRecipeModal();}
 
