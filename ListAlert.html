@@ -140,7 +140,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-backdrop.open{opacity:1;pointer-events:all}
-.modal-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;max-height:92dvh;box-shadow:0 -4px 24px rgba(0,0,0,0.12)}
+.modal-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;max-height:92vh;max-height:92dvh;box-shadow:0 -4px 24px rgba(0,0,0,0.12)}
 .modal-backdrop.open .modal-sheet{transform:translateY(0)}
 .modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:12px auto 0}
 .modal-title{font-size:17px;font-weight:700;padding:16px 20px 0;display:flex;align-items:center;gap:8px}
@@ -551,7 +551,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:"Outfit",
 </div>
 
 <!-- ── Recipe Modal ──────────────────────────────────────────── -->
-<input type="file" accept="image/*" id="photo-file-input" style="display:none" onchange="handlePhotoSelect(this)"/>
+<input type="file" accept="image/*" capture="environment" id="photo-file-input" style="display:none" onchange="handlePhotoSelect(this)"/>
 <input type="file" accept="image/*" id="fridge-file-input" style="display:none" onchange="handleFridgeSelect(this)"/>
 
 <div class="modal-backdrop" id="recipe-modal" onclick="closeRecipeModalBackdrop(event)">
@@ -822,17 +822,17 @@ function startGPS(){if(!navigator.geolocation){setGPS('off','No GPS');return;}se
 function setGPS(state,txt){document.getElementById('gpsbtn').className='gps-btn '+state;document.getElementById('gpsdot').className='dot '+state;document.getElementById('gpstxt').textContent=txt;}
 function dist(a,b,c,d){var R=6371000,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180;var x=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 function checkFences(){if(lat===null)return;stores.forEach(function(s){if(!s.geo||s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var pending=items.filter(function(i){return i.store===s.id&&!i.done;});var st=ss[s.id]||(ss[s.id]={inside:false,alerted:false});if(d<=radius){if(!st.inside){st.inside=true;if(pending.length&&!st.alerted){st.alerted=true;fireAlert(s,pending);}}}else if(d>radius*1.5){st.inside=false;st.alerted=false;}});if(curTab==='list')renderNearby();}
-function renderNearby(){var el=document.getElementById('nearby-area');if(!el)return;if(lat===null){if(!stores.length)return;el.innerHTML='<div class="nearby-wrap"><div class="nearby-gps-prompt" onclick="startGPS()"><span>📍 Enable GPS to see nearby stores</span><span style="color:var(--amber);font-size:13px;font-weight:700">Enable →</span></div></div>';return;}var nearbyStores=[];stores.forEach(function(s){if(s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var nearThreshold=Math.max(radius*3,2000);if(d>nearThreshold)return;var pending=items.filter(function(i){return i.store===s.id&&!i.done;});if(!pending.length)return;nearbyStores.push({store:s,pending:pending.length,dist:d});});if(!nearbyStores.length){el.innerHTML='';return;}nearbyStores.sort(function(a,b){return a.dist-b.dist;});var html='<div class="nearby-wrap"><div class="nearby-label">Near you now</div>';nearbyStores.forEach(function(n){var distStr=n.dist<1000?Math.round(n.dist)+'m away':(n.dist/1000).toFixed(1)+'km away';html+='<div class="nearby-row" onclick="setFilter('+n.store.id+');document.getElementById(\'view-list\').scrollTop=200"><div class="nearby-ico">'+n.store.emoji+'</div><div class="nearby-info"><div class="nearby-name">'+n.store.name+'</div><div class="nearby-meta">'+distStr+'</div></div><div class="nearby-count">'+n.pending+' item'+(n.pending!==1?'s':'')+'</div></div>';});html+='</div>';el.innerHTML=html;}
+function renderNearby(){var el=document.getElementById('nearby-area');if(!el)return;if(lat===null){if(!stores.length)return;el.innerHTML='<div class="nearby-wrap"><div class="nearby-gps-prompt" onclick="startGPS()"><span>📍 Enable GPS to see nearby stores</span><span style="color:var(--amber);font-size:13px;font-weight:700">Enable →</span></div></div>';return;}var nearbyStores=[];stores.forEach(function(s){if(s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var nearThreshold=Math.max(radius*3,2000);if(d>nearThreshold)return;var pending=items.filter(function(i){return i.store===s.id&&!i.done;});if(!pending.length)return;nearbyStores.push({store:s,pending:pending.length,dist:d});});if(!nearbyStores.length){el.innerHTML='';return;}nearbyStores.sort(function(a,b){return a.dist-b.dist;});var html='<div class="nearby-wrap"><div class="nearby-label">Near you now</div>';nearbyStores.forEach(function(n){var distStr=n.dist<1609?Math.round(n.dist*3.281)+' ft away':(n.dist/1609).toFixed(1)+' mi away';html+='<div class="nearby-row" onclick="setFilter('+n.store.id+');document.getElementById(\'view-list\').scrollTop=200"><div class="nearby-ico">'+n.store.emoji+'</div><div class="nearby-info"><div class="nearby-name">'+n.store.name+'</div><div class="nearby-meta">'+distStr+'</div></div><div class="nearby-count">'+n.pending+' item'+(n.pending!==1?'s':'')+'</div></div>';});html+='</div>';el.innerHTML=html;}
 function fireAlert(store,pending){var names=pending.map(function(i){return i.name;}).join(', ');showBanner(store,names);if(window.Notification&&Notification.permission==='granted'){var n=new Notification('Near '+store.name,{body:'Still need: '+names,tag:'la-'+store.id,requireInteraction:true});n.onclick=function(){gotIt(store.id);};}}
 function gotIt(sid){if(ss[sid])ss[sid].alerted=true;document.getElementById('notif-area').innerHTML='';show('list');}
 function notNow(sid){if(ss[sid]){ss[sid].alerted=false;ss[sid].inside=false;}document.getElementById('notif-area').innerHTML='';}
 function showBanner(store,names){document.getElementById('notif-area').innerHTML='<div class="notif"><span class="notif-ico">'+store.emoji+'</span><div style="flex:1"><div class="notif-title">You are near '+store.name+'</div><div class="notif-body">Still need: '+names+'</div><div class="notif-btns"><button class="nbtn p" onclick="gotIt('+store.id+')">Got it</button><button class="nbtn" onclick="notNow('+store.id+')">Not this time</button></div></div></div>';}
 function zipToLatLng(zip){return fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&postalcode='+encodeURIComponent(zip),{headers:{'Accept-Language':'en'}}).then(function(r){return r.json();}).then(function(data){if(!data.length)throw new Error('zip_not_found');return{lat:parseFloat(data[0].lat),lng:parseFloat(data[0].lon)};});}
 function searchStores(storeName,centerLat,centerLng){var delta=0.09;var bbox=(centerLat-delta)+','+(centerLng-delta)+','+(centerLat+delta)+','+(centerLng+delta);var query='[out:json][timeout:10];(node["name"~"'+storeName+'",i]["shop"~"supermarket|convenience|department_store|general|wholesale|grocery"]('+bbox+');way["name"~"'+storeName+'",i]["shop"~"supermarket|convenience|department_store|general|wholesale|grocery"]('+bbox+');node["name"~"'+storeName+'",i]["shop"]('+bbox+');way["name"~"'+storeName+'",i]["shop"]('+bbox+'););out center 8;';var overpassUrls=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];function tryOverpass(urls,i){if(i>=urls.length)return Promise.reject(new Error('overpass_all_failed'));return fetch(urls[i],{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(query)}).then(function(r){if(!r.ok)throw new Error('overpass_error_'+r.status);return r.json();}).catch(function(e){return tryOverpass(urls,i+1);});}return tryOverpass(overpassUrls,0).then(function(data){return data;}).then(function(data){if(!data.elements||!data.elements.length)return[];return data.elements.map(function(el){var elLat=el.lat||(el.center&&el.center.lat);var elLng=el.lon||(el.center&&el.center.lon);var tags=el.tags||{};var addr=[tags['addr:housenumber'],tags['addr:street'],tags['addr:city'],tags['addr:state']].filter(Boolean).join(' ');if(!addr)addr=tags['addr:full']||'';var d=dist(centerLat,centerLng,elLat,elLng);return{name:tags.name||storeName,addr:addr,lat:elLat,lng:elLng,dist:d};}).filter(function(r){return r.lat&&r.lng;}).sort(function(a,b){return a.dist-b.dist;}).slice(0,6);});}
-function doSearch(){var name=document.getElementById('sname').value.trim();var zip=document.getElementById('szip').value.trim();if(!name){alert('Enter a store name.');return;}var res=document.getElementById('search-results');res.innerHTML='<div class="empty">Searching...</div>';var locationPromise;if(zip){locationPromise=zipToLatLng(zip).catch(function(){res.innerHTML='<div class="empty" style="color:var(--red)">Zip code not found. Try again.</div>';throw new Error('stop');});}else if(lat!==null){locationPromise=Promise.resolve({lat:lat,lng:lng});}else{res.innerHTML='<div class="empty">Enter a zip code or enable GPS to search.</div>';return;}locationPromise.then(function(center){return searchStores(name,center.lat,center.lng);}).then(function(results){searchResults=results;if(!results.length){res.innerHTML='<div class="empty">No results nearby. Try a different name or zip.</div>';return;}var html='';results.forEach(function(r,i){var distStr=r.dist<1000?Math.round(r.dist)+'m':(r.dist/1000).toFixed(1)+'km';html+='<div class="result-card" onclick="addResult('+i+')">';html+='<div style="flex:1"><div class="result-name">'+r.name+'</div>';html+='<div class="result-addr">'+(r.addr||'Tap to add')+' <span style="color:var(--text3)">· '+distStr+'</span></div></div>';html+='<span class="add-lbl">+ Add</span></div>';});res.innerHTML=html;}).catch(function(e){if(e.message!=='stop'){res.innerHTML='<div class="empty" style="color:var(--red)">Search failed. Check connection and try again.</div>';}});}
+function doSearch(){var name=document.getElementById('sname').value.trim();var zip=document.getElementById('szip').value.trim();if(!name){alert('Enter a store name.');return;}var res=document.getElementById('search-results');res.innerHTML='<div class="empty">Searching...</div>';var locationPromise;if(zip){locationPromise=zipToLatLng(zip).catch(function(){res.innerHTML='<div class="empty" style="color:var(--red)">Zip code not found. Try again.</div>';throw new Error('stop');});}else if(lat!==null){locationPromise=Promise.resolve({lat:lat,lng:lng});}else{res.innerHTML='<div class="empty">Enter a zip code or enable GPS to search.</div>';return;}locationPromise.then(function(center){return searchStores(name,center.lat,center.lng);}).then(function(results){searchResults=results;if(!results.length){res.innerHTML='<div class="empty">No results nearby. Try a different name or zip.</div>';return;}var html='';results.forEach(function(r,i){var distStr=r.dist<1609?Math.round(r.dist*3.281)+' ft':(r.dist/1609).toFixed(1)+' mi';html+='<div class="result-card" onclick="addResult('+i+')">';html+='<div style="flex:1"><div class="result-name">'+r.name+'</div>';html+='<div class="result-addr">'+(r.addr||'Tap to add')+' <span style="color:var(--text3)">· '+distStr+'</span></div></div>';html+='<span class="add-lbl">+ Add</span></div>';});res.innerHTML=html;}).catch(function(e){if(e.message!=='stop'){res.innerHTML='<div class="empty" style="color:var(--red)">Search failed. Check connection and try again.</div>';}});}
 function useMyLocation(){var res=document.getElementById('search-results');if(lat!==null){document.getElementById('szip').value='';document.getElementById('szip').placeholder='Using your location';res.innerHTML='<div class="empty" style="color:var(--green)">📍 Using your current location — enter a store name and search.</div>';}else{res.innerHTML='<div class="empty" style="color:var(--amber)">Enable GPS first using the button at the top of the screen.</div>';startGPS();}}
-function addResult(idx){var r=searchResults[idx];if(!r)return;var exists=stores.find(function(s){return s.name===r.name&&s.addr===r.addr;});if(exists){alert(r.name+' is already saved.');return;}var newStore={id:nid++,name:r.name,addr:r.addr,emoji:getStoreEmoji(r.name),geo:true,fav:false,lat:r.lat,lng:r.lng};stores.push(newStore);persistStoreWrite(newStore);document.getElementById('search-results').innerHTML='';document.getElementById('sname').value='';document.getElementById('szip').value='';document.getElementById('szip').placeholder='Zip code (e.g. 75075)';renderStores();var nudge=document.createElement('div');nudge.style.cssText='margin:10px 16px 0;padding:12px 14px;background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:14px;font-size:13px;color:var(--amber);font-weight:600;line-height:1.5';nudge.innerHTML='📍 <b>'+r.name+'</b> added! Now tap <b>Save location</b> on the card below while you\'re near this store — this is what enables alerts.';var storesList=document.getElementById('stores-list');storesList.parentNode.insertBefore(nudge,storesList);setTimeout(function(){if(nudge.parentNode)nudge.parentNode.removeChild(nudge);},6000);}
-function renderStores(){var el=document.getElementById('stores-list');if(!stores.length){el.innerHTML='<div class="empty"><b>No stores yet</b>Search above to add your first store. ListAlert will alert you when you\'re nearby.</div>';return;}var sorted=stores.slice().sort(function(a,b){return(b.fav?1:0)-(a.fav?1:0);});el.innerHTML=sorted.map(function(s){var pending=items.filter(function(i){return i.store===s.id&&!i.done;}).length;var needsLocation=s.lat===null;return'<div class="store-card'+(s.fav?' fav':'')+(needsLocation?' needs-loc':'')+'"><div class="store-ico">'+s.emoji+(s.fav?'<span class="store-star">⭐</span>':'')+'</div><div class="store-info"><div class="store-name">'+s.name+'</div><div class="store-addr">'+(s.addr||'')+'</div>'+(needsLocation?'<div class="loc-nudge">⚠️ Save your location to enable alerts</div>':'')+'<div class="store-tags"><span class="stag '+(s.geo?'aon':'aoff')+'">'+(s.geo?'Alerts on':'Alerts off')+'</span><button class="stag '+(s.fav?'fon':'foff')+'" onclick="toggleFav('+s.id+')">'+(s.fav?'★ Fav':'☆ Fav')+'</button>'+(needsLocation?'<button class="stag loc-needed" onclick="pinHere('+s.id+')">📍 Save location</button>':'<span class="stag lon">✓ Location saved</span>')+'</div></div><div class="store-right"><button class="toggle '+(s.geo?'on':'off')+'" onclick="toggleGeo('+s.id+')"></button><button class="sdel" onclick="delStore('+s.id+')">×</button></div></div>';}).join('');}
+function addResult(idx){var r=searchResults[idx];if(!r)return;var exists=stores.find(function(s){return s.name===r.name&&s.addr===r.addr;});if(exists){alert(r.name+' is already saved.');return;}var newStore={id:nid++,name:r.name,addr:r.addr,emoji:getStoreEmoji(r.name),geo:true,fav:false,lat:r.lat,lng:r.lng};stores.push(newStore);persistStoreWrite(newStore);document.getElementById('search-results').innerHTML='';document.getElementById('sname').value='';document.getElementById('szip').value='';document.getElementById('szip').placeholder='Zip code (e.g. 75075)';renderStores();var nudge=document.createElement('div');nudge.style.cssText='margin:10px 16px 0;padding:12px 14px;background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:14px;font-size:13px;color:var(--amber);font-weight:600;line-height:1.5';nudge.innerHTML='📍 <b>'+r.name+'</b> added! Next time you\'re near this store, open ListAlert and tap <b>Save location</b> on the card — that\'s what enables alerts.';var storesList=document.getElementById('stores-list');storesList.parentNode.insertBefore(nudge,storesList);setTimeout(function(){if(nudge.parentNode)nudge.parentNode.removeChild(nudge);},6000);}
+function renderStores(){var el=document.getElementById('stores-list');if(!stores.length){el.innerHTML='<div class="empty"><b>No stores yet</b>Search above to add your first store. ListAlert will alert you when you\'re nearby.</div>';return;}var sorted=stores.slice().sort(function(a,b){return(b.fav?1:0)-(a.fav?1:0);});el.innerHTML=sorted.map(function(s){var pending=items.filter(function(i){return i.store===s.id&&!i.done;}).length;var needsLocation=s.lat===null;return'<div class="store-card'+(s.fav?' fav':'')+(needsLocation?' needs-loc':'')+'"><div class="store-ico">'+s.emoji+(s.fav?'<span class="store-star">⭐</span>':'')+'</div><div class="store-info"><div class="store-name">'+s.name+'</div><div class="store-addr">'+(s.addr||'')+'</div>'+(needsLocation?'<div class="loc-nudge">⚠️ Save your location to enable alerts</div>':'')+'<div class="store-tags"><span class="stag '+(s.geo&&s.lat!==null?'aon':'aoff')+'">'+(s.geo&&s.lat!==null?'Alerts on':'Alerts off')+'</span><button class="stag '+(s.fav?'fon':'foff')+'" onclick="toggleFav('+s.id+')">'+(s.fav?'★ Fav':'☆ Fav')+'</button>'+(needsLocation?'<button class="stag loc-needed" onclick="pinHere('+s.id+')">📍 Save location</button>':'<span class="stag lon">✓ Location saved</span>')+'</div></div><div class="store-right"><button class="toggle '+(s.geo?'on':'off')+'" onclick="toggleGeo('+s.id+')"></button><button class="sdel" onclick="delStore('+s.id+')">×</button></div></div>';}).join('');}
 function toggleGeo(id){var s=stores.find(function(s){return s.id===id;});if(s){s.geo=!s.geo;persistStoreWrite(s);renderStores();}}
 function toggleFav(id){var s=stores.find(function(s){return s.id===id;});if(s){s.fav=!s.fav;persistStoreWrite(s);renderStores();}}
 function delStore(id){if(!confirm('Remove this store?'))return;persistStoreDelete(id);stores=stores.filter(function(s){return s.id!==id;});items.forEach(function(i){if(i.store===id)i.store=null;});persist();renderStores();}
@@ -864,19 +864,8 @@ function assignFromPicker(itemId,storeId){
 }
 
 function shareList(){
-  var active=items.filter(function(i){return !i.done&&!i.skipped;});
-  if(!active.length){alert('Your list is empty.');return;}
-  var lines=['My Shopping List',''];
-  active.forEach(function(it){lines.push('- '+it.name);});
-  var text=lines.join('\n');
-  if(navigator.share){
-    navigator.share({title:'My Shopping List',text:text}).catch(function(){});
-  } else {
-    navigator.clipboard.writeText(text).then(function(){
-      var btn=document.getElementById('share-list-btn');
-      if(btn){var orig=btn.innerHTML;btn.innerHTML='Copied!';setTimeout(function(){btn.innerHTML=orig;},2000);}
-    }).catch(function(){alert(text);});
-  }
+  var nudge=document.getElementById('order-nudge-sheet');
+  if(nudge){nudge.classList.add('open');}
 }
 
 var expandedRecipes={};
@@ -980,7 +969,7 @@ function renderList(){var el=document.getElementById('list-body');var _ob=docume
   if(hasRecipeItems&&!listFilter){renderTripView(el,filtered,sm);return;}
   var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var hasStores=stores.length>0;var badge=s?s.emoji+' '+s.name:(hasStores?'+ store':'');var showBadge=!!(s||hasStores);var recurBadge='';var mainSrc=it.sources&&it.sources.length?it.sources.find(function(s){return s!=='Manual add';}):null;sourceNote=it.sources&&it.sources.length>1?'<div class="item-tag" style="color:var(--blue)">shared · '+it.sources.filter(function(s){return s!=='Manual add';}).join(', ')+'</div>':mainSrc?'<div class="item-tag" style="color:var(--text3);font-size:10px;opacity:0.7">'+mainSrc+'</div>':'';var actionOpen=openActionItem===it.id;var statusHint=it.done?'<span style="font-size:10px;color:var(--text3);margin-left:4px">tap to undo</span>':it.skipped?'<span style="font-size:10px;color:var(--amber);margin-left:4px">skipped</span>':'';return'<div class="item-row'+(it.skipped?' skipped':'')+(actionOpen?' selected':'')+'" data-iid="'+it.id+'"><div class="item-row-swipe-bg">🗑 Remove?</div>'+(it.done?'<div class="chk done" onclick="itemUncheck('+it.id+')"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>':'')+'<div class="item-info" style="cursor:default"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+it.name+recurBadge+statusHint+'</div>'+(showBadge?'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>':'')+sourceNote+'</div></div>'+(actionOpen?buildActionSheet(it):'')+buildPickerPanel(it);}).join('')+'</div>':'<div class="empty">No items for this store yet.<\/div>';el.innerHTML=filterBar+listHtml;initSwipeHandlers();}
 function setFilter(storeId){listFilter=storeId;renderList();}
-function addItem(){var input=document.getElementById('item-input');var name=input.value.trim();if(!name){input.focus();input.style.borderColor='var(--red)';setTimeout(function(){input.style.borderColor='';},1200);return;}var newItem={id:nid++,name:name,store:null,done:false};items.push(newItem);input.value='';persistItemWrite(newItem);renderList();input.focus();}
+function addItem(){var input=document.getElementById('item-input');var name=input.value.trim();if(!name){input.focus();input.style.borderColor='var(--red)';setTimeout(function(){input.style.borderColor='';},1200);return;}var newItem={id:nid++,name:name,store:null,done:false,sources:[]};items.push(newItem);input.value='';persistItemWrite(newItem);renderList();input.focus();}
 function openItemAction(id){
   if(openActionItem===id){openActionItem=null;}else{openActionItem=id;}
   renderList();
@@ -1253,6 +1242,7 @@ function addExtractedToList(recipeName){
   var source=recipeName||'Manual add';
   mergeIngredientsIntoList(toAdd.map(function(i){return i.name;}),source);
   persist();renderList();
+  var listView=document.getElementById('view-list');if(listView)listView.scrollTop=0;
   showSaveRecipePrompt(toAdd.map(function(i){return i.name;}),source,'');
 }
 function showNextDishSavePrompt(){
@@ -1504,7 +1494,7 @@ function buildOrder(mealIds,recipeIds,excludedRecipeIds){
     var r=savedRecipes.find(function(x){return x.id===rid;});
     if(r)mergeIngredientsIntoList(r.items,r.name);
   });
-  persist();renderList();show('list');
+  persist();renderList();show('cookbook');
 }
 
 function clearActiveTrip(silent){
@@ -1928,10 +1918,35 @@ checkRecurring();
 
 if(autoclear){var at=document.getElementById('autoclear-toggle');if(at){at.classList.add('on');at.classList.remove('off');}}
 // Fast-path first-run
+// ?ref=demo — arriving from standalone demo done card: mark as seen + onboarded
 // ?ref=share placeholder — wire up when sharing is built
+(function(){
+  var _ref=(new URLSearchParams(window.location.search)).get('ref');
+  if(_ref==='demo'){
+    localStorage.setItem('la_demo_seen','1');
+    localStorage.setItem('la_onboarded','1');
+    // Clean the URL without triggering a reload
+    if(window.history&&window.history.replaceState){
+      window.history.replaceState({},'',window.location.pathname);
+    }
+  }
+})();
 var _isFirstRun=!localStorage.getItem('la_demo_seen')&&!localStorage.getItem('la_onboarded');
-if(_isFirstRun){localStorage.setItem('la_demo_seen','1');localStorage.setItem('la_onboarded','1');show('list');setTimeout(function(){openRecipeModal();},400);}else if(!sessionStorage.getItem('la_demo_seen')&&!localStorage.getItem('la_demo_seen')){var dp=document.getElementById('demo-prompt');dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}else if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}
+if(_isFirstRun){localStorage.setItem('la_demo_seen','1');localStorage.setItem('la_onboarded','1');show('list');setTimeout(function(){openRecipeModal();},400);}else if(!localStorage.getItem('la_demo_seen')){var dp=document.getElementById('demo-prompt');dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}else if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}
 initSupabase().then(function(){ loadFromSupabase(); });
+
+// ── Android keyboard fix: keep add-bar above keyboard ──────────────────────
+(function(){
+  var bar=document.getElementById('add-bar');
+  if(!bar||!window.visualViewport)return;
+  function adjustBar(){
+    var vv=window.visualViewport;
+    var offsetFromBottom=window.innerHeight-(vv.offsetTop+vv.height);
+    bar.style.bottom=Math.max(0,offsetFromBottom)+'px';
+  }
+  window.visualViewport.addEventListener('resize',adjustBar);
+  window.visualViewport.addEventListener('scroll',adjustBar);
+})();
 
 
 </script>
