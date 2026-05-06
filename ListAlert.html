@@ -922,7 +922,7 @@ function renderHouseholdPanel(){
       +'<button onclick="hhCreate()" style="width:100%;height:46px;background:var(--violet);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif">Create household</button>'
       +'</div>'
       +'<div style="text-align:center;margin:12px 0 8px;font-size:12px;color:var(--text3)">— or join an existing one —</div>'
-      +'<div style="display:flex;flex-direction:column;gap:8px">'      +'<input id="hh-join-display-input" placeholder="Your name (e.g. Sarah)" style="width:100%;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);font-family:\\'Outfit\\',sans-serif;outline:none"/>'      +'<div style="display:flex;gap:8px">'      +'<input id="hh-code-input" placeholder="Invite code (e.g. XK7M2P)" maxlength="6" style="flex:1;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:600;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;text-transform:uppercase;letter-spacing:2px"/>'
+      +'<div style="display:flex;flex-direction:column;gap:8px">'      +'<input id="hh-join-display-input" placeholder="Your name (e.g. Sarah)" style="width:100%;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);outline:none"/>'      +'<div style="display:flex;gap:8px">'      +'<input id="hh-code-input" placeholder="Invite code (e.g. XK7M2P)" maxlength="6" style="flex:1;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:600;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;text-transform:uppercase;letter-spacing:2px"/>'
       +'<button onclick="hhJoin()" style="height:44px;padding:0 18px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif">Join</button>'
       +'</div>'
       +'</div>'
@@ -1059,48 +1059,6 @@ async function migrateLocalData(li,ls,lr){
   persist();renderList();renderStores();
 }
 
-// ── Supabase write helpers (write-through: localStorage first, async remote) ──
-function persistItemWrite(it){
-  persist();
-  if(!supaUserId){queueWrite({type:'upsert_item',item:it});return;}
-  upsertItemRemote(it).catch(function(){queueWrite({type:'upsert_item',item:it});});
-}
-function persistItemDelete(id){
-  persist();
-  var it=items.find(function(i){return i.id===id;});
-  if(!it||!it._rid)return;
-  if(!supaUserId){queueWrite({type:'delete_item',id:it._rid});return;}
-  supaDelete('items','id=eq.'+it._rid).catch(function(){queueWrite({type:'delete_item',id:it._rid});});
-}
-function persistStoreWrite(s){
-  persist();
-  if(!supaUserId){queueWrite({type:'upsert_store',store:s});return;}
-  upsertStoreRemote(s).catch(function(){queueWrite({type:'upsert_store',store:s});});
-}
-function persistStoreDelete(id){
-  persist();
-  var s=stores.find(function(x){return x.id===id;});
-  if(!s||!s._rid)return;
-  if(!supaUserId){queueWrite({type:'delete_store',id:s._rid});return;}
-  supaDelete('stores','id=eq.'+s._rid).catch(function(){queueWrite({type:'delete_store',id:s._rid});});
-}
-function persistRecipeWrite(r){
-  persist();
-  if(!supaUserId){queueWrite({type:'upsert_recipe',recipe:r});return;}
-  upsertRecipeRemote(r).catch(function(){queueWrite({type:'upsert_recipe',recipe:r});});
-}
-function persistRecipeDelete(id){
-  persist();
-  var r=savedRecipes.find(function(x){return x.id===id;});
-  if(!r||!r._rid)return;
-  if(!supaUserId){queueWrite({type:'delete_recipe',id:r._rid});return;}
-  supaDelete('saved_recipes','id=eq.'+r._rid).catch(function(){queueWrite({type:'delete_recipe',id:r._rid});});
-}
-function persistSettings(){
-  persist();
-  if(!supaUserId)return;
-  upsertSettingsRemote().catch(function(){});
-}
 
 function toggleAutoclear(){autoclear=!autoclear;var btn=document.getElementById('autoclear-toggle');if(btn){btn.classList.toggle('on',autoclear);btn.classList.toggle('off',!autoclear);}persistSettings();}
 function show(t){curTab=t;['list','cookbook','stores'].forEach(function(n){document.getElementById('tab-'+n).classList.toggle('active',n===t);document.getElementById('view-'+n).classList.toggle('active',n===t);});document.getElementById('add-bar').style.display=t==='list'?'flex':'none';if(t==='list'){renderList();renderNearby();}if(t==='stores'){renderStores();renderHouseholdPanel();}if(t==='cookbook')renderCookbookTab();}
@@ -1159,9 +1117,7 @@ function toggleRecipeExpand(recipeName){
   expandedRecipes[recipeName]=!expandedRecipes[recipeName];
   renderList();
 }
-function toggleTripItem(itemId){
-  toggleItem(itemId);
-}
+
 function renderTripView(el, filtered, sm){
   // Group items by recipe source
   var recipeGroups=[];
@@ -1246,7 +1202,7 @@ function quickSaveRecipe(name, ingredients){
   persist();
   renderCookbookTab();
 }
-function quickAddRecipe(id){var r=savedRecipes.find(function(x){return x.id===id;});if(!r)return;r.items.forEach(function(ing){var exists=items.find(function(i){return i.name.toLowerCase()===ing.toLowerCase()&&!i.done&&!i.skipped;});if(!exists){items.push({id:nid++,name:ing,store:null,done:false,sources:[r.name]});}else if(exists.sources&&exists.sources.indexOf(r.name)===-1)exists.sources.push(r.name);});persist();renderList();}
+
 function renderList(){var el=document.getElementById('list-body');var _ob=document.getElementById('order-bar');if(_ob)_ob.style.display='none';
   if(!items.length){if(savedRecipes.length){var _rhtml='<div style="margin:16px 16px 0">';_rhtml+='<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;padding:0 2px">Pick a saved recipe to start your list</div>';_rhtml+='<div style="display:flex;flex-direction:column;gap:8px">';savedRecipes.slice(0,5).forEach(function(r){_rhtml+='<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;cursor:pointer" onclick="quickAddRecipe('+r.id+')">';_rhtml+='<div style="font-size:20px">🍽️</div>';_rhtml+='<div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">'+r.name+'</div>';_rhtml+='<div style="font-size:12px;color:var(--text3);margin-top:2px">'+r.items.length+' items'+(r.servings?' · Serves '+r.servings:'')+' — tap to add all</div></div>';_rhtml+='<div style="font-size:13px;font-weight:700;color:var(--green)">+ Add</div></div>';});_rhtml+='</div></div>';el.innerHTML=_rhtml;}else{el.innerHTML='<div class="empty"><b>Your list is empty</b>Tap <b style="color:var(--violet)">🍳 Recipe</b> to scan a photo or get inspired — Claude will build your list automatically.</div>';}return;}var sm={};stores.forEach(function(s){sm[s.id]=s;});var sorted=items.slice().sort(function(a,b){var av=(a.done||a.skipped)?1:0,bv=(b.done||b.skipped)?1:0;return av-bv;});var filtered=listFilter?sorted.filter(function(it){return it.store===listFilter;}):sorted;var _hasTrip=activeTrip&&(activeTrip.mealIds.length||activeTrip.recipeIds.length);
   var filterBar='';
@@ -1301,7 +1257,7 @@ function showRemoveOptions(id){
   var el=document.getElementById('remove-opts-'+id);
   if(el)el.style.display=el.style.display==='none'?'block':'none';
 }
-function buildActionSheet(it){if(isContributor())return '';if(isContributor())return '';
+function buildActionSheet(it){if(isContributor())return '';
   var savedSources=(it.sources||[]).filter(function(s){return s&&s!=='Manual add'&&savedRecipes.find(function(r){return r.name===s;});});
   var hasSavedRecipe=savedSources.length>0;
   var srcName=hasSavedRecipe?savedSources[0]:'';
@@ -1673,12 +1629,7 @@ function deleteSavedRecipe(id,e){e.stopPropagation();if(!confirm('Delete this sa
 function showRecipeError(msg){document.getElementById('recipe-result-area').innerHTML='<div class="recipe-error"><div class="recipe-error-box">'+msg+'</div></div>';}
 
 // ── Email capture banner ──────────────────────────────────────
-function maybeShowEmailPrompt(){
-  if(localStorage.getItem('la_email_saved')||localStorage.getItem('la_email_skipped'))return;
-  var area=document.getElementById('email-banner-area');
-  if(!area||area.querySelector('.email-banner'))return;
-  area.innerHTML='<div class="email-banner"><span class="email-banner-ico">✉️</span><div style="flex:1"><div class="email-banner-title">Save your list to the cloud</div><div class="email-banner-body">Enter your email to sync across devices and never lose your recipes.</div><div class="email-banner-form"><input class="email-banner-input" id="email-banner-input" type="email" placeholder="your@email.com"/><button class="email-banner-send" onclick="submitEmailBanner()">Save</button></div><button class="email-banner-skip" onclick="skipEmailBanner()">Not now</button></div></div>';
-}
+
 function skipEmailBanner(){
   localStorage.setItem('la_email_skipped','1');
   var area=document.getElementById('email-banner-area');
@@ -2426,4 +2377,5 @@ initSupabase().then(function(){ loadFromSupabase(); });
 </div>
 
 </body>
-</html>
+</html+'<input id="hh-join-display-input" placeholder="Your name (e.g. Sarah)" style="width:100%;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);font-family:\\\'Outfit\\\',sans-serif;outline:none;margin-bottom:8px"/>'
+>
