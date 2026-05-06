@@ -821,11 +821,14 @@ async function leaveHousehold(){
 
 function subscribeRealtime(){
   if(!household||realtimeChannel)return;
+  if(window._supaScriptLoading)return;
   if(!window.supabaseClient){
     // Bootstrap Supabase JS client for realtime only
     var script=document.createElement('script');
     script.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
+    window._supaScriptLoading=true;
     script.onload=function(){
+      window._supaScriptLoading=false;
       window.supabaseClient=window.supabase.createClient(SUPA_URL,SUPA_KEY,{
         global:{headers:{Authorization:'Bearer '+(supaSession?supaSession.access_token:SUPA_KEY)}}
       });
@@ -846,6 +849,12 @@ function _subscribeRealtimeChannel(){
     .on('postgres_changes',{event:'*',schema:'public',table:'household_members',filter:'household_id=eq.'+household.id},function(){
       loadHouseholdMembers().then(function(){renderHouseholdPanel();});
     })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'saved_recipes',filter:'household_id=eq.'+household.id},function(payload){
+      var r=payload.new;if(!r)return;
+      var exists=savedRecipes.find(function(x){return x._rid===r.id;});
+      if(!exists){savedRecipes.unshift({id:r.id,_rid:r.id,name:r.name,tags:r.tags||[],type:r.type||'',items:r.items||[],savedAt:r.saved_at,household_id:r.household_id});}
+      if(curTab==='cookbook')renderCookbookTab();
+    })
     .subscribe();
 }
 function handleRealtimeItem(payload){
@@ -864,6 +873,21 @@ function handleRealtimeItem(payload){
   persist();renderList();
 }
 
+function handleRealtimeRecipe(payload){
+  var ev=payload.eventType;
+  var r=payload.new||payload.old;
+  if(!r)return;
+  if(ev==='INSERT'){
+    var exists=savedRecipes.find(function(x){return x._rid===r.id;});
+    if(!exists)savedRecipes.unshift({id:r.id,_rid:r.id,name:r.name,tags:r.tags||[],type:r.type||'',items:r.items||[],savedAt:r.saved_at,household_id:r.household_id});
+  } else if(ev==='UPDATE'){
+    var rec=savedRecipes.find(function(x){return x._rid===r.id;});
+    if(rec){rec.name=r.name;rec.tags=r.tags||[];rec.items=r.items||[];rec.type=r.type||'';}
+  } else if(ev==='DELETE'){
+    savedRecipes=savedRecipes.filter(function(x){return x._rid!==r.id;});
+  }
+  persist();if(curTab==='cookbook')renderCookbookTab();
+}
 function isContributor(){return household&&household.role==='contributor';}
 function isShopper(){return !household||household.role==='shopper'||household.role==='admin';}
 function isAdmin(){return !household||household.role==='admin';}
@@ -898,9 +922,9 @@ function renderHouseholdPanel(){
       +'<button onclick="hhCreate()" style="width:100%;height:46px;background:var(--violet);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif">Create household</button>'
       +'</div>'
       +'<div style="text-align:center;margin:12px 0 8px;font-size:12px;color:var(--text3)">— or join an existing one —</div>'
-      +'<div style="display:flex;gap:8px">'
-      +'<input id="hh-code-input" placeholder="Invite code (e.g. XK7M2P)" maxlength="6" style="flex:1;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:600;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;text-transform:uppercase;letter-spacing:2px"/>'
+      +'<div style="display:flex;flex-direction:column;gap:8px">'      +'<input id="hh-join-display-input" placeholder="Your name (e.g. Sarah)" style="width:100%;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);font-family:\\'Outfit\\',sans-serif;outline:none"/>'      +'<div style="display:flex;gap:8px">'      +'<input id="hh-code-input" placeholder="Invite code (e.g. XK7M2P)" maxlength="6" style="flex:1;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:600;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;text-transform:uppercase;letter-spacing:2px"/>'
       +'<button onclick="hhJoin()" style="height:44px;padding:0 18px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif">Join</button>'
+      +'</div>'
       +'</div>'
       +'</div>';
     return;
@@ -957,8 +981,8 @@ async function hhCreate(){
 }
 async function hhJoin(){
   var code=(document.getElementById('hh-code-input')||{}).value||'';
-  var display=prompt('Your name in this household (e.g. Rob):');
-  if(!display)return;
+  var display=((document.getElementById('hh-join-display-input')||{}).value||'').trim();
+  if(!display){alert('Enter your name first.');return;}
   code=code.trim().toUpperCase();
   if(code.length!==6){alert('Enter the full 6-character invite code.');return;}
   if(!supaUserId){alert('Still connecting — try again in a moment.');return;}
@@ -1277,7 +1301,7 @@ function showRemoveOptions(id){
   var el=document.getElementById('remove-opts-'+id);
   if(el)el.style.display=el.style.display==='none'?'block':'none';
 }
-function buildActionSheet(it){
+function buildActionSheet(it){if(isContributor())return '';if(isContributor())return '';
   var savedSources=(it.sources||[]).filter(function(s){return s&&s!=='Manual add'&&savedRecipes.find(function(r){return r.name===s;});});
   var hasSavedRecipe=savedSources.length>0;
   var srcName=hasSavedRecipe?savedSources[0]:'';
@@ -1390,7 +1414,7 @@ function toggleTripItem(id){
   var it=items.find(function(i){return i.id===id;});if(!it)return;if(it.done){itemUncheck(id);return;}openItemAction(id);
 }
 
-function delItem(id){persistItemDelete(id);items=items.filter(function(i){return i.id!==id;});persist();renderList();}
+function delItem(id){if(isContributor())return;persistItemDelete(id);items=items.filter(function(i){return i.id!==id;});persist();renderList();}
 function renderOrganize(){var el=document.getElementById('org-body');if(!items.length){el.innerHTML='<div class="empty"><b>Nothing to assign</b>Add items on the List tab first.</div>';return;}var grouped={};stores.forEach(function(s){grouped[s.id]=[];});var unassigned=[];items.forEach(function(it){if(it.store&&grouped[it.store]!==undefined)grouped[it.store].push(it);else unassigned.push(it);});var html='';if(unassigned.length){html+='<div class="sec-label">Not assigned</div><div class="org-group">'+unassigned.map(function(it){return orgRow(it);}).join('')+'</div>';}stores.forEach(function(s){var its=grouped[s.id]||[];if(!its.length)return;var left=its.filter(function(i){return!i.done;}).length;html+='<div class="org-group"><div class="org-hdr"><span class="org-hdr-ico">'+s.emoji+'</span><span class="org-hdr-name">'+s.name+'</span><span class="org-hdr-count">'+left+' left</span></div>'+its.map(function(it){return orgRow(it);}).join('')+'</div>';});el.innerHTML=html;}
 function orgRow(it){var opts='<option value="">No store</option>'+stores.map(function(s){return'<option value="'+s.id+'"'+(it.store===s.id?' selected':'')+'>'+s.emoji+' '+s.name+'</option>';}).join('');return'<div class="org-row"><span class="org-name">'+it.name+'</span><select class="org-sel" onchange="assign('+it.id+',this.value)">'+opts+'</select></div>';}
 function assign(itemId,storeId){var it=items.find(function(i){return i.id===itemId;});if(it){it.store=storeId?parseInt(storeId):null;persistItemWrite(it);renderOrganize();renderList();}}
