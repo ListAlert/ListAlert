@@ -1036,8 +1036,11 @@ async function loadFromSupabase(){
     if(settingsRows.length){radius=settingsRows[0].radius||800;autoclear=settingsRows[0].autoclear||false;var rr=document.getElementById('radius-range');if(rr)rr.value=radius;var rl=document.getElementById('radius-lbl');if(rl)rl.textContent=radius+'m';var at=document.getElementById('autoclear-toggle');if(at){at.classList.toggle('on',autoclear);at.classList.toggle('off',!autoclear);}}
     var storeRows=await supaGet('stores','user_id=eq.'+supaUserId+'&select=*&order=created_at.asc');
     if(storeRows.length){stores=storeRows.map(function(r){return{id:r.id,_rid:r.id,name:r.name,addr:r.addr||'',emoji:r.emoji||getStoreEmoji(r.name),lat:r.lat,lng:r.lng,geo:r.geo_enabled,fav:r.fav};});stores.forEach(function(s){if(s.id>=nid)nid=s.id+1;});}
-    var itemRows=await supaGet('items','user_id=eq.'+supaUserId+'&done=eq.false&skipped=eq.false&select=*&order=created_at.asc');
-    if(itemRows.length){itemRows.forEach(function(r){var exists=items.find(function(it){return it._rid===r.id;});if(!exists){var ni={id:nid++,_rid:r.id,name:r.name,done:r.done,skipped:r.skipped,store:r.store_id||null,sources:r.sources||[],recurring:r.recurring,recurDays:r.recur_days,recurLabel:r.recur_label,lastReset:r.last_reset};items.push(ni);}});items.forEach(function(it){if(it.id>=nid)nid=it.id+1;});}
+    var _localActive=items.filter(function(i){return!i.done&&!i.skipped;});
+    if(_localActive.length===0){
+      var itemRows=await supaGet('items','user_id=eq.'+supaUserId+'&done=eq.false&skipped=eq.false&select=*&order=created_at.asc');
+      if(itemRows.length){itemRows.forEach(function(r){var exists=items.find(function(it){return it._rid===r.id;});if(!exists){var ni={id:nid++,_rid:r.id,name:r.name,done:r.done,skipped:r.skipped,store:r.store_id||null,sources:r.sources||[],recurring:r.recurring,recurDays:r.recur_days,recurLabel:r.recur_label,lastReset:r.last_reset};items.push(ni);}});items.forEach(function(it){if(it.id>=nid)nid=it.id+1;});}
+    }
     var recipeRows=await supaGet('saved_recipes','user_id=eq.'+supaUserId+'&select=*&order=saved_at.desc');
     if(recipeRows.length){savedRecipes=recipeRows.map(function(r){return{id:r.id,_rid:r.id,name:r.name,tags:r.tags||[],type:r.type||'',items:r.items||[],source:r.source||'',savedAt:r.saved_at};});}
     try{var mealRows=await supaGet('meals','user_id=eq.'+supaUserId+'&select=*&order=created_at.asc');if(mealRows.length){meals=mealRows.map(function(r){return{id:r.id,_rid:r.id,name:r.name,recipeIds:r.recipe_ids||[],createdAt:r.created_at};});meals.forEach(function(m){if(m.id>=mealNid)mealNid=m.id+1;});}}catch(e){console.warn('meals load failed',e);}
@@ -2305,7 +2308,7 @@ if(autoclear){var at=document.getElementById('autoclear-toggle');if(at){at.class
   }
 })();
 var _isFirstRun=!localStorage.getItem('la_demo_seen')&&!localStorage.getItem('la_onboarded');
-if(_isFirstRun){localStorage.setItem('la_demo_seen','1');localStorage.setItem('la_onboarded','1');show('list');}else if(!localStorage.getItem('la_demo_seen')){var dp=document.getElementById('demo-prompt');dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}else if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}
+if(_isFirstRun){var dp=document.getElementById('demo-prompt');dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}else if(!localStorage.getItem('la_demo_seen')){var dp=document.getElementById('demo-prompt');dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}else if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}
 initSupabase().then(function(){ loadFromSupabase().then(function(){ flushQueue(); }); });
 
 // ── Realtime reconnect on tab visibility ─────────────────
