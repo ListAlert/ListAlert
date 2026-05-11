@@ -713,7 +713,7 @@ async function initSupabase(){
       if(sess.expires_at&&Date.now()/1000<sess.expires_at-60){supaSession=sess;supaUserId=sess.user.id;await supaPatch('users','id=eq.'+supaUserId,{last_seen:new Date().toISOString()}).catch(function(){});await flushQueue();return;}
       try{var refreshed=await supaAuth('token?grant_type=refresh_token',{refresh_token:sess.refresh_token});supaSession=refreshed;supaUserId=refreshed.user.id;localStorage.setItem('la_supa_session',JSON.stringify(refreshed));await flushQueue();return;}catch(e){}
     }
-    var data=await supaAuth('signup',{});
+    var data=await supaAuth('signup',{"anonymous":true});
     supaSession=data;supaUserId=data.user.id;
     localStorage.setItem('la_supa_session',JSON.stringify(data));
     await supaPost('users',{id:supaUserId,anonymous_id:supaUserId}).catch(function(){});
