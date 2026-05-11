@@ -1002,7 +1002,6 @@ async function hhCreate(){
   name=name.trim();display=display.trim();
   if(!name){alert('Enter a household name.');return;}
   if(!display){alert('Enter your name.');return;}
-  if(!supaUserId){alert('Still connecting — try again in a moment.');return;}
   try{
     await createHousehold(name,display);
     renderHouseholdPanel();
@@ -1014,7 +1013,6 @@ async function hhJoin(){
   if(!display){alert('Enter your name first.');return;}
   code=code.trim().toUpperCase();
   if(code.length<6||code.length>8){alert('Enter the full invite code (6–8 characters).');return;}
-  if(!supaUserId){alert('Still connecting — try again in a moment.');return;}
   try{
     await joinHousehold(code,display);
     renderHouseholdPanel();
