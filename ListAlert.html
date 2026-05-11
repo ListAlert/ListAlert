@@ -747,7 +747,21 @@ async function sendMagicLink(){
 // ── Household functions ───────────────────────────────────────
 function persistHousehold(){localStorage.setItem('la_household',JSON.stringify(household));}
 
+// Wait up to 8 seconds for a valid authenticated session before household ops
+function waitForSession(){
+  return new Promise(function(resolve,reject){
+    if(supaSession&&supaSession.access_token&&supaUserId){resolve();return;}
+    var attempts=0;
+    var iv=setInterval(function(){
+      attempts++;
+      if(supaSession&&supaSession.access_token&&supaUserId){clearInterval(iv);resolve();return;}
+      if(attempts>=16){clearInterval(iv);reject(new Error('Session not ready. Check your connection and try again.'));}
+    },500);
+  });
+}
+
 async function createHousehold(name, displayName){
+  await waitForSession();
   if(!supaUserId)return null;
   var hh=await supaPost('households',{name:name,created_by:supaUserId});
   if(!hh||!hh[0])return null;
@@ -761,6 +775,7 @@ async function createHousehold(name, displayName){
 }
 
 async function joinHousehold(inviteCode, displayName){
+  await waitForSession();
   if(!supaUserId)return null;
   var code=inviteCode.trim().toUpperCase();
   var rows=await supaGet('households','invite_code=eq.'+code+'&select=*');
