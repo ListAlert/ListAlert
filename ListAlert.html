@@ -668,8 +668,10 @@ async function supaGet(table, params) {
   return r.json();
 }
 async function supaPost(table, body) {
-  var r = await fetch(SUPA_URL+'/rest/v1/'+table,{method:'POST',headers:supaHeaders({'Prefer':'return=representation'}),body:JSON.stringify(body)});
-  if(!r.ok){var e=await r.text();throw new Error('supaPost '+table+' '+r.status+' '+e);}
+  var hdrs=supaHeaders({'Prefer':'return=representation'});
+  if(table==='households'){console.log('[LA] households INSERT — uid:',supaUserId,'token_prefix:',hdrs['Authorization'].slice(0,30),'session_role:',(supaSession&&supaSession.user&&supaSession.user.role)||'?');}
+  var r = await fetch(SUPA_URL+'/rest/v1/'+table,{method:'POST',headers:hdrs,body:JSON.stringify(body)});
+  if(!r.ok){var e=await r.text();if(table==='households')console.error('[LA] households INSERT failed:',r.status,e);throw new Error('supaPost '+table+' '+r.status+' '+e);}
   return r.json();
 }
 async function supaPatch(table, params, body) {
@@ -763,6 +765,7 @@ function waitForSession(){
 async function createHousehold(name, displayName){
   await waitForSession();
   if(!supaUserId)return null;
+  console.log('[LA] createHousehold — supaUserId:',supaUserId,'session exists:',!!supaSession,'access_token exists:',!!(supaSession&&supaSession.access_token),'user.aud:',(supaSession&&supaSession.user&&supaSession.user.aud)||'?');
   var hh=await supaPost('households',{name:name,created_by:supaUserId});
   if(!hh||!hh[0])return null;
   var hhId=hh[0].id;
