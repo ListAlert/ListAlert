@@ -1660,10 +1660,13 @@ function buildFromSelected(){
 }
 function addAllInspireToList(){
   if(!pendingMealDishes||!pendingMealDishes.length)return;
+  if(!activeTrip)activeTrip={mealIds:[],recipeIds:[],itemIds:[],excludedRecipeIds:[],inspireItems:[],builtAt:new Date().toISOString()};
+  if(!activeTrip.inspireItems)activeTrip.inspireItems=[];
   pendingMealDishes.forEach(function(d){
-    mergeIngredientsIntoList(d.ingredients||[],d.name);
+    activeTrip.inspireItems.push({name:d.name,ingredients:d.ingredients||[]});
   });
-  persist();renderList();
+  if(supaUserId&&household){supaPatch('settings','user_id=eq.'+supaUserId,{household_trip:JSON.stringify(activeTrip)}).catch(function(){});}
+  persist();renderCookbookTab();show('cookbook');
   _pendingDishSaveIdx=0;
   showNextDishSavePrompt();
 }
@@ -1822,7 +1825,7 @@ function addExtractedToList(recipeName){
     pendingMealDishes.forEach(function(dish){
       var dishSelected=extractedIngredients.filter(function(i){return i.dish===dish.name&&i.selected;});
       var dishSkipped=extractedIngredients.filter(function(i){return i.dish===dish.name&&!i.selected;});
-      if(dishSelected.length)mergeIngredientsIntoList(dishSelected.map(function(i){return i.name;}),dish.name);
+      // ingredients stay in order only — not merged into main list
       dishSkipped.forEach(function(ing){
         var key=ing.name.toLowerCase().trim();
         var existing=items.find(function(it){return it.name.toLowerCase().trim()===key;});
@@ -1846,7 +1849,11 @@ function addExtractedToList(recipeName){
   if(!toAdd.length&&!toSkip.length){alert('Select at least one ingredient.');return;}
   var source=recipeName||'Manual add';
   // Add selected items normally
-  if(toAdd.length)mergeIngredientsIntoList(toAdd.map(function(i){return i.name;}),source);
+  // ingredients stay in order only — not merged into main list
+  if(!activeTrip)activeTrip={mealIds:[],recipeIds:[],itemIds:[],excludedRecipeIds:[],inspireItems:[],builtAt:new Date().toISOString()};
+  if(!activeTrip.inspireItems)activeTrip.inspireItems=[];
+  activeTrip.inspireItems.push({name:source,ingredients:toAdd.map(function(i){return i.name;})});
+  if(supaUserId&&household){supaPatch('settings','user_id=eq.'+supaUserId,{household_trip:JSON.stringify(activeTrip)}).catch(function(){});}
   // Add deselected items as skipped — still attributed to recipe, greyed out on list, restorable
   toSkip.forEach(function(ing){
     var key=ing.name.toLowerCase().trim();
@@ -1920,9 +1927,7 @@ function renderSavedRecipesInModal(){var area=document.getElementById('recipe-in
 function quickAddRecipe(id){
   var recipe=savedRecipes.find(function(r){return r.id===id;});
   if(!recipe||!recipe.items||!recipe.items.length)return;
-  mergeIngredientsIntoList(recipe.items, recipe.name);
-  persist();
-  renderList();
+  addRecipeToOrder(recipe.id);
   renderSavedRecipesInModal();
 }
 function toggleRecipeOnTrip(id){
@@ -2520,7 +2525,7 @@ function renderCookbookTab(){
         if(!groupRecipes.length)return;
         var isCollapsed=cbCollapsedGroups[group.key];
         html+='<div style="margin-bottom:4px">';
-        html+='<div onclick="toggleCookbookGroup(\''+group.key+'\')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:'+(isCollapsed?'12px':'12px 12px 0 0')+';cursor:pointer;user-select:none">';
+        var _groupColor=group.key==='main'?'var(--amber-dim)':group.key==='side'?'var(--green-dim)':group.key==='stand'?'var(--violet-dim)':'var(--bg2)';var _groupBorder=group.key==='main'?'var(--amber-border)':group.key==='side'?'var(--green-border)':group.key==='stand'?'var(--violet-border)':'var(--border)';html+='<div onclick="toggleCookbookGroup(\''+group.key+'\')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:'+_groupColor+';border:1px solid '+_groupBorder+';border-radius:'+(isCollapsed?'12px':'12px 12px 0 0')+';cursor:pointer;user-select:none">';
         html+='<span style="font-size:20px">'+group.icon+'</span>';
         html+='<span style="font-size:15px;font-weight:700;color:var(--text);flex:1">'+group.label+'</span>';
         html+='<span style="font-size:12px;color:var(--text3);font-weight:500">'+groupRecipes.length+' recipe'+(groupRecipes.length!==1?'s':'')+'</span>';
@@ -2536,7 +2541,7 @@ function renderCookbookTab(){
             var tagChips=(r.tags||[]).map(function(t){return'<span class="cb-rtag">'+t+'</span>';}).join('');
             var onOrderChip=(onOrder||inMealOnOrder)?'<span class="cb-rtag on-order">On this order</span>':'';
             html+='<div style="background:var(--bg2)'+(isLast?'':';border-bottom:1px solid var(--border2)')+'">';
-            html+='<div onclick="cbToggleCookbookRecipe('+r.id+')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer">';
+            html+='<div onclick="cbToggleCookbookRecipe('+r.id+')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-left:3px solid '+(r.type==='main'?'var(--amber)':r.type==='side'?'var(--green)':r.type==='stand'?'var(--violet)':'var(--border2)')+';cursor:pointer">';
             html+='<div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">'+escapeHTML(r.name)+'</div>';
             html+='<div class="cb-recipe-tags" style="margin-top:3px">'+tagChips+onOrderChip+'<span class="cb-rtag">'+r.items.length+' items</span>'+(r.servings?'<span class="cb-rtag">Serves '+r.servings+'</span>':'')+'</div></div>';
             html+='<div style="font-size:12px;font-weight:700;color:'+(onOrder||inMealOnOrder?'var(--green)':'var(--text3)')+'">'+((isExpanded)?'▲':'▼')+'</div>';
