@@ -30,7 +30,7 @@
 }
 html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit",sans-serif;color:var(--text)}
 @media(min-width:431px){body{display:flex;justify-content:center;}#app{box-shadow:0 0 40px rgba(0,0,0,0.12);}}
-#app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:430px;margin:0 auto;background:var(--bg);overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:560px;margin:0 auto;background:var(--bg);overflow:hidden}
 
 .header{padding:max(52px,env(safe-area-inset-top) + 16px) 20px 12px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
 .header h1{font-size:26px;font-weight:800;letter-spacing:-0.5px;color:var(--text)}
@@ -60,7 +60,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 .nbtn{height:33px;padding:0 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;border:1px solid var(--green-border);background:transparent;color:var(--green)}
 .nbtn.p{background:var(--green);color:#fff;border-color:var(--green)}
 
-.add-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:10px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:8px;z-index:100;box-shadow:0 -2px 12px rgba(0,0,0,0.06)}
+.add-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:560px;padding:10px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:8px;z-index:100;box-shadow:0 -2px 12px rgba(0,0,0,0.06)}
 .add-bar input{flex:1;height:46px;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:14px;font-weight:500;color:var(--text);background:var(--bg3);padding:0 14px;outline:none;font-family:"Outfit",sans-serif}
 .add-bar input::placeholder{color:var(--text3)}
 .add-bar input:focus{border-color:var(--amber)}
@@ -147,7 +147,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-backdrop.open{opacity:1;pointer-events:all}
-.modal-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;max-height:92vh;max-height:92dvh;box-shadow:0 -4px 24px rgba(0,0,0,0.12)}
+.modal-sheet{width:100%;max-width:560px;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;max-height:92vh;max-height:92dvh;box-shadow:0 -4px 24px rgba(0,0,0,0.12)}
 .modal-backdrop.open .modal-sheet{transform:translateY(0)}
 .modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:12px auto 0}
 .modal-title{font-size:17px;font-weight:700;padding:16px 20px 0;display:flex;align-items:center;gap:8px}
@@ -203,7 +203,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 .filter-chip.active{background:var(--green-dim);color:var(--green);border-color:var(--green-border)}
 
 .ob-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:flex;align-items:flex-end;justify-content:center}
-.ob-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;padding:32px 24px max(32px,env(safe-area-inset-bottom));animation:slideup .35s cubic-bezier(.32,.72,0,1)}
+.ob-sheet{width:100%;max-width:560px;background:var(--bg2);border-radius:20px 20px 0 0;padding:32px 24px max(32px,env(safe-area-inset-bottom));animation:slideup .35s cubic-bezier(.32,.72,0,1)}
 @keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .ob-logo{font-size:28px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px;color:var(--text)}
 .ob-logo em{color:var(--amber);font-style:italic;font-family:"Playfair Display",serif;font-weight:400}
@@ -219,7 +219,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 .ob-btn{width:100%;height:52px;background:var(--green);border:none;border-radius:var(--r);color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;margin-bottom:10px}
 .ob-skip{width:100%;height:36px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;font-family:"Outfit",sans-serif}
 
-.demo-backdrop{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;background:var(--bg);max-width:430px;margin:0 auto}
+.demo-backdrop{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;background:var(--bg);max-width:560px;margin:0 auto}
 .demo-app-frame{flex:1;overflow:hidden;position:relative;pointer-events:none;user-select:none;display:flex;flex-direction:column;background:var(--bg)}
 .demo-caption{flex-shrink:0;background:rgba(245,240,232,0.97);border-top:1px solid var(--border);padding:14px 20px max(16px,env(safe-area-inset-bottom))}
 .demo-caption-text{font-size:14px;color:var(--text);line-height:1.5;min-height:42px}
@@ -244,7 +244,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 .photo-preview-wrap img{width:100%;max-height:160px;object-fit:cover;display:block}
 .photo-clear{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.7);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
 
-.save-recipe-prompt{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:500;background:var(--bg2);border-top:2px solid var(--amber-border);border-radius:20px 20px 0 0;overflow:hidden;box-shadow:0 -4px 24px rgba(0,0,0,0.18);width:100%;max-width:430px}
+.save-recipe-prompt{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:500;background:var(--bg2);border-top:2px solid var(--amber-border);border-radius:20px 20px 0 0;overflow:hidden;box-shadow:0 -4px 24px rgba(0,0,0,0.18);width:100%;max-width:560px}
 .save-recipe-prompt-backdrop{position:fixed;inset:0;z-index:499;background:rgba(0,0,0,0.5)}
 .save-recipe-header{padding:14px 14px 10px;display:flex;align-items:center;gap:8px}
 .save-recipe-header span{font-size:14px;font-weight:700;color:var(--amber);flex:1}
@@ -386,17 +386,17 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 .cb-new-meal-form{background:var(--bg2);border:1px solid var(--violet-border);border-radius:14px;padding:14px;margin-bottom:8px}
 .cb-meal-sheet-back{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .cb-meal-sheet-back.open{opacity:1;pointer-events:all}
-.cb-meal-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 20px max(28px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)}
+.cb-meal-sheet{width:100%;max-width:560px;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 20px max(28px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)}
 .cb-meal-sheet-back.open .cb-meal-sheet{transform:translateY(0)}
 .cb-input{width:100%;height:42px;border:1px solid var(--border2);border-radius:10px;font-size:14px;font-weight:500;color:var(--text);background:var(--bg3);padding:0 14px;outline:none;font-family:"Outfit",sans-serif;display:block;margin-bottom:8px}
 .cb-input:focus{border-color:var(--violet)}
-.cb-pinned-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:10px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--border);z-index:90}
+.cb-pinned-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:560px;padding:10px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--border);z-index:90}
 .cb-pinned-order-btn{width:100%;height:52px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:"Outfit",sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
 .cb-pinned-order-btn.ready{background:var(--green);color:#fff}
 .cb-pinned-order-btn.idle{background:var(--bg3);color:var(--text3);border:1px solid var(--border2)}
 .cb-prior-modal{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .cb-prior-modal.open{opacity:1;pointer-events:all}
-.cb-prior-sheet{width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 max(24px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)}
+.cb-prior-sheet{width:100%;max-width:560px;background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 max(24px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)}
 .cb-prior-modal.open .cb-prior-sheet{transform:translateY(0)}
 </style>
 </head>
@@ -406,7 +406,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
   <div class="header">
     <h1>List<em>Alert</em></h1>
     <div style="display:flex;align-items:center;gap:8px">
-      <div id="household-badge" style="display:none;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border);cursor:pointer" onclick="show('stores')"></div>
+      <div id="household-badge" style="display:none;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border);cursor:pointer" onclick="showHouseholdSetupPanel()"></div>
       <div id="gpsbtn" style="display:none"><span class="dot wait" id="gpsdot"></span><span id="gpstxt"></span></div>
     </div>
   </div>
@@ -436,7 +436,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
   </div>
 
   <div class="view" id="view-stores">
-    <div id="household-panel" style="margin:12px 16px 0"></div>
     <div style="margin:0 16px 0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
       <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px">📍 Shop in person?</div>
       <div style="font-size:13px;color:var(--text2);line-height:1.6">Add the stores you shop at. Assign items to each one — ListAlert will notify you automatically when you're nearby and have items to pick up.</div>
@@ -574,8 +573,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
     <div style="padding:14px 20px 0;display:flex;flex-direction:column;gap:6px">
       <div style="display:flex;gap:4px">
         <button class="modal-tab active" id="rtab-photo" onclick="switchRecipeTab('photo')" style="flex:1;font-size:13px">📷 Photo</button>
-        <button class="modal-tab" id="rtab-inspire" onclick="switchRecipeTab('inspire')" style="flex:1;font-size:13px;background:var(--violet-dim);color:var(--violet);border-color:var(--violet-border)">✨ Inspire</button>
-        <button class="modal-tab" id="rtab-smart" onclick="switchRecipeTab('smart')" style="flex:1;font-size:13px;background:var(--green-dim);color:var(--green);border-color:var(--green-border)">🧠 Smart</button>
+        <button class="modal-tab" id="rtab-inspire" onclick="switchRecipeTab('inspire')" style="flex:1;font-size:13px;background:var(--violet-dim);color:var(--violet);border-color:var(--violet-border)">🔍 Inspire</button>
+        <button class="modal-tab" id="rtab-smart" onclick="switchRecipeTab('smart')" style="flex:1;font-size:13px;background:var(--green-dim);color:var(--green);border-color:var(--green-border)">✨ Curate</button>
         <button class="modal-tab" id="rtab-pair" onclick="switchRecipeTab('pair')" style="flex:1;font-size:13px">🔗 Pair</button>
         <button class="modal-tab" id="rtab-saved" onclick="switchRecipeTab('saved')" style="flex:1;font-size:13px">📖 Saved</button>
       </div>
@@ -901,6 +900,29 @@ function _subscribeRealtimeChannel(){
       if(!exists){savedRecipes.unshift({id:r.id,_rid:r.id,name:r.name,tags:r.tags||[],type:r.type||'',items:r.items||[],savedAt:r.saved_at,household_id:r.household_id});}
       if(curTab==='cookbook')renderCookbookTab();
     })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'settings'},function(payload){
+      var r=payload.new;if(!r||!r.user_id)return;
+      // Only act if this update is from a household member (not ourselves)
+      if(r.user_id===supaUserId)return;
+      var isMember=householdMembers.some(function(m){return m.user_id===r.user_id;});
+      if(!isMember)return;
+      if(r.household_trip!==undefined){
+        var incoming=r.household_trip;
+        if(incoming){
+          var parsed=typeof incoming==='string'?JSON.parse(incoming):incoming;
+          if(!activeTrip||new Date(parsed.builtAt)>new Date(activeTrip.builtAt||0)){
+            activeTrip=parsed;
+            persist();
+            if(curTab==='cookbook')renderCookbookTab();
+            showToast('Trip updated');
+          }
+        } else {
+          activeTrip=null;
+          persist();
+          if(curTab==='cookbook')renderCookbookTab();
+        }
+      }
+    })
     .subscribe();
 }
 function handleRealtimeItem(payload){
@@ -1033,7 +1055,7 @@ async function hhCreate(){
   }
 }
 function showHouseholdWelcome(hhName){
-  var el=document.getElementById('household-panel');
+  var el=document.getElementById('hh-sheet-body')||document.getElementById('household-panel');
   if(!el){renderHouseholdPanel();return;}
   var code=household?household.invite_code:'';
   el.innerHTML='<div style="background:var(--bg2);border:2px solid var(--amber-border);border-radius:var(--r);padding:20px 16px;margin-bottom:12px;text-align:center">'
@@ -1057,8 +1079,8 @@ async function hhJoin(){
   if(!supaUserId){alert('Still connecting — try again in a moment.');return;}
   try{
     await joinHousehold(code,display);
-    renderHouseholdPanel();
-    alert('✓ Joined '+household.name+'! Your shared list is now syncing.');
+    renderHouseholdSheetContent();
+    showToast('✓ Joined '+household.name+'!');
   }catch(e){alert('Could not join. Check the invite code and try again.\n'+e.message);}
 }
 function hhLeave(){
@@ -1324,15 +1346,15 @@ function renderList(){var el=document.getElementById('list-body');var _ob=docume
   var filterBar='';
   if(_hasTrip){filterBar+='<div style="margin:8px 16px 4px;padding:10px 14px;background:var(--green-dim);border:1px solid var(--green-border);border-left:3px solid var(--green);border-radius:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="show(\'cookbook\')"><span style="font-size:13px;font-weight:600;color:var(--green)">✅ Your order is ready</span><span style="font-size:12px;font-weight:700;color:var(--green);opacity:0.8">My Cookbook →</span></div>';}
   else{filterBar+='<div style="margin:8px 16px 4px;padding:10px 14px;background:var(--amber-dim);border:1px solid var(--amber-border);border-left:3px solid var(--amber);border-radius:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="show(\'cookbook\')"><span style="font-size:13px;font-weight:600;color:var(--amber)">📖 My Cookbook</span><span style="font-size:12px;font-weight:700;color:var(--amber)">Build my order →</span></div>';}
-  if(!household){filterBar+='<div style="margin:0 16px 4px;padding:9px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="show(\'stores\')"><span style="font-size:13px;font-weight:600;color:var(--text)">👨\u200d👩\u200d👧 Share with your household</span><span style="font-size:12px;font-weight:700;color:var(--violet)">Set up →</span></div>';}
+  if(!household){filterBar+='<div style="margin:0 16px 4px;padding:9px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="showHouseholdSetupPanel()"><span style="font-size:13px;font-weight:600;color:var(--text)">👨\u200d👩\u200d👧 Share with your household</span><span style="font-size:12px;font-weight:700;color:var(--violet)">Set up →</span></div>';}
   else{filterBar+='<div style="margin:0 16px 4px;padding:9px 14px;background:var(--bg2);border:1px solid var(--amber-border);border-radius:10px;display:flex;align-items:center;gap:8px;cursor:pointer" onclick="show(\'stores\')"><span style="font-size:13px;font-weight:600;color:var(--text)">'+household.name+'</span><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--amber-dim);color:var(--amber)">'+roleLabel(household.role)+'</span></div>';}
   filterBar+='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id&&!i.done&&!i.skipped;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'</button>';});filterBar+='<button class="filter-chip" onclick="openRecipeModal()" style="background:var(--violet-dim);border-color:var(--violet-border);color:var(--violet);font-weight:700">🍳 + Recipe</button>';filterBar+='<\/div>';var _activeCount=items.filter(function(i){return!i.done&&!i.skipped;}).length;if(_activeCount){filterBar+='<div style="padding:4px 16px 6px"><button onclick="shareList()" style="width:100%;height:44px;background:#1A1410;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span>🛒<\/span> Order for delivery <span style="font-size:11px;font-weight:600;opacity:0.6;margin-left:2px">(coming soon)<\/span><\/button><\/div>';}
-  if(items.length>0)localStorage.setItem('la_had_items','1');var _hasCompleted=items.some(function(i){return i.done||i.skipped;});if(_activeCount===0&&_hasCompleted&&localStorage.getItem('la_had_items'))maybeShowHomescreenPrompt();if(_hasCompleted){var _doneCount=items.filter(function(i){return i.done||i.skipped;}).length;el.innerHTML+='<div style="padding:10px 16px 4px"><button onclick="clearDoneItems()" style="width:100%;height:40px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;font-size:13px;font-weight:700;color:var(--text3);cursor:pointer;font-family:Outfit,sans-serif">Clear '+_doneCount+' completed item'+((_doneCount!==1)?'s':'')+' ×</button></div>';}
+  if(items.length>0)localStorage.setItem('la_had_items','1');var _hasCompleted=items.some(function(i){return i.done||i.skipped;});if(_activeCount===0&&!_hasCompleted&&localStorage.getItem('la_had_items'))maybeShowHomescreenPrompt();if(_hasCompleted){var _doneCount=items.filter(function(i){return i.done||i.skipped;}).length;el.innerHTML+='<div style="padding:10px 16px 4px"><button onclick="clearDoneItems()" style="width:100%;height:40px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;font-size:13px;font-weight:700;color:var(--text3);cursor:pointer;font-family:Outfit,sans-serif">Clear '+_doneCount+' completed item'+((_doneCount!==1)?'s':'')+' ×</button></div>';}
   
   // Use recipe trip view if any saved recipe has items on the list
   var hasRecipeItems=filtered.some(function(it){return it.sources&&it.sources.some(function(s){return s&&s!=='Manual add';});});
   if(hasRecipeItems&&!listFilter){renderTripView(el,filtered,sm);return;}
-  var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var hasStores=stores.length>0;var badge=s?s.emoji+' '+s.name:(hasStores?'+ store':'');var showBadge=!!(s||hasStores);var recurBadge='';var mainSrc=it.sources&&it.sources.length?it.sources.find(function(s){return s!=='Manual add';}):null;var mainSrcSaved=mainSrc&&savedRecipes.some(function(r){return r.name===mainSrc;});var sourceNote=it.sources&&it.sources.length>1?'<div class="item-tag" style="color:var(--blue)">shared · '+it.sources.filter(function(s){return s!=='Manual add';}).join(', ')+'</div>':mainSrc?(mainSrcSaved?'<div class="item-tag" style="color:var(--text3);font-size:10px;opacity:0.7">'+mainSrc+'</div>':'<div class="item-tag" style="color:var(--amber);font-size:10px">'+mainSrc+' · <span onclick="event.stopPropagation();openSaveFormFor(\''+mainSrc.replace(/\'/g,"\\'")+'\')" style="font-weight:700;cursor:pointer;text-decoration:underline">Save recipe?</span></div>'):'';var actionOpen=openActionItem===it.id;var statusHint=it.done?'<span style="font-size:10px;color:var(--text3);margin-left:4px">tap to undo</span>':it.skipped?'<span style="font-size:10px;color:var(--amber);margin-left:4px">skipped</span>':'';return'<div class="item-row'+(it.skipped?' skipped':'')+(actionOpen?' selected':'')+'" data-iid="'+it.id+'"><div class="item-row-swipe-bg">🗑 Remove?</div>'+(it.done?'<div class="chk done" onclick="itemUncheck('+it.id+')"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>':'')+'<div class="item-info" style="cursor:default"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+escapeHTML(it.name)+recurBadge+statusHint+'</div>'+(showBadge?'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>':'')+sourceNote+'</div></div>'+(actionOpen?buildActionSheet(it):'')+buildPickerPanel(it);}).join('')+'</div>':'<div class="empty">No items for this store yet.<\/div>';el.innerHTML=filterBar+listHtml;initSwipeHandlers();}
+  var listHtml=filtered.length?'<div class="card-list">'+filtered.map(function(it){var s=sm[it.store];var hasStores=stores.length>0;var badge=s?s.emoji+' '+s.name:(hasStores?'+ store':'');var showBadge=!!(s||hasStores);var recurBadge='';var mainSrc=it.sources&&it.sources.length?it.sources.find(function(s){return s!=='Manual add';}):null;var mainSrcSaved=mainSrc&&savedRecipes.some(function(r){return r.name===mainSrc;});var sourceNote=it.sources&&it.sources.length>1?'<div class="item-tag" style="color:var(--blue)">shared · '+it.sources.filter(function(s){return s!=='Manual add';}).join(', ')+'</div>':mainSrc?(mainSrcSaved?'<div class="item-tag" style="color:var(--text3);font-size:10px;opacity:0.7">'+mainSrc+'</div>':'<div class="item-tag" style="color:var(--amber);font-size:10px">'+mainSrc+' · <span onclick="event.stopPropagation();openSaveFormFor(\''+mainSrc.replace(/\'/g,"\\'")+'\')" style="font-weight:700;cursor:pointer;text-decoration:underline">Save recipe?</span></div>'):'';var actionOpen=openActionItem===it.id;var statusHint=it.done?'<span style="font-size:10px;color:var(--text3);margin-left:4px">tap to undo</span>':it.skipped?'<span style="font-size:10px;color:var(--amber);margin-left:4px">skipped</span>':'';return'<div class="item-row'+(it.skipped?' skipped':'')+(actionOpen?' selected':'')+'" data-iid="'+it.id+' onclick="'+(it.done?'itemUncheck('+it.id+')':'openItemAction('+it.id+')')+'"><div class="item-row-swipe-bg">🗑 Remove?</div>'+(it.done?'<div class="chk done" onclick="itemUncheck('+it.id+')"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>':'')+'<div class="item-info" style="cursor:default"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+escapeHTML(it.name)+recurBadge+statusHint+'</div>'+(showBadge?'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>':'')+sourceNote+'</div></div>'+(actionOpen?buildActionSheet(it):'')+buildPickerPanel(it);}).join('')+'</div>':'<div class="empty">No items for this store yet.<\/div>';el.innerHTML=filterBar+listHtml;initSwipeHandlers();}
 function clearDoneItems(){
   var toDelete=items.filter(function(i){return i.done||i.skipped;});
   toDelete.forEach(function(it){persistItemDelete(it.id);});
@@ -1578,7 +1600,7 @@ function closeRecipeModal(){document.getElementById('recipe-modal').classList.re
 function closeRecipeModalBackdrop(e){if(e.target===document.getElementById('recipe-modal'))closeRecipeModal();}
 function switchRecipeTab(tab){recipeTab=tab;['paste','url','photo','inspire','smart','pair','saved','fridge','more'].forEach(function(t){var el=document.getElementById('rtab-'+t);if(el)el.classList.toggle('active',t===tab);});document.getElementById('recipe-result-area').innerHTML='';extractedIngredients=[];pendingMealDishes=[];recipePhotoBase64=null;fridgePhotoBase64=null;var iabw=document.getElementById('inspire-add-btn-wrap');if(iabw)iabw.parentNode.removeChild(iabw);resetGoBtn();var area=document.getElementById('recipe-input-area');if(tab==='saved'){area.innerHTML='';renderSavedRecipesInModal();document.getElementById('recipe-go-btn').style.display='none';document.querySelector('.modal-cancel').textContent='Close';return;}if(tab==='fridge'){area.innerHTML='';renderFridgeTab();document.getElementById('recipe-go-btn').style.display='none';document.querySelector('.modal-cancel').textContent='Close';return;}document.getElementById('recipe-go-btn').style.display='';document.querySelector('.modal-cancel').textContent='Cancel';if(tab==='more'){area.innerHTML='<div style="padding:4px 0"><div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;padding:0 2px">Other ways to import<\/div><button onclick="switchRecipeTab(\'paste\')" style="width:100%;height:46px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:\'Outfit\',sans-serif;display:flex;align-items:center;padding:0 16px;gap:12px;margin-bottom:8px"><span style="font-size:18px">📋<\/span><div style="text-align:left"><div>Paste a recipe<\/div><div style="font-size:11px;color:var(--text3);font-weight:400">Copy text from any recipe source<\/div><\/div><\/button><button onclick="handleUrlImport()" style="width:100%;height:46px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:\'Outfit\',sans-serif;display:flex;align-items:center;padding:0 16px;gap:12px"><span style="font-size:18px">🔗<\/span><div style="text-align:left"><div>Import from URL<\/div><div style="font-size:11px;color:var(--text3);font-weight:400">Link from AllRecipes, Food Network, etc.<\/div><\/div><\/button><\/div>';document.getElementById('recipe-go-btn').style.display='none';document.querySelector('.modal-cancel').textContent='Cancel';return;}
 if(tab==='paste'){area.innerHTML='<textarea class="modal-textarea" id="recipe-text" placeholder="Paste any recipe here — Claude will extract every ingredient automatically."></textarea>';}else if(tab==='url'){area.innerHTML='<input class="modal-url" id="recipe-url" type="url" placeholder="https://www.allrecipes.com/recipe/..."/><div class="modal-url-note">⚠️ Some recipe sites block outside requests. If it fails, paste the text instead.</div>';}else if(tab==='pair'){area.innerHTML='<div><div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;padding:0 2px">What do you already have?<\/div><textarea class="modal-textarea" id="pair-text" placeholder="e.g. \"chicken\"\n\"leftover rice and eggs\"\n\"salmon and potatoes\"" style="min-height:72px"><\/textarea><\/div><div class="modal-url-note" style="color:var(--violet);opacity:0.8;margin-top:4px">Claude will suggest what goes with it and build your ingredients list.<\/div><\/div>';}else if(tab==='smart'){area.innerHTML='<div><div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;padding:0 2px">What do you want to make or eat?<\/div><textarea class="modal-textarea" id="smart-text" placeholder="Try: &quot;chicken tacos for 4&quot;, &quot;high protein dinner&quot;, &quot;easy weeknight pasta&quot;..." style="min-height:90px"><\/textarea><\/div><div style="font-size:11px;color:var(--text2);line-height:1.5">Describe what you want — a dish, a mood, dietary goals, or ingredients you have. Claude will build the shopping list.<\/div><\/div>';}else if(tab==='inspire'){area.innerHTML='<div><div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;padding:0 2px">Main dish<\/div><textarea class="modal-textarea" id="inspire-text" placeholder="What are you in the mood for? Try: &quot;chicken tacos&quot;, &quot;high protein breakfast&quot;, &quot;something my kids will eat&quot;..." style="min-height:72px"><\/textarea><\/div><div style="margin-bottom:6px"><div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;padding:0 2px">Optional sides<\/div><input class="modal-url" id="inspire-side1" placeholder="Optional Side 1" style="margin-bottom:8px"\/><input class="modal-url" id="inspire-side2" placeholder="Optional Side 2" style="margin-bottom:8px"\/><input class="modal-url" id="inspire-side3" placeholder="Optional Side 3"\/><\/div><button id="suggest-sides-btn" onclick="suggestSides()" style="width:100%;height:38px;margin-top:10px;background:none;border:1px solid var(--violet-border);border-radius:var(--r-sm);color:var(--violet);font-size:13px;font-weight:700;cursor:pointer;opacity:0.5;font-family:\'Outfit\',sans-serif">✨ Suggest sides based on main dish<\/button><button onclick=\'browseDishes()\' style=\'width:100%;height:38px;margin-top:8px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:var(--r-sm);color:var(--green);font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif\'>🔍 Browse dish ideas first<\/button><div class="modal-url-note" style="color:var(--violet);opacity:0.8;margin-top:8px">Claude will build a separate ingredient list for each dish.<\/div><\/div>';}else{area.innerHTML='<div class="photo-drop" id="photo-drop-zone" onclick="document.getElementById(\'photo-file-input\').click()"><div class="photo-drop-ico">📷</div><div class="photo-drop-label">Tap to take or choose a photo</div><div class="photo-drop-sub">Recipe card, cookbook page, screenshot — anything with ingredients</div></div>';}}
-function resetGoBtn(){var btn=document.getElementById('recipe-go-btn');if(!btn)return;btn.disabled=false;btn.innerHTML='<span id="recipe-go-label">'+(recipeTab==='inspire'?'Get Inspired ✨':recipeTab==='smart'?'Build my list 🧠':recipeTab==='pair'?'Find what to make ✨':'Extract ingredients')+'</span>';}
+function resetGoBtn(){var btn=document.getElementById('recipe-go-btn');if(!btn)return;btn.disabled=false;btn.innerHTML='<span id="recipe-go-label">'+(recipeTab==='inspire'?'Browse dishes 🔍':recipeTab==='smart'?'Build my list ✨':recipeTab==='pair'?'Find what to make ✨':'Extract ingredients')+'</span>';}
 function setGoBtnLoading(){var btn=document.getElementById('recipe-go-btn');btn.disabled=true;btn.innerHTML='<div class="spinner"></div><span>Extracting...</span>';}
 function handlePhotoSelect(input){var file=input.files&&input.files[0];if(!file)return;recipePhotoMime=file.type&&file.type.startsWith('image/')?file.type:'image/jpeg';var reader=new FileReader();reader.onload=function(e){var dataUrl=e.target.result;var img=new Image();img.onload=function(){var maxDim=1120;var w=img.width,h=img.height;if(w>maxDim||h>maxDim){if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}else{w=Math.round(w*maxDim/h);h=maxDim;}}var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);var resized=canvas.toDataURL('image/jpeg',0.85);recipePhotoBase64=resized.split(',')[1];recipePhotoMime='image/jpeg';var area=document.getElementById('recipe-input-area');area.innerHTML='<div class="photo-preview-wrap"><img src="'+resized+'" alt="Recipe photo"/><button class="photo-clear" onclick="clearPhoto()">×</button></div>';};img.src=dataUrl;};reader.onerror=function(e){alert('FileReader error: '+(reader.error?reader.error.name+' - '+reader.error.message:'unknown'));showRecipeError('Could not read that image. Try a different file.');};reader.readAsDataURL(file);}
 function clearPhoto(){recipePhotoBase64=null;document.getElementById('photo-file-input').value='';switchRecipeTab('photo');}
@@ -1973,6 +1995,68 @@ function demoNext(){if(demoTimer)clearTimeout(demoTimer);demoStep++;renderDemoSt
 function endDemo(){if(demoTimer)clearTimeout(demoTimer);localStorage.setItem('la_demo_seen','1');document.getElementById('demo-backdrop').style.display='none';if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}}
 
 function finishOnboarding(goToStores){localStorage.setItem('la_onboarded','1');document.getElementById('ob-modal').style.display='none';if(goToStores){show('stores');}else{show('list');setTimeout(function(){openRecipeModal();},300);}}
+function showHouseholdSetupPanel(){
+  var sheet=document.getElementById('hh-sheet-back');
+  if(sheet){
+    renderHouseholdSheetContent();
+    sheet.classList.add('open');
+  }
+}
+function closeHouseholdSheet(){
+  var sheet=document.getElementById('hh-sheet-back');
+  if(sheet)sheet.classList.remove('open');
+}
+function renderHouseholdSheetContent(){
+  var el=document.getElementById('hh-sheet-body');
+  if(!el)return;
+  if(!household){
+    el.innerHTML=''
+      +'<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px">Create a household</div>'
+      +'<input id="hh-name-input" placeholder="Household name (e.g. The Smiths)" style="width:100%;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;margin-bottom:8px;box-sizing:border-box"/>'
+      +'<input id="hh-display-input" placeholder="Your name (e.g. Rob)" style="width:100%;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;margin-bottom:8px;box-sizing:border-box"/>'
+      +'<button onclick="hhCreate()" style="width:100%;height:46px;background:var(--violet);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif;margin-bottom:16px">Create household</button>'
+      +'<div style="text-align:center;margin-bottom:14px;font-size:12px;color:var(--text3)">— or join an existing one —</div>'
+      +'<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">Your name</div>'
+      +'<input id="hh-join-display-input" placeholder="Your name (e.g. Sarah)" style="width:100%;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;margin-bottom:8px;box-sizing:border-box"/>'
+      +'<div style="display:flex;gap:8px">'
+      +'<input id="hh-code-input" placeholder="Invite code" maxlength="8" style="flex:1;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:600;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;text-transform:uppercase;letter-spacing:2px;box-sizing:border-box"/>'
+      +'<button onclick="hhJoin()" style="height:44px;padding:0 18px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif">Join</button>'
+      +'</div>';
+    return;
+  }
+  // Active household
+  var meRow=householdMembers.find(function(m){return m.user_id===supaUserId;})||{};
+  var code=household.invite_code;
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+    +'<div><div style="font-size:16px;font-weight:800;color:var(--text)">👨\u200d👩\u200d👧 '+escapeHTML(household.name)+'</div>'
+    +'<div style="font-size:12px;color:var(--text2);margin-top:2px">'+roleLabel(household.role)+'</div></div>'
+    +'<button onclick="hhLeave()" style="font-size:12px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:8px;padding:5px 10px;cursor:pointer;font-family:\'Outfit\',sans-serif">Leave</button>'
+    +'</div>'
+    +'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">'
+    +'<div><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Invite code</div>'
+    +'<div style="font-size:22px;font-weight:800;color:var(--text);letter-spacing:4px">'+escapeHTML(code)+'</div></div>'
+    +'<button onclick="hhCopyCode()" style="height:34px;padding:0 14px;background:var(--violet);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif">Copy</button>'
+    +'</div>';
+  if(householdMembers.length){
+    html+='<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Members</div>';
+    householdMembers.forEach(function(m){
+      var isMe=m.user_id===supaUserId;
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">'
+        +'<div style="width:32px;height:32px;border-radius:50%;background:var(--amber-dim);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--amber);flex-shrink:0">'+(m.display_name||'?').charAt(0).toUpperCase()+'</div>'
+        +'<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">'+(m.display_name||'Member')+(isMe?' <span style="font-size:10px;color:var(--text3)">(you)</span>':'')+'</div>'
+        +'<div style="font-size:11px;color:var(--text3)">'+roleLabel(m.role)+'</div></div>';
+      if(household.role==='admin'&&!isMe){
+        html+='<select onchange="updateMemberRole(\''+m.id+'\',this.value)" style="height:30px;border:1px solid var(--border2);border-radius:8px;font-size:11px;font-weight:600;color:var(--text);background:var(--bg3);padding:0 6px;outline:none;font-family:\'Outfit\',sans-serif;cursor:pointer">';
+        ['admin','shopper','contributor'].forEach(function(r){
+          html+='<option value="'+r+'"'+(m.role===r?' selected':'')+'>'+roleLabel(r).replace(/[^\w\s]/gi,'').trim()+'</option>';
+        });
+        html+='</select>';
+      }
+      html+='</div>';
+    });
+  }
+  el.innerHTML=html;
+}
 function dismissHomescreen(){localStorage.setItem('la_homescreen','1');var p=document.getElementById('homescreen-prompt');p.classList.remove('open');setTimeout(function(){p.style.display='none';},300);}
 function maybeShowHomescreenPrompt(){if(localStorage.getItem('la_homescreen'))return;setTimeout(function(){var p=document.getElementById('homescreen-prompt');if(p){p.style.display='flex';setTimeout(function(){p.classList.add('open');},10);}},1500);}
 
@@ -2288,7 +2372,6 @@ function renderCookbookTab(){
     if(_unsavedSources.length){
       html+='<div class="cb-empty">';
       html+='<div class="cb-empty-icon">📖</div>';
-      if(meals.length||savedRecipes.length){html+='<div style="padding:4px 16px 8px;display:flex;gap:8px"><button id="week-view-btn" onclick="toggleWeekView()" style="height:32px;padding:0 14px;border:1px solid var(--border2);border-radius:20px;background:var(--bg3);color:var(--text3);font-size:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">📅 Week view</button></div><div id="week-view-panel" style="display:none"></div>';setTimeout(renderWeekView,50);}
   html+='<div class="cb-empty-title">Save your recipes</div>';
       html+='<div class="cb-empty-body">You have recipes on your list — save them to your Cookbook to reuse anytime.</div>';
       _unsavedSources.forEach(function(name){
@@ -2304,6 +2387,7 @@ function renderCookbookTab(){
       html+='<div class="cb-empty"><div class="cb-empty-icon">📖</div><div class="cb-empty-title">Your cookbook is empty</div><div class="cb-empty-body">Save recipes here and reuse them anytime.</div><button class="cb-empty-btn" onclick="openRecipeModal()">+ Add your first recipe</button></div>';
     }
   } else {
+    if(meals.length){html+='<div style="padding:4px 0 8px;display:flex;gap:8px"><button id="week-view-btn" onclick="toggleWeekView()" style="height:32px;padding:0 14px;border:1px solid var(--border2);border-radius:20px;background:var(--bg3);color:var(--text3);font-size:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">📅 Week view</button></div><div id="week-view-panel" style="display:none"></div>';setTimeout(renderWeekView,50);}
     savedRecipes.forEach(function(r){
       var inferredType=r.type||(r.tags&&r.tags.indexOf('Side')!==-1?'side':'main');var typeFilter=(cbFilter==='main'&&inferredType!=='main')||(cbFilter==='side'&&inferredType!=='side');
       var tagFilter=cbFilter!=='all'&&cbFilter!=='main'&&cbFilter!=='side'&&(!r.tags||r.tags.indexOf(cbFilter)===-1);
@@ -2625,6 +2709,18 @@ document.addEventListener('visibilitychange',function(){
       <button onclick="hideOrderNudge();show('cookbook')" style="width:100%;height:50px;background:var(--violet);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;margin-bottom:10px">My Cookbook →</button>
       <button onclick="hideOrderNudge()" style="width:100%;height:36px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif">Got it</button>
     </div>
+  </div>
+</div>
+
+<!--  Household Sheet  -->
+<div class="cb-meal-sheet-back" id="hh-sheet-back" onclick="if(event.target===this)closeHouseholdSheet()">
+  <div class="cb-meal-sheet" style="max-height:85vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px">
+      <div class="modal-title" style="margin:0">Household</div>
+      <button onclick="closeHouseholdSheet()" style="width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
+    </div>
+    <div id="hh-sheet-body" style="padding:0 20px 24px"></div>
   </div>
 </div>
 
