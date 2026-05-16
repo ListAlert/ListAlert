@@ -911,6 +911,19 @@ function subscribeRealtime(){
 }
 function _subscribeRealtimeChannel(){
   if(!window.supabaseClient||!household)return;
+  // Startup expiry check — if token is already expired, refresh first
+  var nowCheck=Math.floor(Date.now()/1000);
+  if(supaSession&&supaSession.expires_at&&nowCheck>supaSession.expires_at-60){
+    window.supabaseClient.auth.refreshSession().then(function(res){
+      if(res.data&&res.data.session){
+        supaSession=res.data.session;
+        supaUserId=supaSession.user.id;
+        localStorage.setItem('la_supa_session',JSON.stringify(supaSession));
+      }
+      _subscribeRealtimeChannel();
+    }).catch(function(){ _subscribeRealtimeChannel(); });
+    return;
+  }
   realtimeChannel=window.supabaseClient
     .channel('household-'+household.id)
     .on('postgres_changes',{event:'*',schema:'public',table:'items',filter:'household_id=eq.'+household.id},function(payload){
