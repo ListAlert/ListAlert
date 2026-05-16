@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="ListAlert"/>
 <meta name="theme-color" content="#F5F0E8"/>
-<meta name="mobile-web-app-capable" content="yes"/>h
+<meta name="mobile-web-app-capable" content="yes"/>hh
 <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22ListAlert%22%2C%22short_name%22%3A%22ListAlert%22%2C%22start_url%22%3A%22.%2FListAlert.html%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23F5F0E8%22%2C%22theme_color%22%3A%22%23F5F0E8%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA%2FwD%2FAP%2BgvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH6AUECg8q%2FbZwNAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAABIklEQVR42u3BMQEAAADCoPVP7WsIoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeAMBOAABHgAAAABJRU5ErkJggg%3D%3D%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D"/>
 <title>ListAlert</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Playfair+Display:ital@1&display=swap" rel="stylesheet"/>
@@ -1167,7 +1167,7 @@ function hhCopyCode(){
 function dismissEmailBanner(){localStorage.setItem('la_email_skipped','1');var el=document.getElementById('email-banner-area');if(el)el.innerHTML='';}
 function itemToRow(it){return{id:it._rid||undefined,user_id:supaUserId,household_id:it.household_id||(household?household.id:null)||null,name:it.name,done:it.done||false,skipped:it.skipped||false,store_id:it._storeRid||null,sources:it.sources||[],recurring:it.recurring||false,recur_days:it.recurDays||null,recur_label:it.recurLabel||null,last_reset:it.lastReset||null};}
 async function upsertItemRemote(it){var row=itemToRow(it);if(row.id){return supaPatch('items','id=eq.'+row.id,row);}else{delete row.id;return supaPost('items',row);}}
-function storeToRow(s){return{id:s._rid||undefined,user_id:supaUserId,name:s.name,addr:s.addr||null,emoji:s.emoji||null,lat:s.lat||null,lng:s.lng||null,geo_enabled:s.geo||false,fav:s.fav||false};}
+function storeToRow(s){return{id:s._rid||undefined,user_id:supaUserId,name:s.name,addr:s.addr||null,emoji:s.emoji||null,lat:s.lat||null,lng:s.lng||null,geo_enabled:s.geo||false,fav:s.fav||false,household_id:get_my_household_id()};}
 async function upsertStoreRemote(s){var row=storeToRow(s);if(row.id){return supaPatch('stores','id=eq.'+row.id,row);}else{delete row.id;return supaPost('stores',row);}}
 function recipeToRow(r){return{id:r._rid||undefined,user_id:supaUserId,household_id:r.household_id||(household?household.id:null)||null,name:r.name,tags:r.tags||[],items:r.items||[],source:r.source||null,saved_at:r.savedAt||new Date().toISOString()};}
 function mealToRow(m){return{id:m._rid||undefined,user_id:supaUserId,name:m.name,recipe_ids:m.recipeIds||[],created_at:m.createdAt||new Date().toISOString()};}
