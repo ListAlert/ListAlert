@@ -925,7 +925,7 @@ function _subscribeRealtimeChannel(){
     return;
   }
   realtimeChannel=window.supabaseClient
-    .channel('household-'+household.id)
+    .channel('household-'+household.id+'-'+Date.now())
     .on('postgres_changes',{event:'*',schema:'public',table:'items',filter:'household_id=eq.'+household.id},function(payload){
       handleRealtimeItem(payload);
     })
