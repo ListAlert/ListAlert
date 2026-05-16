@@ -686,13 +686,8 @@ async function supaGet(table, params) {
   return r.json();
 }
 async function supaPost(table, body) {
-  // households INSERT with return=representation triggers a post-insert SELECT.
-  // For a new user with no household yet, the SELECT policy returns nothing -> 403.
-  // Using return=minimal skips the SELECT entirely and fixes the RLS block.
-  var prefer = (table==='households') ? 'return=minimal' : 'return=representation';
-  var r = await fetch(SUPA_URL+'/rest/v1/'+table,{method:'POST',headers:supaHeaders({'Prefer':prefer}),body:JSON.stringify(body)});
+  var r = await fetch(SUPA_URL+'/rest/v1/'+table,{method:'POST',headers:supaHeaders({'Prefer':'return=representation'}),body:JSON.stringify(body)});
   if(!r.ok){var e=await r.text();throw new Error('supaPost '+table+' '+r.status+' '+e);}
-  if(prefer==='return=minimal') return [body];
   return r.json();
 }
 async function supaPatch(table, params, body) {
@@ -786,11 +781,9 @@ function waitForSession(){
 async function createHousehold(name, displayName){
   await waitForSession();
   if(!supaUserId)return null;
-  // INSERT uses return=minimal to avoid post-insert SELECT RLS block.
-  // Fetch the created row back via supaGet (member now exists so SELECT policy passes).
-  await supaPost('households',{name:name,created_by:supaUserId});
-  // After INSERT, immediately add ourselves as member so SELECT policy works on the fetch.
-  var hhRows=await supaGet('households','created_by=eq.'+supaUserId+'&order=created_at.desc&limit=1&select=*');
+  // Use return=representation to get the created row (including generated invite_code) directly.
+  // No follow-up SELECT needed — avoids the chicken-and-egg RLS problem.
+  var hhRows=await supaPost('households',{name:name,created_by:supaUserId});
   if(!hhRows||!hhRows[0])return null;
   var hhId=hhRows[0].id;
   await supaPost('household_members',{household_id:hhId,user_id:supaUserId,role:'admin',display_name:displayName||'Me'});
