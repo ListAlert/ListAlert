@@ -949,6 +949,9 @@ function _subscribeRealtimeChannel(){
       }
     })
     .subscribe();
+  window.supabaseClient.auth.onAuthStateChange((_e,s)=>{
+    if(s?.access_token) window.realtimeChannel?.socket?.setAuth(s.access_token);
+  });
 }
 function handleRealtimeItem(payload){
   var ev=payload.eventType;
