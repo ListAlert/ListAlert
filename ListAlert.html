@@ -899,7 +899,8 @@ function subscribeRealtime(){
     script.onload=function(){
       window._supaScriptLoading=false;
       window.supabaseClient=window.supabase.createClient(SUPA_URL,SUPA_KEY,{
-        global:{headers:{Authorization:'Bearer '+(supaSession?supaSession.access_token:SUPA_KEY)}}
+        global:{headers:{Authorization:'Bearer '+(supaSession?supaSession.access_token:SUPA_KEY)}},
+        realtime:{params:{apikey:SUPA_KEY},headers:{Authorization:'Bearer '+(supaSession?supaSession.access_token:SUPA_KEY)}}
       });
       _subscribeRealtimeChannel();
     };
