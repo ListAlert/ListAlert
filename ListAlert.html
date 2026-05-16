@@ -911,6 +911,11 @@ function subscribeRealtime(){
 }
 function _subscribeRealtimeChannel(){
   if(!window.supabaseClient||!household)return;
+  // Always remove stale channel before creating fresh subscription
+  if(realtimeChannel){
+    window.supabaseClient.removeChannel(realtimeChannel).catch(function(){});
+    realtimeChannel=null;
+  }
   // Startup expiry check — if token is already expired, refresh first
   var nowCheck=Math.floor(Date.now()/1000);
   if(supaSession&&supaSession.expires_at&&nowCheck>supaSession.expires_at-60){
