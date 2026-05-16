@@ -1116,7 +1116,12 @@ async function hhCreate(){
   var btn=document.querySelector('[onclick="hhCreate()"]');
   if(btn){btn.disabled=true;btn.textContent='Setting up...';}
   try{
-    await createHousehold(name,display);
+    var result=await createHousehold(name,display);
+    if(!result){
+      if(btn){btn.disabled=false;btn.textContent='Create household';}
+      alert('Could not create household. Check your connection and try again.');
+      return;
+    }
     showHouseholdWelcome(name);
   }catch(e){
     if(btn){btn.disabled=false;btn.textContent='Create household';}
@@ -1924,8 +1929,19 @@ function addExtractedToList(recipeName){
   var toSkip=extractedIngredients.filter(function(i){return !i.selected;});
   if(!toAdd.length&&!toSkip.length){alert('Select at least one ingredient.');return;}
   var source=recipeName||'Manual add';
-  // Add selected items normally
-  // ingredients stay in order only — not merged into main list
+  // Add selected items to the main list
+  toAdd.forEach(function(ing){
+    var key=ing.name.toLowerCase().trim();
+    var existing=items.find(function(it){return it.name.toLowerCase().trim()===key;});
+    if(!existing){
+      var newItem={id:nid++,name:ing.name,store:null,done:false,skipped:false,sources:[source]};
+      items.push(newItem);persistItemWrite(newItem);
+    } else {
+      if(!existing.sources)existing.sources=[];
+      if(existing.sources.indexOf(source)===-1){existing.sources.push(source);persistItemWrite(existing);}
+    }
+  });
+  // Also track in activeTrip for Cookbook order view
   if(!activeTrip)activeTrip={mealIds:[],recipeIds:[],itemIds:[],excludedRecipeIds:[],inspireItems:[],builtAt:new Date().toISOString()};
   if(!activeTrip.inspireItems)activeTrip.inspireItems=[];
   activeTrip.inspireItems.push({name:source,ingredients:toAdd.map(function(i){return i.name;})});
@@ -2750,8 +2766,7 @@ function cbClosePriorModal(){var m=document.getElementById('cb-prior-modal');if(
 function cbPriorFresh(){cbClosePriorModal();clearActiveTrip(true);cbPlanMode=true;cbPlanSelected={};cbMealExcluded={};cbExpandedMeals={};renderCookbookTab();}
 function cbPriorContinue(){cbClosePriorModal();}
 function cbPinnedTap(){
-  var hasOrder=activeTrip&&(activeTrip.mealIds.length||activeTrip.recipeIds.length);
-  if(hasOrder){showOrderNudge();}else{cbStartPlan();}
+  showOrderNudge();
 }
 
 
