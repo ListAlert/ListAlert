@@ -919,11 +919,11 @@ function _subscribeRealtimeChannel(){
   // Startup expiry check — if token is already expired, refresh first
   var nowCheck=Math.floor(Date.now()/1000);
   if(supaSession&&supaSession.expires_at&&nowCheck>supaSession.expires_at-60){
-    window.supabaseClient.auth.refreshSession().then(function(res){
+    window.supabaseClient.auth.refreshSession({refresh_token:supaSession?.refresh_token}).then(function(res){
       if(res.data&&res.data.session){
         supaSession=res.data.session;
         supaUserId=supaSession.user.id;
-        localStorage.setItem('la_supa_session',JSON.stringify(supaSession));
+        localStorage.setItem('la_supa_session',JSON.stringify(supaSession));window.supabaseClient.auth.setSession({access_token:supaSession.access_token,refresh_token:supaSession.refresh_token}).catch(function(){});
       }
       _subscribeRealtimeChannel();
     }).catch(function(){ _subscribeRealtimeChannel(); });
@@ -974,11 +974,11 @@ function _subscribeRealtimeChannel(){
     var exp=supaSession.expires_at;
     var nowSec=Math.floor(Date.now()/1000);
     if(exp&&nowSec>exp-120){
-      window.supabaseClient.auth.refreshSession().then(function(res){
+      window.supabaseClient.auth.refreshSession({refresh_token:supaSession?.refresh_token}).then(function(res){
         if(res.data&&res.data.session){
           supaSession=res.data.session;
           supaUserId=supaSession.user.id;
-          localStorage.setItem('la_supa_session',JSON.stringify(supaSession));
+          localStorage.setItem('la_supa_session',JSON.stringify(supaSession));window.supabaseClient.auth.setSession({access_token:supaSession.access_token,refresh_token:supaSession.refresh_token}).catch(function(){});
           resubscribeRealtime();
         }
       }).catch(function(){});
