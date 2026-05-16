@@ -949,9 +949,7 @@ function _subscribeRealtimeChannel(){
       }
     })
     .subscribe();
-  window.supabaseClient.auth.onAuthStateChange((_e,s)=>{
-    if(s?.access_token) window.realtimeChannel?.socket?.setAuth(s.access_token);
-  });
+  window.realtimeChannel.socket.accessToken=async()=>window.supaSession?.access_token||SUPA_KEY;
 }
 function handleRealtimeItem(payload){
   var ev=payload.eventType;
