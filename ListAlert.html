@@ -1428,35 +1428,10 @@ function renderList(){var el=document.getElementById('list-body');var _ob=docume
   if(!household&&!bannerDismissed['household']){filterBar+='<div style="margin:0 16px 4px;padding:9px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer" onclick="showHouseholdSetupPanel()">👨\u200d👩\u200d👧 Share with your household</span><div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;font-weight:700;color:var(--violet);cursor:pointer" onclick="showHouseholdSetupPanel()">Set up →</span><span onclick="dismissBanner(\'household\')" style="font-size:16px;color:var(--text3);cursor:pointer;line-height:1">×</span></div></div>';}
   else if(!household&&bannerDismissed['household']){filterBar+='<div style="margin:0 16px 4px"><span onclick="showHouseholdSetupPanel()" style="font-size:12px;color:var(--text3);cursor:pointer;font-weight:600">👨\u200d👩\u200d👧 Share with household →</span></div>';}
   else{filterBar+='<div style="margin:0 16px 4px;padding:9px 14px;background:var(--bg2);border:1px solid var(--amber-border);border-radius:10px;display:flex;align-items:center;gap:8px;cursor:pointer" onclick="show(\'stores\')"><span style="font-size:13px;font-weight:600;color:var(--text)">'+household.name+'</span><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--amber-dim);color:var(--amber)">'+roleLabel(household.role)+'</span></div>';}
-  filterBar+='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';if(items.length){filterBar+='<button class="filter-chip" onclick="clearList()" style="margin-left:auto;background:var(--red-dim);border-color:rgba(248,113,113,0.3);color:var(--red);flex-shrink:0">🗑 Clear list</button>';}if(userCategories.length){userCategories.forEach(function(c){var hasCat=items.some(function(i){return i.category===c&&!i.done&&!i.skipped;});if(hasCat||listFilter===c)filterBar+='<button class="filter-chip'+(listFilter===c?' active':'')+'" onclick="setFilter(\'cat:'+c+'\')">'+escapeHTML(c)+'</button>';});}stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id&&!i.done&&!i.skipped;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'</button>';});filterBar+='<\/div>';var _activeCount=items.filter(function(i){return!i.done&&!i.skipped;}).length;
-  if(items.length>0)localStorage.setItem('la_had_items','1');var _hasCompleted=items.some(function(i){return i.done||i.skipped;});if(_activeCount===0&&!_hasCompleted&&localStorage.getItem('la_had_items'))maybeShowHomescreenPrompt();if(_hasCompleted){
-  var _doneCount=items.filter(function(i){return i.done||i.skipped;}).length;
-  var _doneExpanded=localStorage.getItem('la_done_expanded')==='1';
-  el.innerHTML+='<div style="margin:4px 0 0">'
-    +'<div onclick="var e=localStorage.getItem(\'la_done_expanded\')==\'1\';localStorage.setItem(\'la_done_expanded\',e?\'0\':\'1\');renderList()" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;border-top:1px solid var(--border)">'
-    +'<span style="font-size:13px;font-weight:600;color:var(--text3)">Done ('+_doneCount+')</span>'
-    +'<div style="display:flex;align-items:center;gap:10px">'
-    +'<button onclick="event.stopPropagation();clearDoneItems()" style="height:28px;padding:0 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;font-size:12px;font-weight:700;color:var(--text3);cursor:pointer;font-family:Outfit,sans-serif">Clear ×</button>'
-    +'<span style="font-size:12px;color:var(--text3)">'+(_doneExpanded?'▲':'▼')+'</span>'
-    +'</div></div>'
-    +(_doneExpanded?''+'</div>':'</div>');
-  if(_doneExpanded){
-    var _doneItems=items.filter(function(i){return i.done||i.skipped;});
-    var _doneHtml='<div style="border-top:1px solid var(--border2)">';
-    _doneItems.forEach(function(it,idx){
-      var isLast=idx===_doneItems.length-1;
-      _doneHtml+='<div style="display:flex;align-items:center;gap:12px;padding:11px 16px;'+(isLast?'':'border-bottom:1px solid var(--border2)')+';opacity:0.6">'
-        +'<div class="chk done" onclick="itemUncheck('+it.id+')"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
-        +'<div style="flex:1;font-size:14px;font-weight:500;color:var(--text3);text-decoration:line-through">'+escapeHTML(it.name)+'</div>'
-        +'<span style="font-size:11px;color:var(--text3);cursor:pointer" onclick="itemSkipTrip('+it.id+')">remove</span>'
-        +'</div>';
-    });
-    _doneHtml+='</div>';
-    el.innerHTML+=_doneHtml;
-  }
-}
+  filterBar+='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';if(items.length){filterBar+='<button class="filter-chip" onclick="clearList()" style="margin-left:auto;background:var(--red-dim);border-color:rgba(248,113,113,0.3);color:var(--red);flex-shrink:0">🗑 Clear list</button>';}if(userCategories.length){userCategories.forEach(function(c){var hasCat=items.some(function(i){return i.category===c&&!i.done&&!i.skipped;});if(hasCat||listFilter===c)filterBar+='<button class="filter-chip'+(listFilter===c?' active':'')+'" onclick="setFilter(\'cat:'+c+'\')">'+escapeHTML(c)+'<\/button>';});}stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id&&!i.done&&!i.skipped;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'<\/button>';});filterBar+='<\/div>';var _activeCount=items.filter(function(i){return!i.done&&!i.skipped;}).length;
+  if(items.length>0)localStorage.setItem('la_had_items','1');var _hasCompleted=items.some(function(i){return i.done||i.skipped;});var _doneCount=_hasCompleted?items.filter(function(i){return i.done||i.skipped;}).length:0;var _doneExpanded=localStorage.getItem('la_done_expanded')==='1';if(_activeCount===0&&!_hasCompleted&&localStorage.getItem('la_had_items'))maybeShowHomescreenPrompt();
 
-  // Render items grouped by user-defined categories (no recipe-source grouping)
+    // Render items grouped by user-defined categories (no recipe-source grouping)
   function renderItemRow(it){
     var s=sm[it.store];var hasStores=stores.length>0;
     var badge=s?s.emoji+' '+s.name:(hasStores?'+ store':'');var showBadge=!!(s||hasStores);
@@ -1498,7 +1473,32 @@ function renderList(){var el=document.getElementById('list-body');var _ob=docume
       listHtml='<div class="card-list" style="margin:8px 16px 0">'+filtered.map(renderItemRow).join('')+'</div>';
     }
   } else {
-    listHtml='<div class="empty">No items for this filter yet.</div>';
+    if(!_hasCompleted){listHtml='<div class="empty">No items for this filter yet.</div>';}
+    else if(listFilter){listHtml='<div style="padding:12px 16px 0;font-size:13px;color:var(--text3);text-align:center">All items for this filter are checked off.</div>';}
+  }
+  // Done / checked-off section — always appended after active items
+  if(_hasCompleted){
+    var _doneItems2=items.filter(function(i){return i.done||i.skipped;});
+    listHtml+='<div style="margin:12px 0 0;border-top:1px solid var(--border)">'
+      +'<div onclick="var e=localStorage.getItem(\'la_done_expanded\')==\'1\';localStorage.setItem(\'la_done_expanded\',e?\'0\':\'1\');renderList()" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer">'
+      +'<span style="font-size:13px;font-weight:600;color:var(--text3)">Checked off ('+_doneCount+')</span>'
+      +'<div style="display:flex;align-items:center;gap:10px">'
+      +'<button onclick="event.stopPropagation();clearDoneItems()" style="height:28px;padding:0 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;font-size:12px;font-weight:700;color:var(--text3);cursor:pointer;font-family:Outfit,sans-serif">Clear ×</button>'
+      +'<span style="font-size:12px;color:var(--text3)">'+(_doneExpanded?'▲':'▼')+'</span>'
+      +'</div></div>';
+    if(_doneExpanded){
+      listHtml+='<div style="border-top:1px solid var(--border2)">';
+      _doneItems2.forEach(function(it,idx){
+        var isLast=idx===_doneItems2.length-1;
+        listHtml+='<div style="display:flex;align-items:center;gap:12px;padding:11px 16px;'+(isLast?'':'border-bottom:1px solid var(--border2)')+';opacity:0.6">'
+          +'<div class="chk done" onclick="itemUncheck('+it.id+')"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+          +'<div style="flex:1;font-size:14px;font-weight:500;color:var(--text3);text-decoration:line-through">'+escapeHTML(it.name)+'</div>'
+          +'<span style="font-size:11px;color:var(--text3);cursor:pointer" onclick="event.stopPropagation();itemDeleteFromDone('+it.id+')">remove</span>'
+          +'</div>';
+      });
+      listHtml+='</div>';
+    }
+    listHtml+='</div>';
   }
   el.innerHTML=filterBar+listHtml;initSwipeHandlers();
 }
@@ -1522,6 +1522,11 @@ function clearDoneItems(){
   items=items.filter(function(i){return !i.done&&!i.skipped;});
   persist();renderList();
   showToast(toDelete.length+' item'+(toDelete.length!==1?'s':'')+' cleared');
+}
+function itemDeleteFromDone(id){
+  persistItemDelete(id);
+  items=items.filter(function(i){return i.id!==id;});
+  persist();renderList();
 }
 function setFilter(storeId){listFilter=storeId;renderList();}
 function addItem(){var input=document.getElementById('item-input');var name=input.value.trim();if(!name){input.focus();input.style.borderColor='var(--red)';setTimeout(function(){input.style.borderColor='';},1200);return;}var newItem={id:nid++,name:name,store:null,done:false,sources:[],household_id:household?household.id:null};items.push(newItem);input.value='';persistItemWrite(newItem);renderList();input.focus();}
