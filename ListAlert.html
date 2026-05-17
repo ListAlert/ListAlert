@@ -1172,7 +1172,7 @@ function showHouseholdWelcome(hhName){
 }
 async function hhJoin(){
   var code=(document.getElementById('hh-code-input')||{}).value||'';
-  var display=((document.getElementById('hh-join-display-input')||{}).value||'').trim();
+  var display=((document.getElementById('hh-display-input')||{}).value||'').trim();
   if(!display){alert('Enter your name first.');return;}
   code=code.trim().toUpperCase();
   if(code.length<6||code.length>8){alert('Enter the full invite code (6–8 characters).');return;}
@@ -1459,7 +1459,7 @@ function renderList(){var el=document.getElementById('list-body');var _ob=docume
     var badge=s?s.emoji+' '+s.name:(hasStores?'+ store':'');var showBadge=!!(s||hasStores);
     var actionOpen=openActionItem===it.id;
     var inCart=itemInCart(it.id);
-    var cartBtn='<button onclick="event.stopPropagation();addItemToCart('+it.id+')" style="height:26px;padding:0 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;flex-shrink:0;border:1px solid '+(inCart?'var(--green-border)':'var(--border2)')+';background:'+(inCart?'var(--green-dim)':'var(--bg3)')+';color:'+(inCart?'var(--green)':'var(--text3)')+'">'+(inCart?'✓ In order':'+ Order')+'</button>';
+    var cartBtn='<button onclick="event.stopPropagation();addItemToCart('+it.id+')" style="height:26px;padding:0 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;flex-shrink:0;border:1px solid '+(inCart?'var(--green-border)':'var(--border2)')+';background:'+(inCart?'var(--green-dim)':'var(--bg3)')+';color:'+(inCart?'var(--green)':'var(--text3)')+'">'+(inCart?'✓ In cart':'+ Add to cart')+'</button>';
     return'<div class="item-row'+(it.skipped?' skipped':'')+(actionOpen?' selected':'')+'" data-iid="'+it.id+'" onclick="'+(it.done?'itemUncheck('+it.id+')':'openItemAction('+it.id+')')+'"><div class="item-row-swipe-bg">🗑 Remove?</div>'+(it.done?'<div class="chk done" onclick="itemUncheck('+it.id+')"><svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>':'')+'<div class="item-info" style="cursor:default"><div class="item-name'+(it.done?' done':it.skipped?' skipped':'')+'">'+escapeHTML(it.name)+'</div>'+(showBadge?'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>':'')+'</div>'+(!it.done?cartBtn:'')+'</div>'+(actionOpen?buildActionSheet(it):'')+buildPickerPanel(it);
   }
   var listHtml='';
@@ -1533,6 +1533,7 @@ function toggleCategoryGroup(cat){
 }
 function clearList(){
   if(!items.length)return;
+  if(!confirm('Clear all '+items.length+' item'+(items.length!==1?'s':'')+' from your list?'))return;
   items.forEach(function(it){persistItemDelete(it.id);});
   items=[];
   persist();renderList();
@@ -2287,8 +2288,6 @@ function renderHouseholdSheetContent(){
       +'<input id="hh-display-input" placeholder="Your name (e.g. Rob)" style="width:100%;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;margin-bottom:8px;box-sizing:border-box"/>'
       +'<button onclick="hhCreate()" style="width:100%;height:46px;background:var(--violet);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif;margin-bottom:16px">Create household</button>'
       +'<div style="text-align:center;margin-bottom:14px;font-size:12px;color:var(--text3)">— or join an existing one —</div>'
-      +'<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">Your name</div>'
-      +'<input id="hh-join-display-input" placeholder="Your name (e.g. Sarah)" style="width:100%;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;margin-bottom:8px;box-sizing:border-box"/>'
       +'<div style="display:flex;gap:8px">'
       +'<input id="hh-code-input" placeholder="Invite code" maxlength="8" style="flex:1;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:600;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;text-transform:uppercase;letter-spacing:2px;box-sizing:border-box"/>'
       +'<button onclick="hhJoin()" style="height:44px;padding:0 18px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif">Join</button>'
