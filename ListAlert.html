@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="ListAlert"/>
 <meta name="theme-color" content="#F5F0E8"/>
-<meta name="mobile-web-app-capable" content="yes"/>hh
+<meta name="mobile-web-app-capable" content="yes"/>
 <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22ListAlert%22%2C%22short_name%22%3A%22ListAlert%22%2C%22start_url%22%3A%22.%2FListAlert.html%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23F5F0E8%22%2C%22theme_color%22%3A%22%23F5F0E8%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA%2FwD%2FAP%2BgvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH6AUECg8q%2FbZwNAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAABIklEQVR42u3BMQEAAADCoPVP7WsIoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeAMBOAABHgAAAABJRU5ErkJggg%3D%3D%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D"/>
 <title>ListAlert</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Playfair+Display:ital@1&display=swap" rel="stylesheet"/>
@@ -461,6 +461,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
       </div>
       <div id="search-results"></div>
       <div id="stores-list"></div>
+      <div id="household-panel"></div>
       <div style="margin:16px 16px 0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
         <div class="settings-row">
           <div><div class="settings-label">Alert radius</div><div class="settings-sub">How close before we notify you</div></div>
@@ -522,7 +523,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 </div>
 
 <!--  Onboarding Modal  -->
-<div id="ob-modal" style="display:none" class="ob-backdrop">
+<div id="ob-modal" style="display:none" class="ob-backdrop" onclick="if(event.target===this)finishOnboarding(false)">
   <div class="ob-sheet">
     <div class="ob-logo">List<em>Alert</em></div>
     <div class="ob-tagline">Build your shopping list from a recipe photo — then get alerted when you're near the right store.</div>
@@ -1176,7 +1177,7 @@ function hhCopyCode(){
 function dismissEmailBanner(){localStorage.setItem('la_email_skipped','1');var el=document.getElementById('email-banner-area');if(el)el.innerHTML='';}
 function itemToRow(it){return{id:it._rid||undefined,user_id:supaUserId,household_id:it.household_id||(household?household.id:null)||null,name:it.name,done:it.done||false,skipped:it.skipped||false,store_id:it._storeRid||null,sources:it.sources||[],recurring:it.recurring||false,recur_days:it.recurDays||null,recur_label:it.recurLabel||null,last_reset:it.lastReset||null};}
 async function upsertItemRemote(it){var row=itemToRow(it);if(row.id){return supaPatch('items','id=eq.'+row.id,row);}else{delete row.id;return supaPost('items',row);}}
-function storeToRow(s){return{id:s._rid||undefined,user_id:supaUserId,name:s.name,addr:s.addr||null,emoji:s.emoji||null,lat:s.lat||null,lng:s.lng||null,geo_enabled:s.geo||false,fav:s.fav||false,household_id:get_my_household_id()};}
+function storeToRow(s){return{id:s._rid||undefined,user_id:supaUserId,name:s.name,addr:s.addr||null,emoji:s.emoji||null,lat:s.lat||null,lng:s.lng||null,geo_enabled:s.geo||false,fav:s.fav||false,household_id:household?household.id:null};}
 async function upsertStoreRemote(s){var row=storeToRow(s);if(row.id){return supaPatch('stores','id=eq.'+row.id,row);}else{delete row.id;return supaPost('stores',row);}}
 function recipeToRow(r){return{id:r._rid||undefined,user_id:supaUserId,household_id:r.household_id||(household?household.id:null)||null,name:r.name,tags:r.tags||[],items:r.items||[],source:r.source||null,saved_at:r.savedAt||new Date().toISOString()};}
 function mealToRow(m){return{id:m._rid||undefined,user_id:supaUserId,name:m.name,recipe_ids:m.recipeIds||[],created_at:m.createdAt||new Date().toISOString()};}
@@ -1244,7 +1245,7 @@ async function migrateLocalData(li,ls,lr){
 function toggleAutoclear(){autoclear=!autoclear;var btn=document.getElementById('autoclear-toggle');if(btn){btn.classList.toggle('on',autoclear);btn.classList.toggle('off',!autoclear);}persistSettings();}
 function show(t){curTab=t;['list','cookbook','stores'].forEach(function(n){document.getElementById('tab-'+n).classList.toggle('active',n===t);document.getElementById('view-'+n).classList.toggle('active',n===t);});document.getElementById('add-bar').style.display=t==='list'?'flex':'none';var _cbp=document.getElementById('cb-pinned-bar');if(_cbp)_cbp.style.display=t==='cookbook'?'block':'none';if(t==='list'){renderList();renderNearby();}if(t==='stores'){renderStores();renderHouseholdPanel();}if(t==='cookbook'){setTimeout(function(){renderCookbookTab();},0);}}
 function startGPS(){if(!navigator.geolocation){setGPS('off','No GPS');return;}setGPS('wait','Locating...');navigator.geolocation.getCurrentPosition(function(p){lat=p.coords.latitude;lng=p.coords.longitude;setGPS('on','GPS active');localStorage.setItem('la_gps_on','1');if(!watchId)watchId=navigator.geolocation.watchPosition(function(p){lat=p.coords.latitude;lng=p.coords.longitude;checkFences();},null,{enableHighAccuracy:true,maximumAge:10000});checkFences();},function(){setGPS('off','GPS denied');localStorage.removeItem('la_gps_on');},{enableHighAccuracy:true,timeout:15000});}
-function setGPS(state,txt){document.getElementById('gpsbtn').className='gps-btn '+state;document.getElementById('gpsdot').className='dot '+state;document.getElementById('gpstxt').textContent=txt;}
+function setGPS(state,txt){var gb=document.getElementById('gpsbtn');if(gb){gb.className='gps-btn '+state;gb.style.display='';}document.getElementById('gpsdot').className='dot '+state;document.getElementById('gpstxt').textContent=txt;}
 function dist(a,b,c,d){var R=6371000,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180;var x=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 function checkFences(){if(lat===null)return;stores.forEach(function(s){if(!s.geo||s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var pending=items.filter(function(i){return i.store===s.id&&!i.done;});var st=ss[s.id]||(ss[s.id]={inside:false,alerted:false});if(d<=radius){if(!st.inside){st.inside=true;if(pending.length&&!st.alerted){st.alerted=true;fireAlert(s,pending);}}}else if(d>radius*1.5){st.inside=false;st.alerted=false;}});if(curTab==='list')renderNearby();}
 function renderNearby(){var el=document.getElementById('nearby-area');if(!el)return;if(lat===null){if(!stores.length)return;el.innerHTML='<div class="nearby-wrap"><div class="nearby-gps-prompt" onclick="startGPS()"><span>📍 Enable GPS to see nearby stores</span><span style="color:var(--amber);font-size:13px;font-weight:700">Enable →</span></div></div>';return;}var nearbyStores=[];stores.forEach(function(s){if(s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var nearThreshold=Math.max(radius*3,2000);if(d>nearThreshold)return;var pending=items.filter(function(i){return i.store===s.id&&!i.done;});if(!pending.length)return;nearbyStores.push({store:s,pending:pending.length,dist:d});});if(!nearbyStores.length){el.innerHTML='';return;}nearbyStores.sort(function(a,b){return a.dist-b.dist;});var html='<div class="nearby-wrap"><div class="nearby-label">Near you now</div>';nearbyStores.forEach(function(n){var distStr=n.dist<1609?Math.round(n.dist*3.281)+' ft away':(n.dist/1609).toFixed(1)+' mi away';html+='<div class="nearby-row" onclick="setFilter('+n.store.id+');document.getElementById(\'view-list\').scrollTop=200"><div class="nearby-ico">'+n.store.emoji+'</div><div class="nearby-info"><div class="nearby-name">'+escapeHTML(n.store.name)+'</div><div class="nearby-meta">'+distStr+'</div></div><div class="nearby-count">'+n.pending+' item'+(n.pending!==1?'s':'')+'</div></div>';});html+='</div>';el.innerHTML=html;}
@@ -3109,7 +3110,7 @@ function addItemToCart(itemId){
   var it=items.find(function(i){return i.id===itemId;});
   if(!it)return;
   cartAddItem(it.name,'list');
-  showToast(escapeHTML(it.name)+' added to order');
+  showToast(it.name+' added to order');
   renderList();
 }
 
@@ -3255,5 +3256,4 @@ function recipeInCart(recipeId){
 </div>
 
 </body>
-</html+'<input id="hh-join-display-input" placeholder="Your name (e.g. Sarah)" style="width:100%;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);font-family:\\\'Outfit\\\',sans-serif;outline:none;margin-bottom:8px"/>'
->
+</html>
