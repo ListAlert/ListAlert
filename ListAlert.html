@@ -3021,7 +3021,7 @@ if(autoclear){var at=document.getElementById('autoclear-toggle');if(at){at.class
 })();
 var _isFirstRun=!localStorage.getItem('la_demo_seen')&&!localStorage.getItem('la_onboarded');
 if(_isFirstRun){var dp=document.getElementById('demo-prompt');dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}else if(!localStorage.getItem('la_demo_seen')){var dp=document.getElementById('demo-prompt');dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}else if(!localStorage.getItem('la_onboarded')){document.getElementById('ob-modal').style.display='flex';}
-renderList();renderNearby();initSupabase().then(function(){ loadFromSupabase().then(function(){ flushQueue(); }); });
+renderList();renderNearby();renderList();renderNearby();initSupabase().then(function(){ loadFromSupabase().then(function(){ flushQueue(); }); });
 if(localStorage.getItem('la_gps_on')==='1'){setTimeout(function(){startGPS();},1500);}
 
 //  Realtime reconnect on tab visibility 
