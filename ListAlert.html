@@ -634,12 +634,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 
 // ONE-TIME MIGRATION v2: restore incorrectly skipped manual items (from old remove bug)
 (function(){
-  if(localStorage.getItem('la_items_migration_v2'))return;
+  if(localStorage.getItem('la_items_migration_v3'))return;
   try{
     var raw=localStorage.getItem('la_items');
-    if(!raw){localStorage.setItem('la_items_migration_v2','1');return;}
+    if(!raw){localStorage.setItem('la_items_migration_v3','1');return;}
     var parsed=JSON.parse(raw);
-    if(!Array.isArray(parsed)){localStorage.setItem('la_items_migration_v2','1');return;}
+    if(!Array.isArray(parsed)){localStorage.setItem('la_items_migration_v3','1');return;}
     var fixed=parsed.map(function(it){
       if(it.skipped&&!it.done){
         var isManual=!it.sources||!it.sources.length||it.sources.every(function(s){return!s||s==='Manual add';});
@@ -648,8 +648,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
       return it;
     });
     localStorage.setItem('la_items',JSON.stringify(fixed));
-    localStorage.setItem('la_items_migration_v2','1');
-  }catch(e){localStorage.setItem('la_items_migration_v2','1');}
+    localStorage.setItem('la_items_migration_v3','1');
+  }catch(e){localStorage.setItem('la_items_migration_v3','1');}
 })();
 
 // Security: escape user-supplied strings before inserting into innerHTML
