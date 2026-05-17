@@ -663,6 +663,7 @@ function escapeHTML(str){
 
 var stores = JSON.parse(localStorage.getItem('la_stores') || '[]');
 var items  = JSON.parse(localStorage.getItem('la_items')  || '[]');
+var cartItems = JSON.parse(localStorage.getItem('la_cart') || '[]');
 var radius = parseInt(localStorage.getItem('la_radius')   || '800');
 var nid    = parseInt(localStorage.getItem('la_nid')      || '1');
 var savedRecipes = JSON.parse(localStorage.getItem('la_saved_recipes') || '[]');
@@ -3035,8 +3036,7 @@ document.addEventListener('visibilitychange',function(){
 });
 
 // ── Cart (Order) ──────────────────────────────────────────────────────────────
-var cartItems = JSON.parse(localStorage.getItem('la_cart') || '[]');
-// cartItems: [{id, name, done, source}]  source = 'list' | 'cookbook'
+// cartItems: [{id, name, done, source}]  source = 'list' | 'cookbook'  (initialized at top with other vars)
 
 function persistCart(){localStorage.setItem('la_cart',JSON.stringify(cartItems));}
 
