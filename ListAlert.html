@@ -417,7 +417,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
       <div id="household-badge" style="display:none;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border);cursor:pointer" onclick="showHouseholdSetupPanel()"></div>
       <div id="gpsbtn" style="display:none"><span class="dot wait" id="gpsdot"></span><span id="gpstxt"></span></div>
       <button id="cart-btn" onclick="toggleCart()" style="display:flex;align-items:center;gap:5px;height:34px;padding:0 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:var(--text2);position:relative">
-        🛒 <span id="cart-label">Order</span><span id="cart-badge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:var(--amber);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 3px"></span>
+        🛒 <span id="cart-label">Order</span><span id="cart-badge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:var(--amber);color:#fff;font-size:10px;font-weight:800;align-items:center;justify-content:center;padding:0 3px"></span>
       </button>
     </div>
   </div>
@@ -2902,7 +2902,31 @@ function setCbFilter(f){
 
 function cbConfirmOrder(mealIds,recipeIds,excluded){
   cbPlanMode=false;cbPlanSelected={};cbMealExcluded={};cbExpandedMeals={};
-  buildOrder(mealIds,recipeIds,excluded);
+  // Collect all recipe IDs to add (from direct picks + meals, minus excluded)
+  var allRecipeIds=[];
+  mealIds.forEach(function(mid){
+    var m=meals.find(function(x){return x.id===mid;});
+    if(!m)return;
+    m.recipeIds.forEach(function(rid){
+      if(excluded.indexOf(rid)===-1&&allRecipeIds.indexOf(rid)===-1)allRecipeIds.push(rid);
+    });
+  });
+  recipeIds.forEach(function(rid){
+    if(excluded.indexOf(rid)===-1&&allRecipeIds.indexOf(rid)===-1)allRecipeIds.push(rid);
+  });
+  // Push ingredients into cart
+  var added=0;
+  allRecipeIds.forEach(function(rid){
+    var r=savedRecipes.find(function(x){return x.id===rid;});
+    if(!r)return;
+    r.items.forEach(function(ing){
+      var name=typeof ing==='string'?ing:(ing.name||ing);
+      if(name){cartAddItem(name,'cookbook');added++;}
+    });
+  });
+  persistCart();updateCartBadge();
+  if(added>0){showToast(added+' item'+(added!==1?'s':'')+' added to order — tap 🛒 to view');}
+  renderCookbookTab();
 }
 
 function cbShowNewMealForm(prefillName){
@@ -3001,6 +3025,7 @@ function updateCartBadge(){
     if(btn){btn.style.background='var(--amber-dim)';btn.style.color='var(--amber)';btn.style.borderColor='var(--amber-border)';}
   } else {
     badge.style.display='none';
+    badge.textContent='';
     label.textContent='Order';
     var btn2=document.getElementById('cart-btn');
     if(btn2){btn2.style.background='var(--bg2)';btn2.style.color='var(--text2)';btn2.style.borderColor='var(--border2)';}
