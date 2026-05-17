@@ -1480,7 +1480,7 @@ function renderList(){var el=document.getElementById('list-body');var _ob=docume
       // Uncategorised items
       var uncatItems=filtered.filter(function(it){return!it.category;});
       if(uncatItems.length){
-        var collapsed2=localStorage.getItem('la_cat_collapsed__uncat')==='1';
+        var namedCatsHaveItems=userCategories.some(function(cat){return filtered.some(function(it){return it.category===cat;});});var collapsed2=namedCatsHaveItems?localStorage.getItem('la_cat_collapsed__uncat')==='1':false;
         listHtml+='<div style="margin:8px 16px 0">';
         listHtml+='<div onclick="toggleCategoryGroup(\'__uncat\')" style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:'+(collapsed2?'10px':'10px 10px 0 0')+';cursor:pointer;user-select:none">';
         listHtml+='<span style="font-size:13px;font-weight:700;color:var(--text2)">Other</span>';
