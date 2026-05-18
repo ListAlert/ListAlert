@@ -1115,7 +1115,7 @@ function showHouseholdWelcome(hhName){
 }
 async function hhJoin(){
   var code=(document.getElementById('hh-code-input')||{}).value||'';
-  var display=((document.getElementById('hh-display-input')||{}).value||'').trim();
+  var display=((document.getElementById('hh-join-display-input')||document.getElementById('hh-display-input')||{}).value||'').trim();
   if(!display){alert('Enter your name first.');return;}
   code=code.trim().toUpperCase();
   if(code.length<6||code.length>8){alert('Enter the full invite code (6–8 characters).');return;}
@@ -1209,7 +1209,7 @@ function setGPS(state,txt){var gb=document.getElementById('gpsbtn');if(gb){gb.cl
 function dist(a,b,c,d){var R=6371000,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180;var x=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 function checkFences(){if(lat===null)return;stores.forEach(function(s){if(!s.geo||s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var pending=items.filter(function(i){return i.store===s.id&&!i.done;});var st=ss[s.id]||(ss[s.id]={inside:false,alerted:false});if(d<=radius){if(!st.inside){st.inside=true;if(pending.length&&!st.alerted){st.alerted=true;fireAlert(s,pending);}}}else if(d>radius*1.5){st.inside=false;st.alerted=false;}});if(curTab==='list')renderNearby();}
 function renderNearby(){var el=document.getElementById('nearby-area');if(!el)return;if(lat===null){if(!stores.length)return;el.innerHTML='<div class="nearby-wrap"><div class="nearby-gps-prompt" onclick="startGPS()"><span>📍 Enable GPS to see nearby stores</span><span style="color:var(--amber);font-size:13px;font-weight:700">Enable →</span></div></div>';return;}var nearbyStores=[];stores.forEach(function(s){if(s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var nearThreshold=Math.max(radius*3,2000);if(d>nearThreshold)return;var pending=items.filter(function(i){return i.store===s.id&&!i.done;});if(!pending.length)return;nearbyStores.push({store:s,pending:pending.length,dist:d});});if(!nearbyStores.length){el.innerHTML='';return;}nearbyStores.sort(function(a,b){return a.dist-b.dist;});var html='<div class="nearby-wrap"><div class="nearby-label">Near you now</div>';nearbyStores.forEach(function(n){var distStr=n.dist<1609?Math.round(n.dist*3.281)+' ft away':(n.dist/1609).toFixed(1)+' mi away';html+='<div class="nearby-row" onclick="setFilter('+n.store.id+');document.getElementById(\'view-list\').scrollTop=200"><div class="nearby-ico">'+n.store.emoji+'</div><div class="nearby-info"><div class="nearby-name">'+escapeHTML(n.store.name)+'</div><div class="nearby-meta">'+distStr+'</div></div><div class="nearby-count">'+n.pending+' item'+(n.pending!==1?'s':'')+'</div></div>';});html+='</div>';el.innerHTML=html;}
-function fireAlert(store,pending){var names=pending.map(function(i){return i.name;}).join(', ');showBanner(store,names);if(window.Notification&&Notification.permission==='granted'){var n=new Notification('Near '+store.name,{body:'Still need: '+names,tag:'la-'+store.id,requireInteraction:true});n.onclick=function(){gotIt(store.id);};}}
+function fireAlert(store,pending){var names=pending.map(function(i){return i.name;}).join(', ');showBanner(store,names);if(window.Notification&&Notification.permission==='granted'){var n=new Notification('Near '+store.name,{body:'Still need: '+names,tag:'la-'+store.id});n.onclick=function(){gotIt(store.id);};}}
 function gotIt(sid){if(ss[sid])ss[sid].alerted=true;document.getElementById('notif-area').innerHTML='';show('list');}
 function notNow(sid){if(ss[sid]){ss[sid].alerted=false;ss[sid].inside=false;}document.getElementById('notif-area').innerHTML='';}
 function showBanner(store,names){document.getElementById('notif-area').innerHTML='<div class="notif"><span class="notif-ico">'+store.emoji+'</span><div style="flex:1"><div class="notif-title">You are near '+escapeHTML(store.name)+'</div><div class="notif-body">Still need: '+escapeHTML(names)+'</div><div class="notif-btns"><button class="nbtn p" onclick="gotIt('+store.id+')">Got it</button><button class="nbtn" onclick="notNow('+store.id+')">Not this time</button></div></div></div>';}
@@ -1446,7 +1446,7 @@ function toggleCategoryGroup(cat){
 }
 function clearList(){
   if(!items.length)return;
-  if(!confirm('Clear all '+items.length+' item'+(items.length!==1?'s':'')+' from your list?'))return;
+  if(!confirm('Clear list permanently? This cannot be undone.'))return;
   items.forEach(function(it){persistItemDelete(it.id);});
   items=[];
   persist();renderList();
