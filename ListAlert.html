@@ -383,6 +383,17 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 .cart-item-row:last-child{border-bottom:none}
 .cart-chk{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;transition:all .2s}
 .cart-chk.done{background:var(--green);border-color:var(--green)}
+#sm-overlay{position:fixed;inset:0;z-index:400;background:var(--bg);display:flex;flex-direction:column;max-width:min(860px,96vw);left:50%;transform:translateX(-50%)}
+.sm-item{display:flex;align-items:center;gap:16px;padding:18px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.sm-item:active{background:var(--bg3)}
+.sm-chk{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.sm-chk.done{background:var(--green);border-color:var(--green)}
+.sm-name{font-size:18px;font-weight:500;color:var(--text);flex:1;line-height:1.3}
+.sm-name.done{color:var(--text3);text-decoration:line-through}
+.sm-drawer-back{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:500;opacity:0;pointer-events:none;transition:opacity .25s;display:flex;align-items:flex-end;justify-content:center}
+.sm-drawer-back.open{opacity:1;pointer-events:all}
+.sm-drawer-wrap{width:100%;max-width:min(860px,96vw);background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 max(24px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);max-height:70vh;display:flex;flex-direction:column}
+.sm-drawer-back.open .sm-drawer-wrap{transform:translateY(0)}
 </style>
 </head>
 <body>
@@ -1219,7 +1230,7 @@ function show(t){curTab=t;['list','cookbook','stores'].forEach(function(n){docum
 function startGPS(){if(!navigator.geolocation){setGPS('off','No GPS');return;}setGPS('wait','Locating...');navigator.geolocation.getCurrentPosition(function(p){lat=p.coords.latitude;lng=p.coords.longitude;setGPS('on','GPS active');localStorage.setItem('la_gps_on','1');if(!watchId)watchId=navigator.geolocation.watchPosition(function(p){lat=p.coords.latitude;lng=p.coords.longitude;checkFences();},null,{enableHighAccuracy:true,maximumAge:10000});checkFences();},function(){setGPS('off','GPS denied');localStorage.removeItem('la_gps_on');},{enableHighAccuracy:true,timeout:15000});}
 function setGPS(state,txt){var gb=document.getElementById('gpsbtn');if(gb){gb.className='gps-btn '+state;gb.style.display='';}document.getElementById('gpsdot').className='dot '+state;document.getElementById('gpstxt').textContent=txt;}
 function dist(a,b,c,d){var R=6371000,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180;var x=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
-function checkFences(){if(lat===null)return;stores.forEach(function(s){if(!s.geo||s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var pending=items.filter(function(i){return i.store===s.id&&!i.done&&!i.recurring;});var st=ss[s.id]||(ss[s.id]={inside:false,alerted:false,recurAlerted:false});if(d<=radius){if(!st.inside){st.inside=true;if(pending.length&&!st.alerted){st.alerted=true;fireAlert(s,pending);}}var dueRecurring=items.filter(function(i){return i.recurring&&i.store===s.id&&isRecurringDue(i);});if(dueRecurring.length&&!st.recurAlerted){st.recurAlerted=true;fireRecurringAlert(s,dueRecurring);}}else if(d>radius*1.5){st.inside=false;st.alerted=false;st.recurAlerted=false;}});if(curTab==='list')renderNearby();}
+function checkFences(){if(lat===null)return;stores.forEach(function(s){if(!s.geo||s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var pending=items.filter(function(i){return i.store===s.id&&!i.done&&!i.recurring;});var st=ss[s.id]||(ss[s.id]={inside:false,alerted:false,recurAlerted:false});if(d<=radius){if(!st.inside){st.inside=true;if(pending.length&&!st.alerted){st.alerted=true;fireAlert(s,pending);}}var dueRecurring=items.filter(function(i){return i.recurring&&i.store===s.id&&isRecurringDue(i);});var dueMeds=medications.filter(function(m){return m.store===s.id&&m.recurDays&&isRecurringDue(m);}).map(function(m){return{name:m.name+(m.dosage?' ('+m.dosage+')':'')};});var allDue=dueRecurring.concat(dueMeds);if(allDue.length&&!st.recurAlerted){st.recurAlerted=true;fireRecurringAlert(s,allDue);}}else if(d>radius*1.5){st.inside=false;st.alerted=false;st.recurAlerted=false;}});if(curTab==='list')renderNearby();}
 function renderNearby(){var el=document.getElementById('nearby-area');if(!el)return;if(lat===null){if(!stores.length)return;el.innerHTML='<div class="nearby-wrap"><div class="nearby-gps-prompt" onclick="startGPS()"><span>📍 Enable GPS to see nearby stores</span><span style="color:var(--amber);font-size:13px;font-weight:700">Enable →</span></div></div>';return;}var nearbyStores=[];stores.forEach(function(s){if(s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var nearThreshold=Math.max(radius*3,2000);if(d>nearThreshold)return;var pending=items.filter(function(i){return i.store===s.id&&!i.done;});if(!pending.length)return;nearbyStores.push({store:s,pending:pending.length,dist:d});});if(!nearbyStores.length){el.innerHTML='';return;}nearbyStores.sort(function(a,b){return a.dist-b.dist;});var html='<div class="nearby-wrap"><div class="nearby-label">Near you now</div>';nearbyStores.forEach(function(n){var distStr=n.dist<1609?Math.round(n.dist*3.281)+' ft away':(n.dist/1609).toFixed(1)+' mi away';html+='<div class="nearby-row" onclick="setFilter('+n.store.id+');document.getElementById(\'view-list\').scrollTop=200"><div class="nearby-ico">'+n.store.emoji+'</div><div class="nearby-info"><div class="nearby-name">'+escapeHTML(n.store.name)+'</div><div class="nearby-meta">'+distStr+'</div></div><div class="nearby-count">'+n.pending+' item'+(n.pending!==1?'s':'')+'</div></div>';});html+='</div>';el.innerHTML=html;}
 function fireAlert(store,pending){var names=pending.map(function(i){return i.name;}).join(', ');showBanner(store,names);if(window.Notification&&Notification.permission==='granted'){var n=new Notification('Near '+store.name,{body:'Still need: '+names,tag:'la-'+store.id});n.onclick=function(){gotIt(store.id);};}}
 function gotIt(sid){if(ss[sid])ss[sid].alerted=true;document.getElementById('notif-area').innerHTML='';show('list');}
@@ -1279,6 +1290,9 @@ function setRadius(v){radius=parseInt(v);document.getElementById('radius-lbl').t
 var listFilter=null;
 var openPickerId=null;
 var openActionItem=null;
+var shoppingMode=false;var smCrossedOff={};
+var medications=JSON.parse(localStorage.getItem('la_medications')||'[]');var medNid=parseInt(localStorage.getItem('la_med_nid')||'1');
+var pendingServings=null;var pendingCalories=null;var pendingExtractedAt=null;
 function buildPickerPanel(it){
   if(openPickerId!==it.id)return'';
   if(!stores.length){
@@ -1399,7 +1413,7 @@ function renderList(){var el=document.getElementById('list-body');var _ob=docume
   if(!household&&!_hasActiveItems&&!bannerDismissed['household']){filterBar+='<div style="margin:0 16px 4px;padding:9px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer" onclick="showHouseholdSetupPanel()">👨\u200d👩\u200d👧 Share with your household</span><div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;font-weight:700;color:var(--violet);cursor:pointer" onclick="showHouseholdSetupPanel()">Set up →</span><span onclick="dismissBanner(\'household\')" style="font-size:16px;color:var(--text3);cursor:pointer;line-height:1">×</span></div></div>';}
   else if(!household){filterBar+='<div style="margin:0 16px 2px"><span onclick="showHouseholdSetupPanel()" style="font-size:11px;color:var(--text3);cursor:pointer;font-weight:600">👨\u200d👩\u200d👧 Household →</span></div>';}
   else{filterBar+='<div style="margin:0 16px 4px;padding:9px 14px;background:var(--bg2);border:1px solid var(--amber-border);border-radius:10px;display:flex;align-items:center;gap:8px;cursor:pointer" onclick="show(\'stores\')"><span style="font-size:13px;font-weight:600;color:var(--text)">'+household.name+'</span><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--amber-dim);color:var(--amber)">'+roleLabel(household.role)+'</span></div>';}
-  filterBar+='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';filterBar+='<button class="filter-chip" onclick="showCategorySheet()" style="background:var(--violet-dim);border-color:var(--violet-border);color:var(--violet);flex-shrink:0">🏷 Categories</button>';if(items.length){filterBar+='<button class="filter-chip" onclick="clearList()" style="margin-left:auto;background:var(--red-dim);border-color:rgba(248,113,113,0.3);color:var(--red);flex-shrink:0">🗑 Clear list</button>';}if(userCategories.length){userCategories.forEach(function(c){var hasCat=items.some(function(i){return i.category===c;});if(hasCat||listFilter===c)filterBar+='<button class="filter-chip'+(listFilter===c?' active':'')+'" onclick="setFilter(\'cat:'+c+'\')">'+escapeHTML(c)+'<\/button>';});}stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'<\/button>';});filterBar+='<\/div>';var _activeCount=items.length;
+  filterBar+='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';filterBar+='<button class="filter-chip" onclick="showCategorySheet()" style="background:var(--violet-dim);border-color:var(--violet-border);color:var(--violet);flex-shrink:0">🏷 Categories</button>';filterBar+='<button class="filter-chip" onclick="showMedicationSheet()" style="background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue);flex-shrink:0">💊 Meds</button>';var _smCount=items.filter(function(i){return!i.recurring&&!i.done&&!i.skipped;}).length;if(_smCount>0)filterBar+='<button class="filter-chip" onclick="enterShoppingMode()" style="background:var(--green-dim);border-color:var(--green-border);color:var(--green);flex-shrink:0">🛍 Shop</button>';filterBar+='<button class="filter-chip" onclick="showShareSheet()" style="background:var(--bg2);flex-shrink:0">↗ Share</button>';if(items.length){filterBar+='<button class="filter-chip" onclick="clearList()" style="margin-left:auto;background:var(--red-dim);border-color:rgba(248,113,113,0.3);color:var(--red);flex-shrink:0">🗑 Clear list</button>';}if(userCategories.length){userCategories.forEach(function(c){var hasCat=items.some(function(i){return i.category===c;});if(hasCat||listFilter===c)filterBar+='<button class="filter-chip'+(listFilter===c?' active':'')+'" onclick="setFilter(\'cat:'+c+'\')">'+escapeHTML(c)+'<\/button>';});}stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'<\/button>';});filterBar+='<\/div>';var _activeCount=items.length;
   if(items.length>0)localStorage.setItem('la_had_items','1');if(_activeCount===0&&localStorage.getItem('la_had_items'))maybeShowHomescreenPrompt();
 
     // Render items grouped by user-defined categories (no recipe-source grouping)
@@ -1708,7 +1722,7 @@ function renderFridgeTab(){var listNames=items.filter(function(i){return!i.done&
 function handleFridgeSelect(input){var file=input.files&&input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(e){var img=new Image();img.onload=function(){var maxDim=1120;var w=img.width,h=img.height;if(w>maxDim||h>maxDim){if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}else{w=Math.round(w*maxDim/h);h=maxDim;}}var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);fridgePhotoBase64=canvas.toDataURL('image/jpeg',0.85).split(',')[1];renderFridgeTab();};img.src=e.target.result;};reader.readAsDataURL(file);}
 function clearFridgePhoto(){fridgePhotoBase64=null;document.getElementById('fridge-file-input').value='';renderFridgeTab();}
 async function runFridgeScan(){var listNames=items.filter(function(i){return!i.done&&!i.skipped;}).map(function(i){return i.name;});if(!fridgePhotoBase64||!listNames.length)return;var area=document.getElementById('recipe-input-area');area.innerHTML='<div style="padding:24px 20px;text-align:center"><div style="width:20px;height:20px;border:2px solid rgba(96,165,250,0.3);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px"></div><div style="font-size:14px;color:var(--blue);font-weight:600">Scanning your fridge...</div></div>';try{var _abortCtrl=new AbortController();var _abortTimer=setTimeout(function(){_abortCtrl.abort();},30000);var response=await fetch('https://listalert.serbronn93.workers.dev/?target=anthropic',{method:'POST',headers:{'Content-Type':'application/json'},signal:_abortCtrl.signal,body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:'You are a grocery assistant. You will be shown a photo of a fridge or pantry and a shopping list. Return ONLY a JSON array of item names from the shopping list that are clearly visible and available in the fridge/pantry photo. Only include items you can confidently identify. No explanation, no markdown, just the raw JSON array.',messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:fridgePhotoBase64}},{type:'text',text:'My shopping list: '+JSON.stringify(listNames)+'\n\nWhich of these items can you see in this fridge/pantry photo? Return ONLY a JSON array of the item names from my list that are present.'}]}]})});clearTimeout(_abortTimer);var data=await response.json();var raw=(data.content&&data.content[0]&&data.content[0].text)?data.content[0].text.trim():'';raw=raw.replace(/```json|```/g,'').trim();var found=JSON.parse(raw);if(!Array.isArray(found))throw new Error('bad response');var foundLower=found.map(function(n){return n.toLowerCase();});var removed=[];var toRemove=[];items.forEach(function(it){if(foundLower.some(function(f){return it.name.toLowerCase().indexOf(f)!==-1||f.indexOf(it.name.toLowerCase())!==-1;})){removed.push(it.name);toRemove.push(it.id);}});toRemove.forEach(function(id){persistItemDelete(id);});items=items.filter(function(it){return toRemove.indexOf(it.id)===-1;});persist();renderList();closeRecipeModal();if(removed.length){setTimeout(function(){alert('✓ Skipped '+removed.length+' item'+(removed.length!==1?'s':'')+' you already have:\n'+removed.join(', '));},200);}else{setTimeout(function(){alert('Looks like you\'ll need to buy everything on your list — nothing matched what was in the photo.');},200);}}catch(e){area.innerHTML='<div style="padding:20px;text-align:center;color:var(--red);font-size:13px">Couldn\'t scan the photo. Try a clearer, well-lit image.</div>';renderFridgeTab();}}
-async function runRecipeExtraction(){if(recipeLoading)return;if(extractedIngredients.length&&recipeTab!=='inspire'){addExtractedToList(pendingRecipeName);return;}recipeLoading=true;setGoBtnLoading();document.getElementById('recipe-result-area').innerHTML='';var messages;if(recipeTab==='photo'){if(!recipePhotoBase64){alert('Choose a photo first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:[{type:'image',source:{type:'base64',media_type:recipePhotoMime,data:recipePhotoBase64}},{type:'text',text:'This is a photo of a recipe. Return ONLY a JSON object with two keys: \"name\" (the recipe dish name, e.g. \"Sicilian Cauliflower\") and \"ingredients\" (array of grocery store ingredient names with quantities when visible — e.g. \"2 lbs Chicken Breast\", \"1 can Crushed Tomatoes\", \"3 cloves Garlic\"). Add a type qualifier only when it helps — e.g. \"Chicken Thighs (fresh or frozen)\". No explanation, no markdown. Example: {\"name\":\"Lemon Herb Chicken\",\"ingredients\":[\"2 lbs Chicken Breast\",\"3 cloves Garlic\",\"2 tbsp Olive Oil\"]}. If you cannot find ingredients, return {\"name\":\"My Recipe\",\"ingredients\":[]}.'}]}];}else if(recipeTab==='smart'){var smartInput=(document.getElementById('smart-text')||{}).value||'';smartInput=smartInput.trim();if(!smartInput){alert('Tell us what you already have first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:'I already have: '+smartInput+'. Suggest 1-2 meals I can make and list ONLY the additional ingredients I need to buy. Return ONLY a JSON array of objects with "name" (specific dish name) and "ingredients" (array of items to buy only — exclude what I said I already have). No explanation, no markdown.'}];}else if(recipeTab==='pair'){var pairInput=(document.getElementById('pair-text')||{}).value||'';pairInput=pairInput.trim();if(!pairInput){alert('Tell us what you already have first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:'I already have: '+pairInput+'\nSuggest a complete meal that uses this as the main ingredient and list ONLY the additional ingredients I need to buy. Return ONLY a JSON array of objects, one per dish suggestion (1-2 max), each with "name" (specific dish name) and "ingredients" (array of grocery store ingredient names I need to buy, no quantities). No explanation, no markdown.'}];}else if(recipeTab==='inspire'){var inspireInput=(document.getElementById('inspire-text')||{}).value||'';inspireInput=inspireInput.trim();if(!inspireInput){alert('Describe what you feel like eating first.');recipeLoading=false;resetGoBtn();return;}recipeLoading=false;resetGoBtn();browseDishes();return;}else{var input='';if(recipeTab==='paste'){input=(document.getElementById('recipe-text')||{}).value||'';input=input.trim();if(!input){alert('Paste some recipe text first.');recipeLoading=false;resetGoBtn();return;}}else{var url=(document.getElementById('recipe-url')||{}).value||'';url=url.trim();if(!url){alert('Enter a URL first.');recipeLoading=false;resetGoBtn();return;}input='Recipe URL: '+url;}var prompt=recipeTab==='paste'?'Extract only the ingredient names from this recipe. Return ONLY a JSON array of strings — clean, simple grocery store names with with quantities where present (e.g. "2 cups Flour", "1 lb Butter"). No prep notes. Recipe:\\n\n'+input:'The user wants to import a recipe from this URL: '+input.replace('Recipe URL: ','')+'\n\nYou cannot fetch URLs, so respond with a JSON object: {"error": "url_unsupported"}. Do not attempt to guess or fabricate ingredients.';messages=[{role:'user',content:prompt}];}try{var systemPrompt=recipeTab==='smart'?'You are a meal planning assistant. The user has listed ingredients they already have. Suggest 1-2 complete meals using those ingredients and return ONLY the additional items they need to buy. Return ONLY a JSON array of objects with "name" (specific dish name) and "ingredients" (array of ONLY grocery store items still needed — never include what the user said they already have). No explanation, no markdown.':recipeTab==='pair'?'You are a meal planning assistant. The user will describe ingredients or items they already have at home. Suggest 1-2 specific complete meals they can make with those ingredients. Return ONLY a JSON array of objects with "name" (specific dish name, e.g. "Cheesy Quesadillas" or "Spinach Feta Omelette") and "ingredients" (array of ONLY the additional grocery store items they need to buy — do not include what they said they already have). No explanation, no markdown.':recipeTab==='inspire'?'You are a meal planning assistant. The user will give you a list of dishes they want. Return ONLY a JSON array of objects, one per dish, each with "name" (the specific dish name) and "ingredients" (array of grocery store ingredient naingredient names with quantities — e.g. \"1 lb Ground Beef\", \"1 can Crushed Tomatoes\". Add a type qualifier only when it helps — e.g. \"Chicken Thighs (fresh or frozen)\". No explanation, no markdown. Example: [{\"name\":\"Classic Burger\",\"ingredients\":[\"1 lb Ground Beef\",\"Burger Buns\",\"Lettuce\",\"Cheddar Cheese\"]}]':'You are a grocery list assistant. When asked to extract ingredients, return ONLY a raw JSON array of strings. Add a short qualifier in parentheses only when it meaningfully helps a shopper find the right item — e.g. "Crushed Tomatoes (canned)", "Chicken Thighs (fresh or frozen)", "Coconut Milk (canned)", "Corn (frozen)". Do NOT qualify obvious items like Garlic, Butter, Eggs. Include quantities when present — e.g. \"2 cups Flour\", \"1 can Crushed Tomatoes\". No markdown, no explanation, no backticks. Just the array.';var response=await fetch('https://listalert.serbronn93.workers.dev/?target=anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:systemPrompt,messages:messages})});var data=await response.json();if(data.error){showRecipeError('API said: '+data.error.type+' — '+data.error.message);recipeLoading=false;resetGoBtn();return;}var raw=(data.content&&data.content[0]&&data.content[0].text)?data.content[0].text.trim():'';raw=raw.replace(/```json|```/g,'').trim();if(raw.indexOf('"url_unsupported"')!==-1){showRecipeError('This URL couldn\'t be fetched automatically. Please open the recipe page, select all the text, copy it, and paste it using the "Paste text" tab instead.');recipeLoading=false;resetGoBtn();return;}var parsed=JSON.parse(raw);
+async function runRecipeExtraction(){if(recipeLoading)return;if(extractedIngredients.length&&recipeTab!=='inspire'){addExtractedToList(pendingRecipeName);return;}recipeLoading=true;setGoBtnLoading();document.getElementById('recipe-result-area').innerHTML='';var messages;if(recipeTab==='photo'){if(!recipePhotoBase64){alert('Choose a photo first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:[{type:'image',source:{type:'base64',media_type:recipePhotoMime,data:recipePhotoBase64}},{type:'text',text:'This is a photo of a recipe. Return ONLY a JSON object with four keys: \"name\" (the recipe dish name, e.g. \"Sicilian Cauliflower\"), \"ingredients\" (array of grocery store ingredient names with quantities when visible — e.g. \"2 lbs Chicken Breast\", \"1 can Crushed Tomatoes\"), \"servings\" (integer or short string like \"4\" or \"4-6\", null if unknown), and \"calories_per_serving\" (integer calorie estimate per serving, null if unknown). No explanation, no markdown. Example: {\"name\":\"Lemon Herb Chicken\",\"ingredients\":[\"2 lbs Chicken Breast\",\"3 cloves Garlic\",\"2 tbsp Olive Oil\"],\"servings\":4,\"calories_per_serving\":380}. If you cannot find ingredients, return {\"name\":\"My Recipe\",\"ingredients\":[],\"servings\":null,\"calories_per_serving\":null}.'}]}];}else if(recipeTab==='smart'){var smartInput=(document.getElementById('smart-text')||{}).value||'';smartInput=smartInput.trim();if(!smartInput){alert('Tell us what you already have first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:'I already have: '+smartInput+'. Suggest 1-2 meals I can make and list ONLY the additional ingredients I need to buy. Return ONLY a JSON array of objects with "name" (specific dish name) and "ingredients" (array of items to buy only — exclude what I said I already have). No explanation, no markdown.'}];}else if(recipeTab==='pair'){var pairInput=(document.getElementById('pair-text')||{}).value||'';pairInput=pairInput.trim();if(!pairInput){alert('Tell us what you already have first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:'I already have: '+pairInput+'\nSuggest a complete meal that uses this as the main ingredient and list ONLY the additional ingredients I need to buy. Return ONLY a JSON array of objects, one per dish suggestion (1-2 max), each with "name" (specific dish name) and "ingredients" (array of grocery store ingredient names I need to buy, no quantities). No explanation, no markdown.'}];}else if(recipeTab==='inspire'){var inspireInput=(document.getElementById('inspire-text')||{}).value||'';inspireInput=inspireInput.trim();if(!inspireInput){alert('Describe what you feel like eating first.');recipeLoading=false;resetGoBtn();return;}recipeLoading=false;resetGoBtn();browseDishes();return;}else{var input='';if(recipeTab==='paste'){input=(document.getElementById('recipe-text')||{}).value||'';input=input.trim();if(!input){alert('Paste some recipe text first.');recipeLoading=false;resetGoBtn();return;}}else{var url=(document.getElementById('recipe-url')||{}).value||'';url=url.trim();if(!url){alert('Enter a URL first.');recipeLoading=false;resetGoBtn();return;}input='Recipe URL: '+url;}var prompt=recipeTab==='paste'?'Extract only the ingredient names from this recipe. Return ONLY a JSON array of strings — clean, simple grocery store names with with quantities where present (e.g. "2 cups Flour", "1 lb Butter"). No prep notes. Recipe:\\n\n'+input:'The user wants to import a recipe from this URL: '+input.replace('Recipe URL: ','')+'\n\nYou cannot fetch URLs, so respond with a JSON object: {"error": "url_unsupported"}. Do not attempt to guess or fabricate ingredients.';messages=[{role:'user',content:prompt}];}try{var systemPrompt=recipeTab==='smart'?'You are a meal planning assistant. The user has listed ingredients they already have. Suggest 1-2 complete meals using those ingredients and return ONLY the additional items they need to buy. Return ONLY a JSON array of objects with "name" (specific dish name) and "ingredients" (array of ONLY grocery store items still needed — never include what the user said they already have). No explanation, no markdown.':recipeTab==='pair'?'You are a meal planning assistant. The user will describe ingredients or items they already have at home. Suggest 1-2 specific complete meals they can make with those ingredients. Return ONLY a JSON array of objects with "name" (specific dish name, e.g. "Cheesy Quesadillas" or "Spinach Feta Omelette") and "ingredients" (array of ONLY the additional grocery store items they need to buy — do not include what they said they already have). No explanation, no markdown.':recipeTab==='inspire'?'You are a meal planning assistant. The user will give you a list of dishes they want. Return ONLY a JSON array of objects, one per dish, each with "name" (the specific dish name) and "ingredients" (array of grocery store ingredient naingredient names with quantities — e.g. \"1 lb Ground Beef\", \"1 can Crushed Tomatoes\". Add a type qualifier only when it helps — e.g. \"Chicken Thighs (fresh or frozen)\". No explanation, no markdown. Example: [{\"name\":\"Classic Burger\",\"ingredients\":[\"1 lb Ground Beef\",\"Burger Buns\",\"Lettuce\",\"Cheddar Cheese\"]}]':'You are a grocery list assistant. When asked to extract ingredients, return ONLY a raw JSON array of strings. Add a short qualifier in parentheses only when it meaningfully helps a shopper find the right item — e.g. "Crushed Tomatoes (canned)", "Chicken Thighs (fresh or frozen)", "Coconut Milk (canned)", "Corn (frozen)". Do NOT qualify obvious items like Garlic, Butter, Eggs. Include quantities when present — e.g. \"2 cups Flour\", \"1 can Crushed Tomatoes\". No markdown, no explanation, no backticks. Just the array.';var response=await fetch('https://listalert.serbronn93.workers.dev/?target=anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:systemPrompt,messages:messages})});var data=await response.json();if(data.error){showRecipeError('API said: '+data.error.type+' — '+data.error.message);recipeLoading=false;resetGoBtn();return;}var raw=(data.content&&data.content[0]&&data.content[0].text)?data.content[0].text.trim():'';raw=raw.replace(/```json|```/g,'').trim();if(raw.indexOf('"url_unsupported"')!==-1){showRecipeError('This URL couldn\'t be fetched automatically. Please open the recipe page, select all the text, copy it, and paste it using the "Paste text" tab instead.');recipeLoading=false;resetGoBtn();return;}var parsed=JSON.parse(raw);
 var ingredientList;
 if((recipeTab==='inspire'||recipeTab==='pair'||recipeTab==='smart')&&Array.isArray(parsed)&&parsed.length&&parsed[0].name&&Array.isArray(parsed[0].ingredients)){
   pendingMealDishes=parsed;
@@ -1721,9 +1735,12 @@ if((recipeTab==='inspire'||recipeTab==='pair'||recipeTab==='smart')&&Array.isArr
 } else if(Array.isArray(parsed)){
   ingredientList=parsed;
 } else if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)&&Array.isArray(parsed.ingredients)){
-  // Photo/paste returned {name, ingredients} object
+  // Photo/paste returned {name, ingredients[, servings, calories_per_serving]} object
   ingredientList=parsed.ingredients;
   if(parsed.name&&parsed.name!=='My Recipe')pendingRecipeName=parsed.name;
+  if(parsed.servings!=null)pendingServings=parsed.servings;
+  if(parsed.calories_per_serving!=null)pendingCalories=parsed.calories_per_serving;
+  pendingExtractedAt=Date.now();
 } else {
   throw new Error('empty');
 }
@@ -1880,7 +1897,7 @@ function showSaveRecipePrompt(ingredientNames,sourceName,mergeNote){
     +mergeHtml
     +'<div class="save-recipe-fields">'
     +'<input class="save-recipe-input" id="save-recipe-name" placeholder="Recipe name (e.g. Chicken Tikka Masala)" value="'+(sourceName&&sourceName!=='Manual add'?sourceName:'')+'"/>'
-    +'<div style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">Serves<\/div><div style="display:flex;align-items:center;gap:8px"><input id="save-recipe-servings" type="number" min="1" max="20" placeholder="2" style="width:64px;height:34px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:0 10px;font-size:14px;font-weight:600;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;text-align:center"\/><span style="font-size:12px;color:var(--text3)">people<\/span><\/div><\/div>'
+    +'<div style="display:flex;gap:10px;margin-bottom:8px"><div><div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">Serves<\/div><div style="display:flex;align-items:center;gap:6px"><input id="save-recipe-servings" type="number" min="1" max="20" placeholder="4" value="'+(pendingServings!=null?pendingServings:'')+'" style="width:60px;height:34px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:0 8px;font-size:14px;font-weight:600;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;text-align:center"\/><span style="font-size:12px;color:var(--text3)">ppl<\/span><\/div><\/div><div><div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">Cal\/serving<\/div><input id="save-recipe-calories" type="number" min="1" placeholder="e.g. 420" value="'+(pendingCalories!=null?pendingCalories:'')+'" style="width:90px;height:34px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:0 8px;font-size:14px;font-weight:600;color:var(--text);font-family:\'Outfit\',sans-serif;outline:none;text-align:center"\/><\/div><\/div>'
     +'<div style="margin-bottom:6px"><div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">Type<\/div><div class="cb-type-picker" id="cb-type-picker"><div class="cb-tpick t-main" id="cbt-main" onclick="setCbType(\'main\')">🍗 Main<\/div><div class="cb-tpick t-side" id="cbt-side" onclick="setCbType(\'side\')">🥗 Side<\/div><div class="cb-tpick t-stand" id="cbt-stand" onclick="setCbType(\'stand\')">📦 Standalone<\/div><\/div><\/div>'
     +'<div class="save-recipe-tags" id="save-recipe-tags">'+tagBtns+'</div>'
     +'</div>'
@@ -1891,7 +1908,7 @@ function showSaveRecipePrompt(ingredientNames,sourceName,mergeNote){
 }
 
 function toggleSaveTag(el,tag){var on=el.classList.toggle('on');if(on){if(saveRecipeTags.indexOf(tag)===-1)saveRecipeTags.push(tag);}else{saveRecipeTags=saveRecipeTags.filter(function(t){return t!==tag;});}}
-function doSaveRecipe(ingredients){var name=(document.getElementById('save-recipe-name').value||'').trim();if(!name){document.getElementById('save-recipe-name').focus();document.getElementById('save-recipe-name').style.borderColor='var(--red)';return;}var _srv=parseInt((document.getElementById('save-recipe-servings')||{}).value||'0');var newRecipe={id:Date.now(),name:name,tags:saveRecipeTags.slice(),items:ingredients,servings:_srv||null,savedAt:new Date().toISOString()};savedRecipes.unshift(newRecipe);items.forEach(function(it){if(it.sources){var idx=it.sources.indexOf(pendingRecipeName);if(idx!==-1)it.sources[idx]=name;}});persistRecipeWrite(newRecipe);persist();if(typeof _pendingDishSaveQueue!=='undefined'&&_pendingDishSaveQueue.length>0&&_pendingDishSaveIdx>0){showNextDishSavePrompt();}else{closeRecipeModal();}}
+function doSaveRecipe(ingredients){var name=(document.getElementById('save-recipe-name').value||'').trim();if(!name){document.getElementById('save-recipe-name').focus();document.getElementById('save-recipe-name').style.borderColor='var(--red)';return;}var _srv=parseInt((document.getElementById('save-recipe-servings')||{}).value||'0');var _cal=parseInt((document.getElementById('save-recipe-calories')||{}).value||'0');var newRecipe={id:Date.now(),name:name,tags:saveRecipeTags.slice(),items:ingredients,servings:_srv||null,calories_per_serving:_cal||null,extracted_at:pendingExtractedAt||null,savedAt:new Date().toISOString()};pendingServings=null;pendingCalories=null;pendingExtractedAt=null;savedRecipes.unshift(newRecipe);items.forEach(function(it){if(it.sources){var idx=it.sources.indexOf(pendingRecipeName);if(idx!==-1)it.sources[idx]=name;}});persistRecipeWrite(newRecipe);persist();if(typeof _pendingDishSaveQueue!=='undefined'&&_pendingDishSaveQueue.length>0&&_pendingDishSaveIdx>0){showNextDishSavePrompt();}else{closeRecipeModal();}}
 
 var savedRecipeFilter=null;
 function setSavedFilter(tag){savedRecipeFilter=(savedRecipeFilter===tag)?null:tag;renderSavedRecipesInModal();}
@@ -2132,7 +2149,7 @@ function renderHouseholdSheetContent(){
   el.innerHTML=html;
 }
 function dismissHomescreen(){localStorage.setItem('la_homescreen','1');var p=document.getElementById('homescreen-prompt');p.classList.remove('open');setTimeout(function(){p.style.display='none';},300);}
-function maybeShowHomescreenPrompt(){if(localStorage.getItem('la_homescreen'))return;var visits=parseInt(localStorage.getItem('la_visit_count')||'0');if(visits<3)return;setTimeout(function(){var p=document.getElementById('homescreen-prompt');if(p){p.style.display='flex';setTimeout(function(){p.classList.add('open');},10);}},1500);}
+function maybeShowHomescreenPrompt(){if(localStorage.getItem('la_homescreen'))return;if(!localStorage.getItem('la_sm_completed'))return;setTimeout(function(){var p=document.getElementById('homescreen-prompt');if(p){p.style.display='flex';setTimeout(function(){p.classList.add('open');},10);}},1500);}
 
 // Cookbook tab functions
 var cbExpandedRecipes={};
@@ -2323,11 +2340,13 @@ function renderCookbookTab(){
           html+='<div style="background:var(--bg2)'+(isLast?'':';border-bottom:1px solid var(--border2)')+'">';
           html+='<div onclick="cbToggleCookbookRecipe('+r.id+')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-left:3px solid '+(r.type==='main'?'var(--amber)':r.type==='side'?'var(--green)':r.type==='stand'?'var(--violet)':'var(--border2)')+';cursor:pointer">';
           html+='<div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">'+escapeHTML(r.name)+'</div>';
-          html+='<div class="cb-recipe-tags" style="margin-top:3px">'+tagChips+'<span class="cb-rtag">'+r.items.length+' items</span>'+(r.servings?'<span class="cb-rtag">Serves '+r.servings+'</span>':'')+'</div></div>';
+          html+='<div class="cb-recipe-tags" style="margin-top:3px">'+tagChips+'<span class="cb-rtag">'+r.items.length+' items</span>'+(r.servings?'<span class="cb-rtag">Serves '+r.servings+'</span>':'')+(r.calories_per_serving?'<span class="cb-rtag">~'+r.calories_per_serving+' cal</span>':'')+'</div></div>';
           html+='<div style="font-size:12px;font-weight:700;color:var(--text3)">'+((isExpanded)?'▲':'▼')+'</div>';
           html+='</div>';
           if(isExpanded){
             html+='<div style="border-top:1px solid var(--border2);padding:10px 14px 12px;background:var(--bg3)">';
+            var _nutParts=[];if(r.calories_per_serving)_nutParts.push('~'+r.calories_per_serving+' cal/serving');if(r.servings)_nutParts.push('Serves '+r.servings);if(r.extracted_at&&_nutParts.length)_nutParts.push('pulled '+formatExtractedDate(r.extracted_at));
+            if(_nutParts.length){html+='<div style="margin-bottom:8px;font-size:12px;color:var(--text2)">'+_nutParts.join(' · ')+'</div>';html+='<button data-reextract="'+r.id+'" onclick="event.stopPropagation();reExtractNutrition('+r.id+')" style="margin-bottom:10px;font-size:11px;font-weight:600;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:8px;padding:4px 10px;cursor:pointer;font-family:Outfit,sans-serif">↻ Re-extract nutrition</button>';}else{html+='<button data-reextract="'+r.id+'" onclick="event.stopPropagation();reExtractNutrition('+r.id+')" style="margin-bottom:10px;font-size:11px;font-weight:600;color:var(--text3);background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:5px 12px;cursor:pointer;font-family:Outfit,sans-serif">+ Add nutrition info</button>';}
             html+='<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Ingredients</div>';
             html+='<div style="display:flex;flex-direction:column;gap:3px;margin-bottom:12px">';
             r.items.forEach(function(ing){
@@ -2414,7 +2433,7 @@ if(autoclear){var at=document.getElementById('autoclear-toggle');if(at){at.class
 var _isFirstRun=!localStorage.getItem('la_demo_seen')&&!localStorage.getItem('la_onboarded');
 if(!localStorage.getItem('la_onboarded')&&localStorage.getItem('la_demo_seen')){document.getElementById('ob-modal').style.display='flex';}
 function maybeShowDemoPrompt(){if(localStorage.getItem('la_demo_seen'))return;var dp=document.getElementById('demo-prompt');if(dp){dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}}
-initSupabase().then(function(){ loadFromSupabase().then(function(){ flushQueue();setTimeout(maybeShowHomescreenPrompt,2000);if(_isFirstRun)setTimeout(maybeShowDemoPrompt,8000); }); });
+initSupabase().then(function(){ loadFromSupabase().then(function(){ flushQueue();if(_isFirstRun)setTimeout(maybeShowDemoPrompt,8000); }); });
 if(localStorage.getItem('la_gps_on')==='1'){setTimeout(function(){startGPS();},1500);}
 
 //  Realtime reconnect on tab visibility 
@@ -2586,6 +2605,173 @@ function recipeInCart(recipeId){
   window.visualViewport.addEventListener('scroll',adjustBar);
 })();
 
+// ── Shopping Mode ─────────────────────────────────────────────────────────────
+function enterShoppingMode(){
+  smCrossedOff={};
+  var ov=document.getElementById('sm-overlay');if(ov)ov.style.display='flex';
+  renderShoppingMode();
+}
+function exitShoppingMode(){
+  var ov=document.getElementById('sm-overlay');if(ov)ov.style.display='none';
+  if(!localStorage.getItem('la_sm_completed')){
+    localStorage.setItem('la_sm_completed','1');
+    maybeShowHomescreenPrompt();
+  }
+}
+function smToggleItem(itemId){
+  smCrossedOff[itemId]=!smCrossedOff[itemId];
+  if(smCrossedOff[itemId]){
+    var it=items.find(function(i){return i.id===itemId;});
+    if(it){var hist=JSON.parse(localStorage.getItem('la_purchase_history')||'[]');hist.push({name:it.name,ts:Date.now()});localStorage.setItem('la_purchase_history',JSON.stringify(hist));}
+  }
+  renderShoppingMode();
+}
+function renderShoppingMode(){
+  var el=document.getElementById('sm-list');if(!el)return;
+  var activeItems=items.filter(function(i){return!i.recurring&&!i.done&&!i.skipped;});
+  if(!activeItems.length){el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--text3)"><div style="font-size:40px;margin-bottom:12px">✓</div><div style="font-size:16px;font-weight:600;color:var(--text2)">List is empty</div></div>';
+  }else{
+    el.innerHTML=activeItems.map(function(it){
+      var crossed=smCrossedOff[it.id];
+      return'<div class="sm-item" style="background:'+(crossed?'var(--bg3)':'var(--bg2)')+'" onclick="smToggleItem('+it.id+')">'
+        +'<div class="sm-chk'+(crossed?' done':'')+'">'+(crossed?'<svg width="14" height="10" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><\/svg>':'')+'<\/div>'
+        +'<span class="sm-name'+(crossed?' done':'')+'">'+escapeHTML(it.name)+'<\/span>'
+        +'<\/div>';
+    }).join('');
+  }
+  var crossedCount=Object.keys(smCrossedOff).filter(function(k){return smCrossedOff[k];}).length;
+  var db=document.getElementById('sm-drawer-btn');
+  if(db){if(crossedCount>0){db.style.display='';db.textContent='Crossed off ('+crossedCount+')';}else{db.style.display='none';}}
+}
+function smOpenDrawer(){
+  var back=document.getElementById('sm-drawer-back');if(!back)return;
+  var el=document.getElementById('sm-drawer');if(!el)return;
+  var crossedItems=items.filter(function(i){return smCrossedOff[i.id];});
+  el.innerHTML=crossedItems.map(function(it){
+    return'<div onclick="smToggleItem('+it.id+');smOpenDrawer()" style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer">'
+      +'<span style="font-size:16px;font-weight:500;color:var(--text3);text-decoration:line-through;flex:1">'+escapeHTML(it.name)+'<\/span>'
+      +'<span style="font-size:12px;font-weight:700;color:var(--green)">Restore<\/span>'
+      +'<\/div>';
+  }).join('');
+  back.style.display='flex';setTimeout(function(){back.classList.add('open');},10);
+}
+function smCloseDrawer(){
+  var back=document.getElementById('sm-drawer-back');if(!back)return;
+  back.classList.remove('open');setTimeout(function(){back.style.display='none';},300);
+}
+
+// ── Share List ────────────────────────────────────────────────────────────────
+function showShareSheet(){
+  var back=document.getElementById('share-sheet-back');if(!back)return;
+  var el=document.getElementById('share-sheet-body');
+  var activeItems=items.filter(function(i){return!i.done&&!i.recurring;});
+  var lines=[];
+  if(userCategories.length){
+    userCategories.forEach(function(cat){var ci=activeItems.filter(function(i){return i.category===cat;});if(!ci.length)return;lines.push('['+cat+']');ci.forEach(function(it){var s=it.store?stores.find(function(s){return s.id===it.store;}):null;lines.push('  • '+it.name+(s?' ('+s.name+')':''));});});
+    var unc=activeItems.filter(function(i){return!i.category;});if(unc.length){if(lines.length)lines.push('');lines.push('[Other]');unc.forEach(function(it){lines.push('  • '+it.name);});}
+  }else if(stores.length){
+    var byStore={};var noStore=[];
+    activeItems.forEach(function(it){if(it.store){var s=stores.find(function(s){return s.id===it.store;});if(s){if(!byStore[s.name])byStore[s.name]=[];byStore[s.name].push(it);return;}}noStore.push(it);});
+    Object.keys(byStore).forEach(function(sn){lines.push('['+sn+']');byStore[sn].forEach(function(it){lines.push('  • '+it.name);});});
+    if(noStore.length){if(lines.length)lines.push('');noStore.forEach(function(it){lines.push('• '+it.name);});}
+  }else{activeItems.forEach(function(it){lines.push('• '+it.name);});}
+  var text=lines.join('\n');
+  window._shareListText=text;
+  if(el)el.innerHTML='<div style="margin-bottom:14px"><textarea readonly style="width:100%;height:110px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text);font-family:Outfit,sans-serif;resize:none;outline:none;box-sizing:border-box">'+escapeHTML(text)+'<\/textarea><\/div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px">'
+    +'<button onclick="shareListCopy()" style="width:100%;height:46px;background:var(--green);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">📋 Copy to clipboard<\/button>'
+    +'<button onclick="shareListDownload()" style="width:100%;height:46px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:15px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif">⬇ Download .txt<\/button>'
+    +'<div style="text-align:center;padding:6px 0;font-size:12px;color:var(--text3)">Direct retailer cart handoff coming soon.<\/div>'
+    +'<\/div>';
+  back.style.display='flex';setTimeout(function(){back.classList.add('open');},10);
+}
+function closeShareSheet(){var back=document.getElementById('share-sheet-back');if(!back)return;back.classList.remove('open');setTimeout(function(){back.style.display='none';},300);}
+function shareListCopy(){navigator.clipboard.writeText(window._shareListText||'').then(function(){showToast('List copied to clipboard');closeShareSheet();}).catch(function(){alert('Copy failed. Your list:\n\n'+(window._shareListText||''));});}
+function shareListDownload(){var text=window._shareListText||'';var blob=new Blob([text],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='shopping-list.txt';a.click();URL.revokeObjectURL(a.href);showToast('List downloaded');}
+
+// ── Medications ───────────────────────────────────────────────────────────────
+function persistMedications(){localStorage.setItem('la_medications',JSON.stringify(medications));localStorage.setItem('la_med_nid',medNid);}
+function showMedicationSheet(){var back=document.getElementById('med-sheet-back');if(!back)return;renderMedicationSheet();back.style.display='flex';setTimeout(function(){back.classList.add('open');},10);}
+function closeMedicationSheet(){var back=document.getElementById('med-sheet-back');if(!back)return;back.classList.remove('open');setTimeout(function(){back.style.display='none';},300);}
+function renderMedicationSheet(){
+  var el=document.getElementById('med-sheet-body');if(!el)return;
+  var html='';
+  if(!medications.length){
+    html='<div style="text-align:center;padding:32px 0 20px;color:var(--text3)"><div style="font-size:40px;margin-bottom:10px">💊</div><div style="font-size:16px;font-weight:600;color:var(--text2);margin-bottom:6px">No medications yet</div><div style="font-size:13px;line-height:1.6">Track refills here. You\'ll get a reminder when you\'re near the pharmacy and it\'s time to refill.</div></div>';
+  }else{
+    html=medications.map(function(m){
+      var _due=isRecurringDue(m);
+      var _dl=daysUntilDue(m);
+      var _lbl=!m.recurDays?'No refill schedule':(_due?'⚠️ Due for refill now':(_dl<=3?'🔔 Due for refill in '+_dl+' day'+(_dl!==1?'s':''):'Refill in '+_dl+' days'));
+      var _store=m.store?stores.find(function(s){return s.id===m.store;}):null;
+      return'<div style="background:var(--bg2);border:1px solid '+(_due?'var(--amber-border)':'var(--border)')+';border-radius:12px;padding:13px 14px;margin-bottom:8px">'
+        +'<div style="display:flex;align-items:flex-start;gap:10px">'
+        +'<div style="font-size:22px;flex-shrink:0">💊</div>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700;color:var(--text)">'+escapeHTML(m.name)+'</div>'
+        +(m.dosage?'<div style="font-size:12px;color:var(--text3);margin-top:1px">'+escapeHTML(m.dosage)+'</div>':'')
+        +'<div style="font-size:12px;color:'+(_due?'var(--red)':'var(--text3)')+';margin-top:4px">'+_lbl+(_store?' · '+_store.emoji+' '+_store.name:'')+'</div></div>'
+        +'<button onclick="medMarkRefilled('+m.id+')" style="height:34px;padding:0 14px;background:'+(_due?'var(--amber)':'var(--bg3)')+';border:1px solid '+(_due?'var(--amber-border)':'var(--border2)')+';border-radius:8px;font-size:12px;font-weight:700;color:'+(_due?'#fff':'var(--text3)')+';cursor:pointer;font-family:Outfit,sans-serif;flex-shrink:0">✓ Refilled<\/button>'
+        +'</div>'
+        +'<div style="margin-top:8px;display:flex;gap:10px;align-items:center">'
+        +(stores.length?'<select onchange="medAssignStore('+m.id+',this.value)" style="height:28px;border:1px solid var(--border2);border-radius:8px;font-size:11px;font-weight:600;color:var(--text);background:var(--bg3);padding:0 6px;outline:none;font-family:Outfit,sans-serif;cursor:pointer"><option value="">Store: Any</option>'+stores.map(function(s){return'<option value="'+s.id+'"'+(m.store===s.id?' selected':'')+'>'+s.emoji+' '+s.name+'</option>';}).join('')+'</select>':'')
+        +'<button onclick="medDelete('+m.id+')" style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;padding:0;font-family:Outfit,sans-serif;margin-left:auto">Remove</button>'
+        +'</div>'
+        +'</div>';
+    }).join('');
+  }
+  html+='<div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">'
+    +'<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px">+ Add medication</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px">'
+    +'<input id="med-name-inp" placeholder="Medication name" style="width:100%;height:42px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);font-family:Outfit,sans-serif;outline:none;box-sizing:border-box"/>'
+    +'<input id="med-dosage-inp" placeholder="Dosage (optional, e.g. 10mg)" style="width:100%;height:42px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);font-family:Outfit,sans-serif;outline:none;box-sizing:border-box"/>'
+    +'<input id="med-days-inp" type="number" min="1" placeholder="Refill every N days (optional)" style="width:100%;height:42px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:0 13px;font-size:14px;font-weight:500;color:var(--text);font-family:Outfit,sans-serif;outline:none;box-sizing:border-box"/>'
+    +'<button onclick="medAdd()" style="width:100%;height:44px;background:var(--amber);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Add Medication</button>'
+    +'</div></div>';
+  el.innerHTML=html;
+}
+function medAdd(){
+  var name=((document.getElementById('med-name-inp')||{}).value||'').trim();
+  var dosage=((document.getElementById('med-dosage-inp')||{}).value||'').trim();
+  var days=parseInt((document.getElementById('med-days-inp')||{}).value||'0');
+  if(!name){var inp=document.getElementById('med-name-inp');if(inp){inp.style.borderColor='var(--red)';inp.focus();}return;}
+  var newMed={id:medNid++,name:name,dosage:dosage||null,store:null,recurDays:days>0?days:null,lastReset:new Date().toISOString().split('T')[0]};
+  medications.push(newMed);persistMedications();
+  renderMedicationSheet();showToast('💊 '+name+' added');
+}
+function medMarkRefilled(id){
+  var m=medications.find(function(x){return x.id===id;});if(!m)return;
+  m.lastReset=new Date().toISOString().split('T')[0];persistMedications();
+  renderMedicationSheet();showToast('✓ '+m.name+' marked as refilled');
+}
+function medAssignStore(id,storeId){
+  var m=medications.find(function(x){return x.id===id;});if(!m)return;
+  m.store=storeId?parseInt(storeId):null;persistMedications();
+}
+function medDelete(id){
+  if(!confirm('Remove this medication?'))return;
+  medications=medications.filter(function(x){return x.id!==id;});persistMedications();
+  renderMedicationSheet();
+}
+
+// ── Nutrition helpers ─────────────────────────────────────────────────────────
+function formatExtractedDate(ts){if(!ts)return'';var d=new Date(ts);return d.toLocaleString('en-US',{month:'long',year:'numeric'});}
+async function reExtractNutrition(recipeId){
+  var r=savedRecipes.find(function(x){return x.id===recipeId;});if(!r)return;
+  var btn=document.querySelector('[data-reextract="'+recipeId+'"]');
+  if(btn){btn.disabled=true;btn.textContent='Getting nutrition...';}
+  try{
+    var prompt='Recipe: "'+r.name+'"\nIngredients: '+r.items.join(', ')+'\n\nEstimate nutrition. Return ONLY a JSON object with "servings" (integer, typical serving count) and "calories_per_serving" (integer estimate). No explanation, no markdown.';
+    var resp=await fetch('https://listalert.serbronn93.workers.dev/?target=anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:100,system:'You are a nutrition expert. Return only JSON.',messages:[{role:'user',content:prompt}]})});
+    var data=await resp.json();
+    var raw=(data.content&&data.content[0]&&data.content[0].text)?data.content[0].text.trim():'';
+    raw=raw.replace(/```json|```/g,'').trim();
+    var parsed=JSON.parse(raw);
+    if(parsed.servings)r.servings=parsed.servings;
+    if(parsed.calories_per_serving)r.calories_per_serving=parsed.calories_per_serving;
+    r.extracted_at=Date.now();
+    persistRecipeWrite(r);persist();renderCookbookTab();showToast('Nutrition updated for '+r.name);
+  }catch(e){if(btn){btn.disabled=false;btn.textContent='+ Add nutrition info';}showToast('Could not get nutrition. Try again.');}
+}
 
 </script>
 
@@ -2627,6 +2813,57 @@ function recipeInCart(recipeId){
       </div>
     </div>
     <div id="cart-body" style="overflow-y:auto;flex:1;padding-bottom:8px"></div>
+  </div>
+</div>
+
+<!-- Shopping Mode Overlay -->
+<div id="sm-overlay" style="display:none;overflow:hidden">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:max(52px,env(safe-area-inset-top) + 16px) 20px 14px;flex-shrink:0;border-bottom:1px solid var(--border)">
+    <div>
+      <div style="font-size:22px;font-weight:800;color:var(--text)">Shopping</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px">Tap to cross off</div>
+    </div>
+    <button onclick="exitShoppingMode()" style="height:38px;padding:0 18px;background:var(--green);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">Done Shopping</button>
+  </div>
+  <div id="sm-list" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
+  <div style="padding:12px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom));flex-shrink:0">
+    <button id="sm-drawer-btn" onclick="smOpenDrawer()" style="display:none;width:100%;height:44px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Outfit',sans-serif"></button>
+  </div>
+</div>
+
+<!-- Shopping Mode Crossed-off Drawer -->
+<div class="sm-drawer-back" id="sm-drawer-back" onclick="if(event.target===this)smCloseDrawer()">
+  <div class="sm-drawer-wrap">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px;flex-shrink:0">
+      <div style="font-size:16px;font-weight:700;color:var(--text)">Crossed off</div>
+      <button onclick="smCloseDrawer()" style="width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
+    </div>
+    <div id="sm-drawer" style="overflow-y:auto;flex:1;padding-bottom:max(20px,env(safe-area-inset-bottom))"></div>
+  </div>
+</div>
+
+<!-- Share List Sheet -->
+<div class="modal-backdrop" id="share-sheet-back" onclick="if(event.target===this)closeShareSheet()" style="display:none">
+  <div style="background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:min(860px,96vw);padding:0 0 max(28px,env(safe-area-inset-bottom));position:absolute;bottom:0">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px">
+      <div style="font-size:17px;font-weight:700;color:var(--text)">↗ Share List</div>
+      <button onclick="closeShareSheet()" style="width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
+    </div>
+    <div id="share-sheet-body" style="padding:0 20px 8px"></div>
+  </div>
+</div>
+
+<!-- Medication Sheet -->
+<div class="cb-meal-sheet-back" id="med-sheet-back" onclick="if(event.target===this)closeMedicationSheet()">
+  <div class="cb-meal-sheet" style="max-height:90vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px">
+      <div style="font-size:17px;font-weight:700;color:var(--text)">💊 Medications</div>
+      <button onclick="closeMedicationSheet()" style="width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
+    </div>
+    <div id="med-sheet-body" style="padding:0 20px 28px"></div>
   </div>
 </div>
 
