@@ -754,8 +754,8 @@ async function initSupabase(){
     var stored=localStorage.getItem('la_supa_session');
     if(stored){
       var sess=JSON.parse(stored);
-      if(sess.expires_at&&Date.now()/1000<sess.expires_at-60){supaSession=sess;supaUserId=sess.user.id;await supaPatch('users','id=eq.'+supaUserId,{last_seen:new Date().toISOString()}).catch(function(){});await flushQueue();var _hhRec=household&&household.invite_code?JSON.stringify({invite_code:household.invite_code,household_id:household.id}):null;if(_hhRec)sessionStorage.setItem('la_hh_recovery',_hhRec);return;}
-      try{var refreshed=await supaAuth('token?grant_type=refresh_token',{refresh_token:sess.refresh_token});supaSession=refreshed;supaUserId=refreshed.user.id;localStorage.setItem('la_supa_session',JSON.stringify(refreshed));await flushQueue();var _hhRec2=household&&household.invite_code?JSON.stringify({invite_code:household.invite_code,household_id:household.id}):null;if(_hhRec2)sessionStorage.setItem('la_hh_recovery',_hhRec2);return;}catch(e){}
+      if(sess.expires_at&&Date.now()/1000<sess.expires_at-60){supaSession=sess;supaUserId=sess.user.id;await supaPatch('users','id=eq.'+supaUserId,{last_seen:new Date().toISOString()}).catch(function(){});await flushQueue();var _hhRec=household&&household.invite_code?JSON.stringify({invite_code:household.invite_code,household_id:household.id,display_name:household.display_name||'Me'}):null;if(_hhRec)localStorage.setItem('la_hh_recovery',_hhRec);return;}
+      try{var refreshed=await supaAuth('token?grant_type=refresh_token',{refresh_token:sess.refresh_token});supaSession=refreshed;supaUserId=refreshed.user.id;localStorage.setItem('la_supa_session',JSON.stringify(refreshed));await flushQueue();var _hhRec2=household&&household.invite_code?JSON.stringify({invite_code:household.invite_code,household_id:household.id,display_name:household.display_name||'Me'}):null;if(_hhRec2)localStorage.setItem('la_hh_recovery',_hhRec2);return;}catch(e){}
     }
     var data=await supaAuth('signup',{"anonymous":true});
     supaSession=data;supaUserId=data.user.id;
@@ -1219,9 +1219,9 @@ async function loadFromSupabase(){
     // Load household if previously joined
     if(household&&supaUserId){loadHouseholdMembers().then(function(){loadSharedData();subscribeRealtime();renderHouseholdPanel();});}
     else if(!household&&supaUserId){
-      var _hhRec3=null;try{_hhRec3=JSON.parse(sessionStorage.getItem('la_hh_recovery')||'null');}catch(e){}
+      var _hhRec3=null;try{_hhRec3=JSON.parse(localStorage.getItem('la_hh_recovery')||'null');}catch(e){}
       if(_hhRec3&&_hhRec3.invite_code){
-        joinHousehold(_hhRec3.invite_code,'Me').then(function(){sessionStorage.removeItem('la_hh_recovery');renderHouseholdPanel();renderList();}).catch(function(){sessionStorage.removeItem('la_hh_recovery');});
+        joinHousehold(_hhRec3.invite_code,_hhRec3.display_name||'Me').then(function(){localStorage.removeItem('la_hh_recovery');renderHouseholdPanel();renderList();}).catch(function(){localStorage.removeItem('la_hh_recovery');});
       } else {
         supaGet('household_members','user_id=eq.'+supaUserId+'&select=*,households(*)').then(function(rows){
           if(rows&&rows.length&&rows[0].households){
