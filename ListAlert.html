@@ -403,6 +403,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
     <h1>List<em>Alert</em></h1>
     <div style="display:flex;align-items:center;gap:8px">
       <div id="household-badge" style="display:none;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border);cursor:pointer" onclick="showHouseholdSetupPanel()"></div>
+      <span id="sync-indicator" style="display:none;font-size:11px;font-weight:700;color:var(--amber);padding:3px 8px;background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:20px">Syncing…</span>
       <div id="gpsbtn" style="display:none"><span class="dot wait" id="gpsdot"></span><span id="gpstxt"></span></div>
       <button id="cart-btn" onclick="toggleCart()" style="display:flex;align-items:center;gap:5px;height:34px;padding:0 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:var(--text2);position:relative">
         🛒 <span id="cart-label">Order</span><span id="cart-badge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:var(--amber);color:#fff;font-size:10px;font-weight:800;align-items:center;justify-content:center;padding:0 3px"></span>
@@ -730,10 +731,13 @@ async function supaAuth(endpoint, body) {
 function queueWrite(op){syncQueue.push(op);localStorage.setItem('la_sync_queue',JSON.stringify(syncQueue));}
 async function flushQueue(){
   if(!syncQueue.length||!supaUserId)return;
+  updateSyncIndicator();
   var remaining=[];
   for(var i=0;i<syncQueue.length;i++){try{await execQueueOp(syncQueue[i]);}catch(e){remaining.push(syncQueue[i]);}}
   syncQueue=remaining;localStorage.setItem('la_sync_queue',JSON.stringify(syncQueue));
+  updateSyncIndicator();
 }
+function updateSyncIndicator(){var el=document.getElementById('sync-indicator');if(el)el.style.display=syncQueue.length>0?'':'none';}
 async function execQueueOp(op){
   if(op.type==='upsert_item')await upsertItemRemote(op.item);
   else if(op.type==='delete_item')await supaDelete('items','id=eq.'+op.id);
@@ -1188,7 +1192,7 @@ async function upsertStoreRemote(s){var row=storeToRow(s);if(row.id){return supa
 function recipeToRow(r){return{id:r._rid||undefined,user_id:supaUserId,household_id:r.household_id||(household?household.id:null)||null,name:r.name,tags:r.tags||[],items:r.items||[],source:r.source||null,saved_at:r.savedAt||new Date().toISOString()};}
 async function upsertRecipeRemote(r){var row=recipeToRow(r);if(row.id){return supaPatch('saved_recipes','id=eq.'+row.id,row);}else{delete row.id;return supaPost('saved_recipes',row);}}
 async function upsertSettingsRemote(){return supaPatch('settings','user_id=eq.'+supaUserId,{radius:radius,autoclear:autoclear});}
-async function persistItemWrite(it){persist();if(!supaUserId)return;try{var result=await upsertItemRemote(it);if(result&&result[0]&&result[0].id&&!it._rid){it._rid=result[0].id;persist();}}catch(e){queueWrite({type:'upsert_item',item:it});}}
+async function persistItemWrite(it){persist();if(!supaUserId)return;try{var result=await upsertItemRemote(it);if(result&&result[0]&&result[0].id&&!it._rid){it._rid=result[0].id;persist();}}catch(e){queueWrite({type:'upsert_item',item:it});updateSyncIndicator();}}
 async function persistItemDelete(rid){persist();if(!supaUserId||!rid)return;try{await supaDelete('items','id=eq.'+rid);}catch(e){queueWrite({type:'delete_item',id:rid});}}
 async function persistStoreWrite(s){persist();if(!supaUserId)return;try{var result=await upsertStoreRemote(s);if(result&&result[0]&&result[0].id&&!s._rid){s._rid=result[0].id;persist();}}catch(e){queueWrite({type:'upsert_store',store:s});}}
 async function persistStoreDelete(rid){persist();if(!supaUserId||!rid)return;try{await supaDelete('stores','id=eq.'+rid);}catch(e){queueWrite({type:'delete_store',id:rid});}}
@@ -1256,12 +1260,26 @@ function show(t){curTab=t;['list','cookbook','stores'].forEach(function(n){docum
 function startGPS(){if(!navigator.geolocation){setGPS('off','No GPS');return;}setGPS('wait','Locating...');navigator.geolocation.getCurrentPosition(function(p){lat=p.coords.latitude;lng=p.coords.longitude;setGPS('on','GPS active');localStorage.setItem('la_gps_on','1');if(!watchId)watchId=navigator.geolocation.watchPosition(function(p){lat=p.coords.latitude;lng=p.coords.longitude;checkFences();},null,{enableHighAccuracy:true,maximumAge:10000});checkFences();},function(){setGPS('off','GPS denied');localStorage.removeItem('la_gps_on');},{enableHighAccuracy:true,timeout:15000});}
 function setGPS(state,txt){var gb=document.getElementById('gpsbtn');if(gb){gb.className='gps-btn '+state;gb.style.display='';}document.getElementById('gpsdot').className='dot '+state;document.getElementById('gpstxt').textContent=txt;}
 function dist(a,b,c,d){var R=6371000,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180;var x=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
-function checkFences(){if(lat===null)return;stores.forEach(function(s){if(!s.geo||s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var pending=items.filter(function(i){return i.store===s.id&&!i.done&&!i.recurring;});var st=ss[s.id]||(ss[s.id]={inside:false,alerted:false,recurAlerted:false});if(d<=radius){if(!st.inside){st.inside=true;if(pending.length&&!st.alerted){st.alerted=true;fireAlert(s,pending);}}var dueRecurring=items.filter(function(i){return i.recurring&&i.store===s.id&&isRecurringDue(i);});var dueMeds=medications.filter(function(m){return m.store===s.id&&m.recurDays&&isRecurringDue(m);}).map(function(m){return{name:m.name+(m.dosage?' ('+m.dosage+')':'')};});var allDue=dueRecurring.concat(dueMeds);if(allDue.length&&!st.recurAlerted){st.recurAlerted=true;fireRecurringAlert(s,allDue);}}else if(d>radius*1.5){st.inside=false;st.alerted=false;st.recurAlerted=false;}});if(curTab==='list')renderNearby();}
+function checkFences(){if(lat===null)return;stores.forEach(function(s){if(!s.geo||s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var pending=items.filter(function(i){return i.store===s.id&&!i.done&&!i.recurring;});var st=ss[s.id]||(ss[s.id]={inside:false,alerted:false,recurAlerted:false,medAlerted:{}});if(!st.medAlerted)st.medAlerted={};if(d<=radius){if(!st.inside){st.inside=true;if(pending.length&&!st.alerted){st.alerted=true;fireAlert(s,pending);}}var dueRecurring=items.filter(function(i){return i.recurring&&i.store===s.id&&isRecurringDue(i);});if(dueRecurring.length&&!st.recurAlerted){st.recurAlerted=true;fireRecurringAlert(s,dueRecurring);}medications.forEach(function(m){if(m.store!==s.id||!m.recurDays||!isRecurringDue(m))return;if(st.medAlerted[m.id])return;st.medAlerted[m.id]=true;showBanner(s,m.name,'Time to refill: '+escapeHTML(m.name));});}else if(d>radius*1.5){st.inside=false;st.alerted=false;st.recurAlerted=false;st.medAlerted={};}});if(curTab==='list')renderNearby();}
 function renderNearby(){var el=document.getElementById('nearby-area');if(!el)return;if(lat===null){if(!stores.length)return;el.innerHTML='<div class="nearby-wrap"><div class="nearby-gps-prompt" onclick="startGPS()"><span>📍 Enable GPS to see nearby stores</span><span style="color:var(--amber);font-size:13px;font-weight:700">Enable →</span></div></div>';return;}var nearbyStores=[];stores.forEach(function(s){if(s.lat===null)return;var d=dist(lat,lng,s.lat,s.lng);var nearThreshold=Math.max(radius*3,2000);if(d>nearThreshold)return;var pending=items.filter(function(i){return i.store===s.id&&!i.done;});if(!pending.length)return;nearbyStores.push({store:s,pending:pending.length,dist:d});});if(!nearbyStores.length){el.innerHTML='';return;}nearbyStores.sort(function(a,b){return a.dist-b.dist;});var html='<div class="nearby-wrap"><div class="nearby-label">Near you now</div>';nearbyStores.forEach(function(n){var distStr=n.dist<1609?Math.round(n.dist*3.281)+' ft away':(n.dist/1609).toFixed(1)+' mi away';html+='<div class="nearby-row" onclick="setFilter('+n.store.id+');document.getElementById(\'view-list\').scrollTop=200"><div class="nearby-ico">'+n.store.emoji+'</div><div class="nearby-info"><div class="nearby-name">'+escapeHTML(n.store.name)+'</div><div class="nearby-meta">'+distStr+'</div></div><div class="nearby-count">'+n.pending+' item'+(n.pending!==1?'s':'')+'</div></div>';});html+='</div>';el.innerHTML=html;}
 function fireAlert(store,pending){var names=pending.map(function(i){return i.name;}).join(', ');showBanner(store,names);if(window.Notification&&Notification.permission==='granted'){var n=new Notification('Near '+store.name,{body:'Still need: '+names,tag:'la-'+store.id});n.onclick=function(){gotIt(store.id);};}}
 function gotIt(sid){if(ss[sid])ss[sid].alerted=true;document.getElementById('notif-area').innerHTML='';show('list');}
 function notNow(sid){if(ss[sid]){ss[sid].alerted=false;ss[sid].inside=false;}document.getElementById('notif-area').innerHTML='';}
-function showBanner(store,names){document.getElementById('notif-area').innerHTML='<div class="notif"><span class="notif-ico">'+store.emoji+'</span><div style="flex:1"><div class="notif-title">You are near '+escapeHTML(store.name)+'</div><div class="notif-body">Still need: '+escapeHTML(names)+'</div><div class="notif-btns"><button class="nbtn p" onclick="gotIt('+store.id+')">Got it</button><button class="nbtn" onclick="notNow('+store.id+')">Not this time</button></div></div></div>';}
+var _pendingReminderAlerts={};
+function showBanner(store,names,bodyText){
+  _pendingReminderAlerts[store.id]={store:store,names:names,bodyText:bodyText};
+  var body=bodyText!==undefined?bodyText:('Still need: '+escapeHTML(names));
+  document.getElementById('notif-area').innerHTML='<div class="notif"><span class="notif-ico">'+store.emoji+'</span><div style="flex:1"><div class="notif-title">You are near '+escapeHTML(store.name)+'</div><div class="notif-body">'+body+'</div><div class="notif-btns"><button class="nbtn p" onclick="gotIt('+store.id+')">Got it</button><button class="nbtn" onclick="notNow('+store.id+')">Not this time</button><button class="nbtn" onclick="remindLater('+store.id+')">Remind me in 15 min</button></div></div></div>';
+}
+function remindLater(storeId){
+  document.getElementById('notif-area').innerHTML='';
+  var pending=_pendingReminderAlerts[storeId];if(!pending)return;
+  setTimeout(function(){
+    if(lat===null)return;
+    var s=stores.find(function(x){return x.id===storeId;});if(!s||!s.geo||s.lat===null)return;
+    if(dist(lat,lng,s.lat,s.lng)<=radius){showBanner(pending.store,pending.names,pending.bodyText);}
+  },15*60*1000);
+}
 function zipToLatLng(zip){return fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&postalcode='+encodeURIComponent(zip),{headers:{'Accept-Language':'en'}}).then(function(r){return r.json();}).then(function(data){if(!data.length)throw new Error('zip_not_found');return{lat:parseFloat(data[0].lat),lng:parseFloat(data[0].lon)};});}
 function searchStores(storeName,centerLat,centerLng){
   function makeQuery(d){var b=(centerLat-d)+','+(centerLng-d)+','+(centerLat+d)+','+(centerLng+d);return '[out:json][timeout:15];(node["name"~"'+storeName+'",i]["shop"]('+b+');way["name"~"'+storeName+'",i]["shop"]('+b+');node["name"~"'+storeName+'",i]["amenity"]('+b+');way["name"~"'+storeName+'",i]["amenity"]('+b+'););out center 10;';}
@@ -2462,7 +2480,13 @@ if(autoclear){var at=document.getElementById('autoclear-toggle');if(at){at.class
 var _isFirstRun=!localStorage.getItem('la_demo_seen')&&!localStorage.getItem('la_onboarded');
 if(!localStorage.getItem('la_onboarded')&&localStorage.getItem('la_demo_seen')){document.getElementById('ob-modal').style.display='flex';}
 function maybeShowDemoPrompt(){if(localStorage.getItem('la_demo_seen'))return;var dp=document.getElementById('demo-prompt');if(dp){dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}}
-initSupabase().then(function(){ loadFromSupabase().then(function(){ flushQueue();if(_isFirstRun)setTimeout(maybeShowDemoPrompt,8000); }); });
+initSupabase().then(function(){
+  loadFromSupabase().then(function(){ flushQueue();if(_isFirstRun)setTimeout(maybeShowDemoPrompt,8000); });
+  var _wCtrl=new AbortController();var _wTimer=setTimeout(function(){_wCtrl.abort();},5000);
+  fetch('https://listalert.serbronn93.workers.dev/?ping=1',{signal:_wCtrl.signal})
+    .then(function(){clearTimeout(_wTimer);})
+    .catch(function(){clearTimeout(_wTimer);var na=document.getElementById('notif-area');if(na&&!na.innerHTML.trim()){na.innerHTML='<div style="padding:6px 16px 2px;font-size:12px;color:var(--text3)">Recipe extraction is temporarily unavailable.<\/div>';}});
+});
 if(localStorage.getItem('la_gps_on')==='1'){setTimeout(function(){startGPS();},1500);}
 
 //  Realtime reconnect on tab visibility 
@@ -2642,11 +2666,30 @@ function enterShoppingMode(){
 }
 function exitShoppingMode(){
   var ov=document.getElementById('sm-overlay');if(ov)ov.style.display='none';
-  if(!localStorage.getItem('la_sm_completed')){
-    localStorage.setItem('la_sm_completed','1');
-    maybeShowHomescreenPrompt();
-  }
+  var mv=document.getElementById('sm-main-view');if(mv)mv.style.display='flex';
+  var cv=document.getElementById('sm-celebration-view');if(cv)cv.style.display='none';
 }
+function smDoneShopping(){
+  var activeItems=items.filter(function(i){return!i.recurring&&!i.done&&!i.skipped;});
+  var gotItems=activeItems.filter(function(i){return smCrossedOff[i.id];});
+  var gotCount=gotItems.length;
+  var skippedCount=activeItems.length-gotCount;
+  var history=JSON.parse(localStorage.getItem('la_trip_history')||'[]');
+  var entry={date:new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}),gotCount:gotCount,skippedCount:skippedCount,items:activeItems.map(function(i){return{name:i.name,got:!!smCrossedOff[i.id]};})};
+  history.unshift(entry);if(history.length>50)history=history.slice(0,50);
+  localStorage.setItem('la_trip_history',JSON.stringify(history));
+  var mv=document.getElementById('sm-main-view');if(mv)mv.style.display='none';
+  var cv=document.getElementById('sm-celebration-view');
+  if(cv){
+    cv.innerHTML='<div style="font-size:72px;margin-bottom:24px">✅<\/div>'
+      +'<div style="font-size:26px;font-weight:800;color:var(--text);margin-bottom:8px">You got '+gotCount+' item'+(gotCount!==1?'s':'')+'<\/div>'
+      +'<div style="font-size:15px;color:var(--text2);margin-bottom:40px">'+entry.date+'<\/div>'
+      +'<button onclick="smFinishCelebration()" style="height:52px;padding:0 40px;background:var(--green);border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Back to list<\/button>';
+    cv.style.display='flex';
+  }
+  if(!localStorage.getItem('la_sm_completed')){localStorage.setItem('la_sm_completed','1');maybeShowHomescreenPrompt();}
+}
+function smFinishCelebration(){exitShoppingMode();}
 function smToggleItem(itemId){
   smCrossedOff[itemId]=!smCrossedOff[itemId];
   if(smCrossedOff[itemId]){
@@ -2658,19 +2701,30 @@ function smToggleItem(itemId){
 function renderShoppingMode(){
   var el=document.getElementById('sm-list');if(!el)return;
   var activeItems=items.filter(function(i){return!i.recurring&&!i.done&&!i.skipped;});
-  if(!activeItems.length){el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--text3)"><div style="font-size:40px;margin-bottom:12px">✓</div><div style="font-size:16px;font-weight:600;color:var(--text2)">List is empty</div></div>';
+  var uncrossed=activeItems.filter(function(i){return!smCrossedOff[i.id];});
+  var crossed=activeItems.filter(function(i){return smCrossedOff[i.id];});
+  var html='';
+  if(!uncrossed.length&&!crossed.length){
+    html='<div style="text-align:center;padding:60px 20px;color:var(--text3)"><div style="font-size:40px;margin-bottom:12px">✓</div><div style="font-size:16px;font-weight:600;color:var(--text2)">List is empty</div></div>';
   }else{
-    el.innerHTML=activeItems.map(function(it){
-      var crossed=smCrossedOff[it.id];
-      return'<div class="sm-item" style="background:'+(crossed?'var(--bg3)':'var(--bg2)')+'" onclick="smToggleItem('+it.id+')">'
-        +'<div class="sm-chk'+(crossed?' done':'')+'">'+(crossed?'<svg width="14" height="10" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><\/svg>':'')+'<\/div>'
-        +'<span class="sm-name'+(crossed?' done':'')+'">'+escapeHTML(it.name)+'<\/span>'
+    html+=uncrossed.map(function(it){
+      return'<div class="sm-item" onclick="smToggleItem('+it.id+')">'
+        +'<div class="sm-chk"></div>'
+        +'<span class="sm-name">'+escapeHTML(it.name)+'<\/span>'
         +'<\/div>';
     }).join('');
+    if(crossed.length){
+      html+='<div style="padding:10px 20px 6px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;border-top:1px solid var(--border);margin-top:4px">Got it ('+crossed.length+')<\/div>';
+      html+=crossed.map(function(it){
+        return'<div class="sm-item" style="background:var(--bg3)" onclick="smToggleItem('+it.id+')">'
+          +'<div class="sm-chk done"><svg width="14" height="10" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><\/svg><\/div>'
+          +'<span class="sm-name done" style="opacity:0.5">'+escapeHTML(it.name)+'<\/span>'
+          +'<\/div>';
+      }).join('');
+    }
   }
-  var crossedCount=Object.keys(smCrossedOff).filter(function(k){return smCrossedOff[k];}).length;
-  var db=document.getElementById('sm-drawer-btn');
-  if(db){if(crossedCount>0){db.style.display='';db.textContent='Crossed off ('+crossedCount+')';}else{db.style.display='none';}}
+  el.innerHTML=html;
+  var db=document.getElementById('sm-drawer-btn');if(db)db.style.display='none';
 }
 function smOpenDrawer(){
   var back=document.getElementById('sm-drawer-back');if(!back)return;
@@ -2707,16 +2761,30 @@ function showShareSheet(){
   var text=lines.join('\n');
   window._shareListText=text;
   if(el)el.innerHTML='<div style="margin-bottom:14px"><textarea readonly style="width:100%;height:110px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text);font-family:Outfit,sans-serif;resize:none;outline:none;box-sizing:border-box">'+escapeHTML(text)+'<\/textarea><\/div>'
-    +'<div style="display:flex;flex-direction:column;gap:8px">'
+    +'<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">'
     +'<button onclick="shareListCopy()" style="width:100%;height:46px;background:var(--green);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">📋 Copy to clipboard<\/button>'
     +'<button onclick="shareListDownload()" style="width:100%;height:46px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:15px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif">⬇ Download .txt<\/button>'
-    +'<div style="text-align:center;padding:6px 0;font-size:12px;color:var(--text3)">Direct retailer cart handoff coming soon.<\/div>'
+    +'<\/div>'
+    +'<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px">Open in delivery app<\/div>'
+    +'<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Opens each item in the store\'s search. You add to cart.<\/div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<button onclick="shareToInstacart()" style="height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">🛒 Instacart<\/button>'
+    +'<button onclick="shareToWalmart()" style="height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">🏬 Walmart<\/button>'
+    +'<button onclick="shareToKroger()" style="height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">🛍 Kroger<\/button>'
+    +'<button onclick="shareToUberEats()" style="height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">🚗 UberEats<\/button>'
+    +'<button onclick="shareToDoorDash()" style="height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;grid-column:1/-1">🚪 DoorDash<\/button>'
     +'<\/div>';
   back.style.display='flex';setTimeout(function(){back.classList.add('open');},10);
 }
 function closeShareSheet(){var back=document.getElementById('share-sheet-back');if(!back)return;back.classList.remove('open');setTimeout(function(){back.style.display='none';},300);}
 function shareListCopy(){navigator.clipboard.writeText(window._shareListText||'').then(function(){showToast('List copied to clipboard');closeShareSheet();}).catch(function(){alert('Copy failed. Your list:\n\n'+(window._shareListText||''));});}
 function shareListDownload(){var text=window._shareListText||'';var blob=new Blob([text],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='shopping-list.txt';a.click();URL.revokeObjectURL(a.href);showToast('List downloaded');}
+function _shareOpenPerItem(urlFn,stagger){var activeItems=items.filter(function(i){return!i.done&&!i.recurring;});if(!activeItems.length){showToast('No items to share.');return;}activeItems.forEach(function(it,idx){setTimeout(function(){window.open(urlFn(it.name),'_blank');},idx*stagger);});closeShareSheet();}
+function shareToInstacart(){_shareOpenPerItem(function(n){return'https://www.instacart.com/store/search?q='+encodeURIComponent(n);},400);}
+function shareToWalmart(){_shareOpenPerItem(function(n){return'https://www.walmart.com/search?q='+encodeURIComponent(n);},400);}
+function shareToKroger(){_shareOpenPerItem(function(n){return'https://www.kroger.com/search?query='+encodeURIComponent(n);},400);}
+function shareToUberEats(){navigator.clipboard.writeText(window._shareListText||'').then(function(){window.open('https://www.ubereats.com','_blank');closeShareSheet();showToast('List copied — paste into UberEats search.');}).catch(function(){window.open('https://www.ubereats.com','_blank');closeShareSheet();});}
+function shareToDoorDash(){navigator.clipboard.writeText(window._shareListText||'').then(function(){window.open('https://www.doordash.com','_blank');closeShareSheet();showToast('List copied — paste into DoorDash search.');}).catch(function(){window.open('https://www.doordash.com','_blank');closeShareSheet();});}
 
 // ── Medications ───────────────────────────────────────────────────────────────
 function persistMedications(){localStorage.setItem('la_medications',JSON.stringify(medications));localStorage.setItem('la_med_nid',medNid);}
@@ -2847,17 +2915,20 @@ async function reExtractNutrition(recipeId){
 
 <!-- Shopping Mode Overlay -->
 <div id="sm-overlay" style="display:none;overflow:hidden">
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:max(52px,env(safe-area-inset-top) + 16px) 20px 14px;flex-shrink:0;border-bottom:1px solid var(--border)">
-    <div>
-      <div style="font-size:22px;font-weight:800;color:var(--text)">Shopping</div>
-      <div style="font-size:12px;color:var(--text3);margin-top:2px">Tap to cross off</div>
+  <div id="sm-main-view" style="display:flex;flex-direction:column;flex:1;min-height:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:max(52px,env(safe-area-inset-top) + 16px) 20px 14px;flex-shrink:0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:22px;font-weight:800;color:var(--text)">Shopping</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">Tap to cross off</div>
+      </div>
+      <button onclick="smDoneShopping()" style="height:38px;padding:0 18px;background:var(--green);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">Done Shopping</button>
     </div>
-    <button onclick="exitShoppingMode()" style="height:38px;padding:0 18px;background:var(--green);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">Done Shopping</button>
+    <div id="sm-list" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
+    <div style="padding:12px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom));flex-shrink:0">
+      <button id="sm-drawer-btn" style="display:none;width:100%;height:44px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Outfit',sans-serif"></button>
+    </div>
   </div>
-  <div id="sm-list" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
-  <div style="padding:12px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom));flex-shrink:0">
-    <button id="sm-drawer-btn" onclick="smOpenDrawer()" style="display:none;width:100%;height:44px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Outfit',sans-serif"></button>
-  </div>
+  <div id="sm-celebration-view" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px"></div>
 </div>
 
 <!-- Shopping Mode Crossed-off Drawer -->
