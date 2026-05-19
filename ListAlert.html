@@ -672,8 +672,8 @@ document.getElementById('radius-lbl').textContent = radius + 'm';
 if (!localStorage.getItem('la_emoji_v2')) {stores.forEach(function(s){s.emoji=getStoreEmoji(s.name);});persist();localStorage.setItem('la_emoji_v2','1');}
 function persist(){localStorage.setItem('la_stores',JSON.stringify(stores));localStorage.setItem('la_items',JSON.stringify(items));localStorage.setItem('la_radius',radius);localStorage.setItem('la_nid',nid);localStorage.setItem('la_saved_recipes',JSON.stringify(savedRecipes));localStorage.setItem('la_autoclear',autoclear?'1':'0');}
 function persistAllergies(){localStorage.setItem('la_allergies',JSON.stringify(allergies));}
-function addAllergy(name){var k=name.toLowerCase().trim();if(k&&allergies.indexOf(k)===-1){allergies.push(k);persistAllergies();showToast('Added to allergy list: '+name);if(curTab==='cookbook')renderCookbookTab();}}
-function removeAllergy(name){var k=name.toLowerCase().trim();allergies=allergies.filter(function(a){return a!==k;});persistAllergies();if(curTab==='cookbook')renderCookbookTab();}
+function addAllergy(name){var k=name.toLowerCase().trim();if(k&&allergies.indexOf(k)===-1){allergies.push(k);persistAllergies();if(household&&supaUserId){supaPost('household_allergies',{household_id:household.id,item_name:k}).catch(function(e){console.warn('addAllergy sync failed',e);});}showToast('Added to allergy list: '+name);if(curTab==='cookbook')renderCookbookTab();}}
+function removeAllergy(name){var k=name.toLowerCase().trim();allergies=allergies.filter(function(a){return a!==k;});persistAllergies();if(household&&supaUserId){supaGet('household_allergies','household_id=eq.'+household.id+'&item_name=eq.'+encodeURIComponent(k)+'&select=id').then(function(rows){if(rows&&rows.length)supaDelete('household_allergies','id=eq.'+rows[0].id).catch(function(){});}).catch(function(){});}if(curTab==='cookbook')renderCookbookTab();}
 function isRecurringDue(it){if(!it.recurDays)return true;if(!it.lastReset)return true;var last=new Date(it.lastReset);var due=new Date(last.getTime()+it.recurDays*24*60*60*1000);return new Date()>=due;}
 function daysUntilDue(it){if(!it.recurDays||!it.lastReset)return null;var last=new Date(it.lastReset);var due=new Date(last.getTime()+it.recurDays*24*60*60*1000);var diff=Math.ceil((due-new Date())/(24*60*60*1000));return diff;}
 function makeRecurring(id){var it=items.find(function(i){return i.id===id;});if(!it)return;var days=prompt('Refill every how many days? (Leave blank to set later)','');it.recurring=true;it.lastReset=new Date().toISOString().split('T')[0];if(days&&parseInt(days)>0){it.recurDays=parseInt(days);}persistItemWrite(it);openActionItem=null;renderList();showToast('🔁 '+it.name+' is now recurring');}
@@ -750,8 +750,8 @@ async function initSupabase(){
     var stored=localStorage.getItem('la_supa_session');
     if(stored){
       var sess=JSON.parse(stored);
-      if(sess.expires_at&&Date.now()/1000<sess.expires_at-60){supaSession=sess;supaUserId=sess.user.id;await supaPatch('users','id=eq.'+supaUserId,{last_seen:new Date().toISOString()}).catch(function(){});await flushQueue();return;}
-      try{var refreshed=await supaAuth('token?grant_type=refresh_token',{refresh_token:sess.refresh_token});supaSession=refreshed;supaUserId=refreshed.user.id;localStorage.setItem('la_supa_session',JSON.stringify(refreshed));await flushQueue();return;}catch(e){}
+      if(sess.expires_at&&Date.now()/1000<sess.expires_at-60){supaSession=sess;supaUserId=sess.user.id;await supaPatch('users','id=eq.'+supaUserId,{last_seen:new Date().toISOString()}).catch(function(){});await flushQueue();var _hhRec=household&&household.invite_code?JSON.stringify({invite_code:household.invite_code,household_id:household.id}):null;if(_hhRec)sessionStorage.setItem('la_hh_recovery',_hhRec);return;}
+      try{var refreshed=await supaAuth('token?grant_type=refresh_token',{refresh_token:sess.refresh_token});supaSession=refreshed;supaUserId=refreshed.user.id;localStorage.setItem('la_supa_session',JSON.stringify(refreshed));await flushQueue();var _hhRec2=household&&household.invite_code?JSON.stringify({invite_code:household.invite_code,household_id:household.id}):null;if(_hhRec2)sessionStorage.setItem('la_hh_recovery',_hhRec2);return;}catch(e){}
     }
     var data=await supaAuth('signup',{"anonymous":true});
     supaSession=data;supaUserId=data.user.id;
@@ -872,9 +872,27 @@ async function loadSharedData(){
         if(!exists)savedRecipes.unshift({id:r.id,_rid:r.id,name:r.name,tags:r.tags||[],type:r.type||'',items:r.items||[],savedAt:r.saved_at,household_id:r.household_id});
       });
     }
+    await loadHouseholdCategories();
+    await loadHouseholdAllergies();
     persist();renderList();if(curTab==='cookbook')renderCookbookTab();
     subscribeRealtime();
   }catch(e){console.warn('loadSharedData failed',e);}
+}
+
+async function loadHouseholdCategories(){
+  if(!household||!supaUserId)return;
+  try{
+    var rows=await supaGet('household_categories','household_id=eq.'+household.id+'&select=*&order=created_at.asc');
+    if(rows){userCategories=rows.map(function(r){return r.name;});saveCategories();}
+  }catch(e){console.warn('loadHouseholdCategories failed',e);}
+}
+
+async function loadHouseholdAllergies(){
+  if(!household||!supaUserId)return;
+  try{
+    var rows=await supaGet('household_allergies','household_id=eq.'+household.id+'&select=*&order=created_at.asc');
+    if(rows){allergies=rows.map(function(r){return r.item_name;});persistAllergies();}
+  }catch(e){console.warn('loadHouseholdAllergies failed',e);}
 }
 
 async function updateMemberRole(memberId, newRole){
@@ -1196,13 +1214,20 @@ async function loadFromSupabase(){
     checkLocalMigration();
     // Load household if previously joined
     if(household&&supaUserId){loadHouseholdMembers().then(function(){loadSharedData();subscribeRealtime();renderHouseholdPanel();});}
-    else if(!household&&supaUserId){supaGet('household_members','user_id=eq.'+supaUserId+'&select=*,households(*)').then(function(rows){
-      if(rows&&rows.length&&rows[0].households){
-        var hh=rows[0].households;var mem=rows[0];
-        household={id:hh.id,name:hh.name,invite_code:hh.invite_code,role:mem.role,display_name:mem.display_name||'Me'};
-        persistHousehold();loadHouseholdMembers().then(function(){loadSharedData();subscribeRealtime();renderHouseholdPanel();renderList();});
+    else if(!household&&supaUserId){
+      var _hhRec3=null;try{_hhRec3=JSON.parse(sessionStorage.getItem('la_hh_recovery')||'null');}catch(e){}
+      if(_hhRec3&&_hhRec3.invite_code){
+        joinHousehold(_hhRec3.invite_code,'Me').then(function(){sessionStorage.removeItem('la_hh_recovery');renderHouseholdPanel();renderList();}).catch(function(){sessionStorage.removeItem('la_hh_recovery');});
+      } else {
+        supaGet('household_members','user_id=eq.'+supaUserId+'&select=*,households(*)').then(function(rows){
+          if(rows&&rows.length&&rows[0].households){
+            var hh=rows[0].households;var mem=rows[0];
+            household={id:hh.id,name:hh.name,invite_code:hh.invite_code,role:mem.role,display_name:mem.display_name||'Me'};
+            persistHousehold();loadHouseholdMembers().then(function(){loadSharedData();subscribeRealtime();renderHouseholdPanel();renderList();});
+          }
+        }).catch(function(){});
       }
-    }).catch(function(){});}
+    }
   }catch(e){console.warn('loadFromSupabase failed:',e);}
 }
 function checkLocalMigration(){
@@ -2220,7 +2245,10 @@ function saveCategories(){localStorage.setItem('la_categories',JSON.stringify(us
 function createCategory(name){
   name=name.trim();
   if(!name)return;
-  if(userCategories.indexOf(name)===-1){userCategories.push(name);saveCategories();}
+  if(userCategories.indexOf(name)===-1){
+    userCategories.push(name);saveCategories();
+    if(household&&supaUserId){supaPost('household_categories',{household_id:household.id,name:name}).catch(function(e){console.warn('createCategory sync failed',e);});}
+  }
 }
 function assignItemCategory(id,cat){
   var it=items.find(function(i){return i.id===id;});
@@ -2262,7 +2290,7 @@ function renderCategorySheet(){
   el.innerHTML=html;
 }
 function catSheetCreate(){var inp=document.getElementById('cat-sheet-input');if(!inp)return;var name=inp.value.trim();if(!name){inp.focus();return;}createCategory(name);renderCategorySheet();renderList();}
-function deleteCategory(cat){if(!confirm('Delete category "'+cat+'"? Items remain but become uncategorized.'))return;userCategories=userCategories.filter(function(c){return c!==cat;});items.forEach(function(it){if(it.category===cat){it.category=null;persistItemWrite(it);}});saveCategories();renderCategorySheet();renderList();}
+function deleteCategory(cat){if(!confirm('Delete category "'+cat+'"? Items remain but become uncategorized.'))return;userCategories=userCategories.filter(function(c){return c!==cat;});items.forEach(function(it){if(it.category===cat){it.category=null;persistItemWrite(it);}});saveCategories();if(household&&supaUserId){supaGet('household_categories','household_id=eq.'+household.id+'&name=eq.'+encodeURIComponent(cat)+'&select=id').then(function(rows){if(rows&&rows.length)supaDelete('household_categories','id=eq.'+rows[0].id).catch(function(){});}).catch(function(){});}renderCategorySheet();renderList();}
 function catRemoveItem(itemId){var it=items.find(function(i){return i.id===itemId;});if(!it)return;it.category=null;persistItemWrite(it);renderCategorySheet();renderList();}
 function catAssignFromSheet(itemId,cat){if(!cat)return;var it=items.find(function(i){return i.id===itemId;});if(!it)return;it.category=cat;persistItemWrite(it);renderCategorySheet();renderList();}
 
