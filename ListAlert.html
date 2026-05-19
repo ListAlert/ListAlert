@@ -1952,7 +1952,7 @@ function showSaveRecipePrompt(ingredientNames,sourceName,mergeNote){
 }
 
 function toggleSaveTag(el,tag){var on=el.classList.toggle('on');if(on){if(saveRecipeTags.indexOf(tag)===-1)saveRecipeTags.push(tag);}else{saveRecipeTags=saveRecipeTags.filter(function(t){return t!==tag;});}}
-function doSaveRecipe(ingredients){var name=(document.getElementById('save-recipe-name').value||'').trim();if(!name){document.getElementById('save-recipe-name').focus();document.getElementById('save-recipe-name').style.borderColor='var(--red)';return;}var _srv=parseInt((document.getElementById('save-recipe-servings')||{}).value||'0');var _cal=parseInt((document.getElementById('save-recipe-calories')||{}).value||'0');var newRecipe={id:Date.now(),name:name,tags:saveRecipeTags.slice(),items:ingredients,servings:_srv||null,calories_per_serving:_cal||null,extracted_at:pendingExtractedAt||null,savedAt:new Date().toISOString()};pendingServings=null;pendingCalories=null;pendingExtractedAt=null;savedRecipes.unshift(newRecipe);items.forEach(function(it){if(it.sources){var idx=it.sources.indexOf(pendingRecipeName);if(idx!==-1)it.sources[idx]=name;}});persistRecipeWrite(newRecipe);persist();if(typeof _pendingDishSaveQueue!=='undefined'&&_pendingDishSaveQueue.length>0&&_pendingDishSaveIdx>0){showNextDishSavePrompt();}else{closeRecipeModal();}}
+function doSaveRecipe(ingredients){var name=(document.getElementById('save-recipe-name').value||'').trim();if(!name){document.getElementById('save-recipe-name').focus();document.getElementById('save-recipe-name').style.borderColor='var(--red)';return;}var _srv=parseInt((document.getElementById('save-recipe-servings')||{}).value||'0');var _cal=parseInt((document.getElementById('save-recipe-calories')||{}).value||'0');var newRecipe={id:Date.now(),name:name,tags:saveRecipeTags.slice(),type:cbRecipeType||'',items:ingredients,servings:_srv||null,calories_per_serving:_cal||null,extracted_at:pendingExtractedAt||null,savedAt:new Date().toISOString()};pendingServings=null;pendingCalories=null;pendingExtractedAt=null;cbRecipeType='';savedRecipes.unshift(newRecipe);items.forEach(function(it){if(it.sources){var idx=it.sources.indexOf(pendingRecipeName);if(idx!==-1)it.sources[idx]=name;}});persistRecipeWrite(newRecipe);persist();if(typeof _pendingDishSaveQueue!=='undefined'&&_pendingDishSaveQueue.length>0&&_pendingDishSaveIdx>0){showNextDishSavePrompt();}else{closeRecipeModal();if(curTab==='cookbook')renderCookbookTab();}}
 
 var savedRecipeFilter=null;
 function setSavedFilter(tag){savedRecipeFilter=(savedRecipeFilter===tag)?null:tag;renderSavedRecipesInModal();}
@@ -2485,7 +2485,7 @@ initSupabase().then(function(){
   var _wCtrl=new AbortController();var _wTimer=setTimeout(function(){_wCtrl.abort();},5000);
   fetch('https://listalert.serbronn93.workers.dev/?ping=1',{signal:_wCtrl.signal})
     .then(function(){clearTimeout(_wTimer);})
-    .catch(function(){clearTimeout(_wTimer);var na=document.getElementById('notif-area');if(na&&!na.innerHTML.trim()){na.innerHTML='<div style="padding:6px 16px 2px;font-size:12px;color:var(--text3)">Recipe extraction is temporarily unavailable.<\/div>';}});
+    .catch(function(e){clearTimeout(_wTimer);if(e&&e.name==='AbortError')return;var na=document.getElementById('notif-area');if(na&&!na.innerHTML.trim()){na.innerHTML='<div style="padding:6px 16px 2px;font-size:12px;color:var(--text3)">Recipe extraction is temporarily unavailable.<\/div>';}});
 });
 if(localStorage.getItem('la_gps_on')==='1'){setTimeout(function(){startGPS();},1500);}
 
