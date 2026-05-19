@@ -1070,9 +1070,10 @@ function renderHouseholdPanel(){
   html+='</div>';
   // Invite code
   html+='<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">';
-  html+='<div><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Invite code</div>';
-  html+='<div style="font-size:20px;font-weight:800;color:var(--text);letter-spacing:4px">'+household.invite_code+'</div></div>';
-  html+='<button onclick="hhCopyCode()" style="height:34px;padding:0 14px;background:var(--violet);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif">Copy</button>';
+  html+='<div style="flex:1"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Invite code</div>';
+  html+='<div style="font-size:20px;font-weight:800;color:var(--text);letter-spacing:4px">'+household.invite_code+'</div>';
+  html+='<div style="font-size:10px;color:var(--text3);margin-top:3px">Save this — needed to rejoin if you clear browser data</div></div>';
+  html+='<button onclick="hhCopyCode()" style="height:34px;padding:0 14px;background:var(--violet);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif;flex-shrink:0;margin-left:10px">Copy</button>';
   html+='</div>';
   // Members
   if(householdMembers.length){
@@ -1241,7 +1242,7 @@ function searchStores(storeName,centerLat,centerLng){
   function makeQuery(d){var b=(centerLat-d)+','+(centerLng-d)+','+(centerLat+d)+','+(centerLng+d);return '[out:json][timeout:15];(node["name"~"'+storeName+'",i]["shop"]('+b+');way["name"~"'+storeName+'",i]["shop"]('+b+');node["name"~"'+storeName+'",i]["amenity"]('+b+');way["name"~"'+storeName+'",i]["amenity"]('+b+'););out center 10;';}
   var overpassUrls=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
   function fetchWithTimeout(url,body,ms){var ctrl=new AbortController();var timer=setTimeout(function(){ctrl.abort();},ms);return fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(body),signal:ctrl.signal}).then(function(r){clearTimeout(timer);if(!r.ok)throw new Error('overpass_'+r.status);return r.json();}).catch(function(e){clearTimeout(timer);throw e;});}
-  function tryOverpass(urls,i,query){if(i>=urls.length)return Promise.reject(new Error('overpass_all_failed'));return fetchWithTimeout(urls[i],query,8000).catch(function(){return tryOverpass(urls,i+1,query);});}
+  function tryOverpass(urls,i,query){if(i>=urls.length)return Promise.reject(new Error('overpass_all_failed'));return fetchWithTimeout(urls[i],query,12000).catch(function(){return tryOverpass(urls,i+1,query);});}
   function parseElements(data){if(!data||!data.elements||!data.elements.length)return[];return data.elements.map(function(el){var elLat=el.lat||(el.center&&el.center.lat);var elLng=el.lon||(el.center&&el.center.lon);var tags=el.tags||{};var addr=[tags['addr:housenumber'],tags['addr:street'],tags['addr:city'],tags['addr:state']].filter(Boolean).join(' ');if(!addr)addr=tags['addr:full']||'';var d=dist(centerLat,centerLng,elLat,elLng);return{name:tags.name||storeName,addr:addr,lat:elLat,lng:elLng,dist:d};}).filter(function(r){return r.lat&&r.lng;}).sort(function(a,b){return a.dist-b.dist;}).slice(0,6);}
   return tryOverpass(overpassUrls,0,makeQuery(0.12)).then(function(data){
     var results=parseElements(data);
