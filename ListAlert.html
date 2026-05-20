@@ -131,18 +131,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 .radius-bar input[type=range]{flex:1;accent-color:var(--green)}
 .radius-bar span{font-size:12px;font-weight:700;color:var(--green);min-width:44px;text-align:right}
 
-.org-wrap{padding:12px 16px 0}
-.org-group{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
-.org-hdr{display:flex;align-items:center;padding:11px 14px;gap:9px;background:var(--bg3);border-bottom:1px solid var(--border)}
-.org-hdr-ico{font-size:17px}
-.org-hdr-name{font-size:14px;font-weight:700;color:var(--text);flex:1}
-.org-hdr-count{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--bg4);color:var(--text2)}
-.org-row{display:flex;align-items:center;padding:12px 14px;gap:11px;border-bottom:1px solid var(--border);background:var(--bg2)}
-.org-row:last-child{border-bottom:none}
-.org-name{flex:1;font-size:14px;font-weight:500;color:var(--text)}
-.org-sel{height:32px;border:1px solid var(--border2);border-radius:8px;font-size:12px;font-weight:600;color:var(--text);background:var(--bg3);padding:0 8px;outline:none;font-family:"Outfit",sans-serif;cursor:pointer;max-width:130px;-webkit-appearance:none}
-.org-sel:focus{border-color:var(--green)}
-
 .empty{text-align:center;padding:50px 24px;color:var(--text3);font-size:14px;line-height:1.8}
 .empty b{color:var(--text2);display:block;font-size:16px;margin-bottom:6px}
 @keyframes skel-pulse{0%,100%{opacity:.35}50%{opacity:.65}}
@@ -405,7 +393,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 /* iOS 14.0–14.4 flex gap fallbacks — gap: is ignored; use margin on children instead */
 .add-bar>*+*{margin-left:8px}.notif-btns>*+*{margin-left:8px}.modal-actions>*+*{margin-left:8px}.save-recipe-btns>*+*{margin-left:8px}
 .tabs>*+*{margin-left:2px}.modal-tabs>*+*{margin-left:4px}.cb-type-picker>*+*{margin-left:6px}
-.notif>*+*{margin-left:12px}.result-card>*+*{margin-left:10px}.store-card>*+*{margin-left:11px}.org-row>*+*{margin-left:11px}
+.notif>*+*{margin-left:12px}.result-card>*+*{margin-left:10px}.store-card>*+*{margin-left:11px}
 .item-row>*+*{margin-left:12px}.nearby-row>*+*{margin-left:12px}.recipe-trip-header>*+*{margin-left:12px}.cart-item-row>*+*{margin-left:12px}.sm-item>*+*{margin-left:16px}
 .ob-step>*+*{margin-left:14px}.srow>*+*{margin-left:8px}
 .action-sheet>*+*{margin-top:4px}.save-recipe-fields>*+*{margin-top:8px}.ob-steps>*+*{margin-top:18px}
@@ -438,7 +426,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
     <div id="email-banner-area"></div>
     <div id="notif-area"></div>
     <div id="nearby-area"></div>
-    <div id="ready-banner" style="display:none;padding:8px 16px 2px"><div style="font-size:12px;color:var(--text3);text-align:center;padding:4px 0">Your list is ready — tap below to order for delivery</div></div>
     <div id="order-bar" style="display:none"></div>
     <div id="list-body"></div>
   </div>
@@ -485,10 +472,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
         <button onclick="skipToApp()" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline">Skip to app</button>
       </div>
     </div>
-  </div>
-
-  <div class="view" id="view-organize">
-    <div class="org-wrap" id="org-body"></div>
   </div>
 
   <div class="add-bar" id="add-bar">
@@ -1254,7 +1237,7 @@ async function loadFromSupabase(){
     var recipeRows=await supaGet('saved_recipes','user_id=eq.'+supaUserId+'&select=*&order=saved_at.desc');
     if(recipeRows.length){savedRecipes=recipeRows.map(function(r){return{id:r.id,_rid:r.id,name:r.name,tags:r.tags||[],type:r.type||'',items:r.items||[],source:r.source||'',savedAt:r.saved_at};});}
 
-    persist();renderList();renderNearby();updateCartBadge();if(curTab==='stores'){renderStores();renderHouseholdPanel();}if(curTab==='organize')renderOrganize();if(curTab==='cookbook')renderCookbookTab();
+    persist();renderList();renderNearby();updateCartBadge();if(curTab==='stores'){renderStores();renderHouseholdPanel();}if(curTab==='cookbook')renderCookbookTab();
     checkLocalMigration();
     // Load household if previously joined
     if(household&&supaUserId){loadHouseholdMembers().then(function(){loadSharedData();subscribeRealtime();renderHouseholdPanel();});}
@@ -1711,9 +1694,7 @@ function toggleTripItem(id){
 }
 
 function delItem(id){if(isContributor())return;persistItemDelete(id);items=items.filter(function(i){return i.id!==id;});persist();renderList();if(items.length===0&&supaUserId){supaDelete('items','user_id=eq.'+supaUserId).catch(function(){});}}
-function renderOrganize(){var el=document.getElementById('org-body');if(!items.length){el.innerHTML='<div class="empty"><b>Nothing to assign</b>Add items on the List tab first.</div>';return;}var grouped={};stores.forEach(function(s){grouped[s.id]=[];});var unassigned=[];items.forEach(function(it){if(it.store&&grouped[it.store]!==undefined)grouped[it.store].push(it);else unassigned.push(it);});var html='';if(unassigned.length){html+='<div class="sec-label">Not assigned</div><div class="org-group">'+unassigned.map(function(it){return orgRow(it);}).join('')+'</div>';}stores.forEach(function(s){var its=grouped[s.id]||[];if(!its.length)return;var left=its.filter(function(i){return!i.done;}).length;html+='<div class="org-group"><div class="org-hdr"><span class="org-hdr-ico">'+s.emoji+'</span><span class="org-hdr-name">'+s.name+'</span><span class="org-hdr-count">'+left+' left</span></div>'+its.map(function(it){return orgRow(it);}).join('')+'</div>';});el.innerHTML=html;}
-function orgRow(it){var opts='<option value="">No store</option>'+stores.map(function(s){return'<option value="'+s.id+'"'+(it.store===s.id?' selected':'')+'>'+s.emoji+' '+s.name+'</option>';}).join('');return'<div class="org-row"><span class="org-name">'+escapeHTML(it.name)+'</span><select class="org-sel" onchange="assign('+it.id+',this.value)">'+opts+'</select></div>';}
-function assign(itemId,storeId){var it=items.find(function(i){return i.id===itemId;});if(it){var sid2=storeId?parseInt(storeId):null;it.store=sid2;var ms2=sid2?stores.find(function(s){return s.id===sid2;}):null;it._storeRid=ms2&&ms2._rid?ms2._rid:null;persistItemWrite(it);renderOrganize();renderList();}}
+function assign(itemId,storeId){var it=items.find(function(i){return i.id===itemId;});if(it){var sid2=storeId?parseInt(storeId):null;it.store=sid2;var ms2=sid2?stores.find(function(s){return s.id===sid2;}):null;it._storeRid=ms2&&ms2._rid?ms2._rid:null;persistItemWrite(it);renderList();}}
 var recipeTab='paste',extractedIngredients=[],recipeLoading=false,recipePhotoBase64=null,recipePhotoMime='image/jpeg',pendingMealDishes=[];
 
 function handleUrlImport(){
@@ -2799,7 +2780,7 @@ function renderShoppingMode(){
     }
   }
   el.innerHTML=html;
-  var db=document.getElementById('sm-drawer-btn');if(db)db.style.display='none';
+  var db=document.getElementById('sm-drawer-btn');if(db){if(crossed.length){db.textContent='View crossed off ('+crossed.length+')';db.onclick=smOpenDrawer;db.style.display='';}else{db.style.display='none';}}
 }
 function smOpenDrawer(){
   var back=document.getElementById('sm-drawer-back');if(!back)return;
@@ -2978,7 +2959,7 @@ async function reExtractNutrition(recipeId){
   <div class="cart-drawer">
     <div class="modal-handle"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;flex-shrink:0">
-      <div style="font-size:17px;font-weight:700;color:var(--text)">🛒 Shopping Cart</div>
+      <div style="font-size:17px;font-weight:700;color:var(--text)">🛒 Cart</div>
       <div style="display:flex;gap:8px;align-items:center">
         <button onclick="clearCart()" id="cart-clear-btn" style="display:none;height:30px;padding:0 12px;background:var(--red-dim);border:1px solid rgba(248,113,113,0.3);border-radius:8px;color:var(--red);font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">Clear cart</button>
         <button onclick="toggleCart()" style="width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
