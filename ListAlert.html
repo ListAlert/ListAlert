@@ -71,7 +71,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 .item-row{display:flex;align-items:center;padding:13px 15px;gap:12px;background:var(--bg2);border-bottom:1px solid var(--border);position:relative;transition:transform .2s ease;will-change:transform;overflow:hidden}
 .item-row:last-child{border-bottom:none}
 .item-row-swipe-bg{position:absolute;right:0;top:0;bottom:0;width:90px;background:var(--red-dim);display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;color:var(--red);border-left:1px solid rgba(248,113,113,0.2);opacity:0;transition:opacity .15s}
-.item-row.swiping .item-row-swipe-bg{opacity:1}
+.item-row.swiping-left .item-row-swipe-bg{opacity:1}
+.item-row-swipe-bg-right{position:absolute;left:0;top:0;bottom:0;width:90px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;color:var(--green);border-right:1px solid rgba(74,222,128,0.2);opacity:0;transition:opacity .15s}
+.item-row.swiping-right .item-row-swipe-bg-right{opacity:1}
 .chk{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;transition:all .2s}
 .chk.done{background:var(--green);border-color:var(--green)}
 .chk svg{display:none}
@@ -143,6 +145,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 
 .empty{text-align:center;padding:50px 24px;color:var(--text3);font-size:14px;line-height:1.8}
 .empty b{color:var(--text2);display:block;font-size:16px;margin-bottom:6px}
+@keyframes skel-pulse{0%,100%{opacity:.35}50%{opacity:.65}}
+.skel-row{height:54px;border-radius:12px;background:var(--bg3);margin:0 16px 8px;animation:skel-pulse 1.2s ease-in-out infinite}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 32px;text-align:center}
+.empty-state svg{margin-bottom:18px;opacity:.35}
+.empty-state h3{font-size:17px;font-weight:700;color:var(--text2);margin:0 0 6px}
+.empty-state p{font-size:14px;color:var(--text3);margin:0;line-height:1.6}
 .sec-label{padding:14px 20px 6px;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase}
 
 .modal-backdrop{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:min(860px,96vw);background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -394,6 +402,15 @@ html,body{height:100%;overflow:hidden;background:var(--bg4);font-family:"Outfit"
 .sm-drawer-back.open{opacity:1;pointer-events:all}
 .sm-drawer-wrap{width:100%;max-width:min(860px,96vw);background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 max(24px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);max-height:70vh;display:flex;flex-direction:column}
 .sm-drawer-back.open .sm-drawer-wrap{transform:translateY(0)}
+/* iOS 14.0–14.4 flex gap fallbacks — gap: is ignored; use margin on children instead */
+.add-bar>*+*{margin-left:8px}.notif-btns>*+*{margin-left:8px}.modal-actions>*+*{margin-left:8px}.save-recipe-btns>*+*{margin-left:8px}
+.tabs>*+*{margin-left:2px}.modal-tabs>*+*{margin-left:4px}.cb-type-picker>*+*{margin-left:6px}
+.notif>*+*{margin-left:12px}.result-card>*+*{margin-left:10px}.store-card>*+*{margin-left:11px}.org-row>*+*{margin-left:11px}
+.item-row>*+*{margin-left:12px}.nearby-row>*+*{margin-left:12px}.recipe-trip-header>*+*{margin-left:12px}.cart-item-row>*+*{margin-left:12px}.sm-item>*+*{margin-left:16px}
+.ob-step>*+*{margin-left:14px}.srow>*+*{margin-left:8px}
+.action-sheet>*+*{margin-top:4px}.save-recipe-fields>*+*{margin-top:8px}.ob-steps>*+*{margin-top:18px}
+.store-tags{margin:-2px}.store-tags>*{margin:2px}.save-recipe-tags{margin:-3px}.save-recipe-tags>*{margin:3px}.saved-recipe-meta{margin:-2px}.saved-recipe-meta>*{margin:2px}.cb-recipe-tags{margin:-2px}.cb-recipe-tags>*{margin:2px}
+.filter-bar{gap:7px}.filter-bar>*+*{margin-left:7px}.cb-filter-bar>*+*{margin-left:6px}
 </style>
 </head>
 <body>
@@ -645,6 +662,7 @@ function escapeHTML(str){
 
 var stores = JSON.parse(localStorage.getItem('la_stores') || '[]');
 var items  = JSON.parse(localStorage.getItem('la_items')  || '[]');
+var _supabaseLoading = true;
 var cartItems = JSON.parse(localStorage.getItem('la_cart') || '[]');
 var radius = parseInt(localStorage.getItem('la_radius')   || '800');
 var nid    = parseInt(localStorage.getItem('la_nid')      || '1');
@@ -815,6 +833,7 @@ async function createHousehold(name, displayName){
   await supaPost('household_members',{household_id:hhId,user_id:supaUserId,role:'admin',display_name:displayName||'Me'});
   household={id:hhId,name:name,invite_code:hhRows[0].invite_code,role:'admin',display_name:displayName||'Me'};
   persistHousehold();
+  localStorage.setItem('la_saved_invite',hhRows[0].invite_code);
   await loadHouseholdMembers();
   subscribeRealtime();
   return household;
@@ -838,6 +857,8 @@ async function joinHousehold(inviteCode, displayName){
   }
   household={id:hh.id,name:hh.name,invite_code:hh.invite_code,role:role,display_name:displayName||'Me'};
   persistHousehold();
+  localStorage.setItem('la_saved_invite',code);
+  localStorage.setItem('la_display_name_saved',displayName||'Me');
   await loadHouseholdMembers();
   await loadSharedData();
   subscribeRealtime();
@@ -852,6 +873,12 @@ async function loadHouseholdMembers(){
     // Update own role in case it changed
     var me=householdMembers.find(function(m){return m.user_id===supaUserId;});
     if(me){household.role=me.role;household.display_name=me.display_name||household.display_name;persistHousehold();}
+    // Admin ghost: if no admin exists, promote the first member alphabetically
+    var admins=householdMembers.filter(function(m){return m.role==='admin';});
+    if(!admins.length&&householdMembers.length>0){
+      var sorted=householdMembers.slice().sort(function(a,b){return(a.display_name||'').localeCompare(b.display_name||'');});
+      try{await updateMemberRole(sorted[0].id,'admin');}catch(e2){console.warn('admin ghost promotion failed',e2);}
+    }
   }catch(e){console.warn('loadHouseholdMembers failed',e);}
 }
 
@@ -979,6 +1006,19 @@ function _subscribeRealtimeChannel(){
       if(r.user_id===supaUserId)return;
       var isMember=householdMembers.some(function(m){return m.user_id===r.user_id;});
       if(!isMember)return;
+    })
+    .on('broadcast',{event:'list_cleared'},function(msg){
+      var who=(msg.payload&&msg.payload.cleared_by)||'Someone';
+      clearList(true);
+      showToast(escapeHTML(who)+' cleared the list');
+    })
+    .on('broadcast',{event:'order_updated'},function(msg){
+      if(!msg.payload)return;
+      _orderRecipeIds=Array.isArray(msg.payload.recipeIds)?msg.payload.recipeIds:[];
+      _saveOrderRecipeIds();
+      if(curTab==='cookbook')renderCookbookTab();
+      var who=msg.payload.by||'Someone';
+      showToast(escapeHTML(who)+' updated the shared order');
     })
     .subscribe();
   window.realtimeChannel.socket.accessToken=async()=>window.supaSession?.access_token||SUPA_KEY;
@@ -1220,14 +1260,23 @@ async function loadFromSupabase(){
     if(household&&supaUserId){loadHouseholdMembers().then(function(){loadSharedData();subscribeRealtime();renderHouseholdPanel();});}
     else if(!household&&supaUserId){
       var _hhRec3=null;try{_hhRec3=JSON.parse(localStorage.getItem('la_hh_recovery')||'null');}catch(e){}
+      var _savedInvite=localStorage.getItem('la_saved_invite')||'';
+      var _savedDisplay=localStorage.getItem('la_display_name_saved')||'Me';
       if(_hhRec3&&_hhRec3.invite_code){
         joinHousehold(_hhRec3.invite_code,_hhRec3.display_name||'Me').then(function(){localStorage.removeItem('la_hh_recovery');renderHouseholdPanel();renderList();}).catch(function(){localStorage.removeItem('la_hh_recovery');});
+      } else if(_savedInvite){
+        // Silent auto-rejoin using persisted invite code
+        joinHousehold(_savedInvite,_savedDisplay).then(function(){renderHouseholdPanel();renderList();showToast('Household reconnected');}).catch(function(){localStorage.removeItem('la_saved_invite');renderList();});
       } else {
         supaGet('household_members','user_id=eq.'+supaUserId+'&select=*,households(*)').then(function(rows){
           if(rows&&rows.length&&rows[0].households){
             var hh=rows[0].households;var mem=rows[0];
             household={id:hh.id,name:hh.name,invite_code:hh.invite_code,role:mem.role,display_name:mem.display_name||'Me'};
-            persistHousehold();loadHouseholdMembers().then(function(){loadSharedData();subscribeRealtime();renderHouseholdPanel();renderList();});
+            persistHousehold();localStorage.setItem('la_saved_invite',hh.invite_code);loadHouseholdMembers().then(function(){loadSharedData();subscribeRealtime();renderHouseholdPanel();renderList();});
+          } else {
+            // No household found — show "lost" banner if user has prior shared items
+            var _hadShared=items.some(function(i){return i._rid;});
+            if(_hadShared)localStorage.setItem('la_hh_lost','1');
           }
         }).catch(function(){});
       }
@@ -1325,7 +1374,7 @@ function scrollToManualAdd(){
   var el=document.getElementById('manual-add-btn');
   if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
 }
-function renderStores(){var el=document.getElementById('stores-list');if(!stores.length){el.innerHTML='<div class="empty"><b>No stores yet</b>Search above to add your first store. ListAlert will alert you when you\'re nearby.</div>';return;}var sorted=stores.slice().sort(function(a,b){return(b.fav?1:0)-(a.fav?1:0);});el.innerHTML=sorted.map(function(s){var pending=items.filter(function(i){return i.store===s.id&&!i.done;}).length;var needsLocation=s.lat===null;return'<div class="store-card'+(s.fav?' fav':'')+(needsLocation?' needs-loc':'')+'"><div class="store-ico">'+s.emoji+(s.fav?'<span class="store-star">⭐</span>':'')+'</div><div class="store-info"><div class="store-name">'+escapeHTML(s.name)+'</div><div class="store-addr">'+escapeHTML(s.addr||'')+'</div>'+(needsLocation?'<div class="loc-nudge">⚠️ Save your location to enable alerts</div>':'')+'<div class="store-tags"><span class="stag '+(s.geo&&s.lat!==null?'aon':'aoff')+'">'+(s.geo&&s.lat!==null?'Alerts on':'Alerts off')+'</span><button class="stag '+(s.fav?'fon':'foff')+'" onclick="toggleFav('+s.id+')">'+(s.fav?'★ Fav':'☆ Fav')+'</button>'+(needsLocation?'<button class="stag loc-needed" onclick="pinHere('+s.id+')">📍 Save location</button>':'<span class="stag lon">✓ Location saved</span>')+'</div></div><div class="store-right"><button class="toggle '+(s.geo?'on':'off')+'" onclick="toggleGeo('+s.id+')"></button><button class="sdel" onclick="delStore('+s.id+')">×</button></div></div>';}).join('');}
+function renderStores(){var el=document.getElementById('stores-list');if(!stores.length){el.innerHTML='<div class="empty"><b>No stores yet</b>Search above to add your first store. ListAlert will alert you when you\'re nearby.</div>';return;}var sorted=stores.slice().sort(function(a,b){return(b.fav?1:0)-(a.fav?1:0);});el.innerHTML=sorted.map(function(s){var pending=items.filter(function(i){return i.store===s.id&&!i.done;}).length;var needsLocation=s.lat===null;var _distLabel='';if(lat!==null&&s.lat!==null){var _sd=dist(lat,lng,s.lat,s.lng);_distLabel=_sd<1609?Math.round(_sd*3.281)+' ft':(_sd/1609).toFixed(1)+' mi';}else{_distLabel='— mi';}return'<div class="store-card'+(s.fav?' fav':'')+(needsLocation?' needs-loc':'')+'"><div class="store-ico">'+s.emoji+(s.fav?'<span class="store-star">⭐</span>':'')+'</div><div class="store-info"><div class="store-name">'+escapeHTML(s.name)+'</div><div class="store-addr">'+escapeHTML(s.addr||'')+'<span style="color:var(--text3);font-size:11px;margin-left:6px">'+escapeHTML(_distLabel)+'</span></div>'+(needsLocation?'<div class="loc-nudge">⚠️ Save your location to enable alerts</div>':'')+'<div class="store-tags"><span class="stag '+(s.geo&&s.lat!==null?'aon':'aoff')+'">'+(s.geo&&s.lat!==null?'Alerts on':'Alerts off')+'</span><button class="stag '+(s.fav?'fon':'foff')+'" onclick="toggleFav('+s.id+')">'+(s.fav?'★ Fav':'☆ Fav')+'</button>'+(needsLocation?'<button class="stag loc-needed" onclick="pinHere('+s.id+')">📍 Save location</button>':'<span class="stag lon">✓ Location saved</span>')+'</div></div><div class="store-right"><button class="toggle '+(s.geo?'on':'off')+'" onclick="toggleGeo('+s.id+')"></button><button class="sdel" onclick="delStore('+s.id+')">×</button></div></div>';}).join('');}
 function toggleGeo(id){var s=stores.find(function(s){return s.id===id;});if(s){s.geo=!s.geo;persistStoreWrite(s);renderStores();}}
 function toggleFav(id){var s=stores.find(function(s){return s.id===id;});if(s){s.fav=!s.fav;persistStoreWrite(s);renderStores();}}
 function delStore(id){if(!confirm('Remove this store?'))return;persistStoreDelete(id);stores=stores.filter(function(s){return s.id!==id;});items.forEach(function(i){if(i.store===id)i.store=null;});persist();renderStores();}
@@ -1336,7 +1385,10 @@ var openPickerId=null;
 var openActionItem=null;
 var shoppingMode=false;var smCrossedOff={};
 var medications=JSON.parse(localStorage.getItem('la_medications')||'[]');var medNid=parseInt(localStorage.getItem('la_med_nid')||'1');
-var pendingServings=null;var pendingCalories=null;var pendingExtractedAt=null;
+var pendingServings=null;var pendingCalories=null;var pendingExtractedAt=null;var pendingRecipeSource=null;
+var _orderRecipeIds=JSON.parse(localStorage.getItem('la_order_recipe_ids')||'[]');
+function _broadcastOrderUpdate(){if(!household||!window.supabaseClient||!realtimeChannel)return;try{realtimeChannel.send({type:'broadcast',event:'order_updated',payload:{recipeIds:_orderRecipeIds,by:localStorage.getItem('la_display_name')||'Someone',ts:Date.now()}});}catch(e){}}
+function _saveOrderRecipeIds(){localStorage.setItem('la_order_recipe_ids',JSON.stringify(_orderRecipeIds));}
 function buildPickerPanel(it){
   if(openPickerId!==it.id)return'';
   if(!stores.length){
@@ -1449,15 +1501,19 @@ function quickSaveRecipe(name, ingredients){
   renderCookbookTab();
 }
 
-function renderList(){var el=document.getElementById('list-body');var _ob=document.getElementById('order-bar');if(_ob)_ob.style.display='none';
-  if(!items.length){if(savedRecipes.length){var _rhtml='<div style="margin:16px 16px 0">';_rhtml+='<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;padding:0 2px">Pick a saved recipe to start your list</div>';_rhtml+='<div style="display:flex;flex-direction:column;gap:8px">';savedRecipes.slice(0,5).forEach(function(r){_rhtml+='<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;cursor:pointer" onclick="addRecipeIngredientsToCart('+r.id+')">';_rhtml+='<div style="font-size:20px">🍽️</div>';_rhtml+='<div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">'+r.name+'</div>';_rhtml+='<div style="font-size:12px;color:var(--text3);margin-top:2px">'+r.items.length+' items'+(r.servings?' · Serves '+r.servings:'')+' — tap to add all</div></div>';_rhtml+='<div style="font-size:13px;font-weight:700;color:var(--green)">+ Add</div></div>';});_rhtml+='</div></div>';el.innerHTML=_rhtml;}else{var _emptyHtml='';if(!household&&!bannerDismissed['household']){_emptyHtml+='<div style="margin:12px 16px 0;padding:9px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer" onclick="showHouseholdSetupPanel()">👨‍👩‍👧 Share with your household</span><div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;font-weight:700;color:var(--violet);cursor:pointer" onclick="showHouseholdSetupPanel()">Set up →</span><span onclick="dismissBanner(\'household\')" style="font-size:16px;color:var(--text3);cursor:pointer">×</span></div></div>';}else if(!household&&bannerDismissed['household']){_emptyHtml+='<div style="margin:12px 16px 0"><span onclick="showHouseholdSetupPanel()" style="font-size:12px;color:var(--text3);cursor:pointer;font-weight:600">👨‍👩‍👧 Share with household →</span></div>';}_emptyHtml+='<div class="empty"><b>Your list is empty</b><span style="color:var(--text3);font-size:13px">Type an item above and tap Add.</span></div>';if(!bannerDismissed['recipe'])_emptyHtml+='<div style="margin:12px 16px 16px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;color:var(--text2);cursor:pointer" onclick="show(\'cookbook\')">Have a recipe? Save it to your cookbook →</span><span onclick="dismissBanner(\'recipe\')" style="font-size:16px;color:var(--text3);cursor:pointer;padding:0 2px;line-height:1">×</span></div>';el.innerHTML=_emptyHtml;}return;}var sm={};stores.forEach(function(s){sm[s.id]=s;});var sorted=items.slice();var recurItems=sorted.filter(function(it){return it.recurring;});
+function showOrderReadyBanner(count){var ob=document.getElementById('order-bar');if(!ob)return;var oid='ob_'+Date.now();if(localStorage.getItem('la_order_banner_dismissed_'+oid))return;ob.dataset.oid=oid;ob.dataset.active='1';ob.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--violet-dim);border-bottom:1px solid var(--violet-border);cursor:pointer';ob.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--violet)">✓ Order ready · '+count+' item'+(count!==1?'s':'')+' added to your list</div><span onclick="dismissOrderBanner()" style="font-size:18px;color:var(--violet);opacity:.7;padding:0 2px;line-height:1">×</span>';ob.onclick=function(e){if(e.target.tagName!=='SPAN')show('list');};}
+function dismissOrderBanner(){var ob=document.getElementById('order-bar');if(!ob)return;if(ob.dataset.oid)localStorage.setItem('la_order_banner_dismissed_'+ob.dataset.oid,'1');ob.dataset.active='';ob.style.display='none';}
+function renderList(){var el=document.getElementById('list-body');var _ob=document.getElementById('order-bar');if(_ob&&!_ob.dataset.active)_ob.style.display='none';
+  if(_supabaseLoading&&!items.length){el.innerHTML='<div style="padding:8px 0 0">'+['','margin-right:60px','margin-right:30px','margin-right:80px','margin-right:45px'].map(function(s){return'<div class="skel-row"'+(s?' style="'+s+'"':'')+'>  </div>';}).join('')+'</div>';return;}
+  if(!items.length){if(savedRecipes.length){var _rhtml='<div style="margin:16px 16px 0">';_rhtml+='<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;padding:0 2px">Pick a saved recipe to start your list</div>';_rhtml+='<div style="display:flex;flex-direction:column;gap:8px">';savedRecipes.slice(0,5).forEach(function(r){_rhtml+='<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;cursor:pointer" onclick="addRecipeIngredientsToCart('+r.id+')">';_rhtml+='<div style="font-size:20px">🍽️</div>';_rhtml+='<div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">'+r.name+'</div>';_rhtml+='<div style="font-size:12px;color:var(--text3);margin-top:2px">'+r.items.length+' items'+(r.servings?' · Serves '+r.servings:'')+' — tap to add all</div></div>';_rhtml+='<div style="font-size:13px;font-weight:700;color:var(--green)">+ Add</div></div>';});_rhtml+='</div></div>';el.innerHTML=_rhtml;}else{var _emptyHtml='';if(!household&&!bannerDismissed['household']){_emptyHtml+='<div style="margin:12px 16px 0;padding:9px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer" onclick="showHouseholdSetupPanel()">👨‍👩‍👧 Share with your household</span><div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;font-weight:700;color:var(--violet);cursor:pointer" onclick="showHouseholdSetupPanel()">Set up →</span><span onclick="dismissBanner(\'household\')" style="font-size:16px;color:var(--text3);cursor:pointer">×</span></div></div>';}else if(!household&&bannerDismissed['household']){_emptyHtml+='<div style="margin:12px 16px 0"><span onclick="showHouseholdSetupPanel()" style="font-size:12px;color:var(--text3);cursor:pointer;font-weight:600">👨‍👩‍👧 Share with household →</span></div>';}_emptyHtml+='<div class="empty-state"><svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" color="var(--text3)"><circle cx="36" cy="36" r="32" stroke="currentColor" stroke-width="2.5" fill="none"/><path d="M22 26h5l7 18h14l5-13H29" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="32" cy="47" r="2.5" fill="currentColor"/><circle cx="44" cy="47" r="2.5" fill="currentColor"/></svg><h3>Your list is clear.</h3><p>Add something above to get started.</p></div>';if(!bannerDismissed['recipe'])_emptyHtml+='<div style="margin:12px 16px 16px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;color:var(--text2);cursor:pointer" onclick="show(\'cookbook\')">Have a recipe? Save it to your cookbook →</span><span onclick="dismissBanner(\'recipe\')" style="font-size:16px;color:var(--text3);cursor:pointer;padding:0 2px;line-height:1">×</span></div>';el.innerHTML=_emptyHtml;}return;}var sm={};stores.forEach(function(s){sm[s.id]=s;});var sorted=items.slice();var recurItems=sorted.filter(function(it){return it.recurring;});
   var filtered=listFilter?(listFilter.indexOf('cat:')===0?sorted.filter(function(it){return it.category===listFilter.slice(4)&&!it.recurring;}):sorted.filter(function(it){return it.store===listFilter&&!it.recurring;})):sorted.filter(function(it){return!it.recurring;});
   var filterBar='';
   var _hasActiveItems=items.length>0;
   if(!household&&!_hasActiveItems&&!bannerDismissed['household']){filterBar+='<div style="margin:0 16px 4px;padding:9px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer" onclick="showHouseholdSetupPanel()">👨\u200d👩\u200d👧 Share with your household</span><div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;font-weight:700;color:var(--violet);cursor:pointer" onclick="showHouseholdSetupPanel()">Set up →</span><span onclick="dismissBanner(\'household\')" style="font-size:16px;color:var(--text3);cursor:pointer;line-height:1">×</span></div></div>';}
   else if(!household){filterBar+='<div style="margin:0 16px 2px"><span onclick="showHouseholdSetupPanel()" style="font-size:11px;color:var(--text3);cursor:pointer;font-weight:600">👨\u200d👩\u200d👧 Household →</span></div>';}
   else{filterBar+='<div style="margin:0 16px 4px;padding:9px 14px;background:var(--bg2);border:1px solid var(--amber-border);border-radius:10px;display:flex;align-items:center;gap:8px;cursor:pointer" onclick="show(\'stores\')"><span style="font-size:13px;font-weight:600;color:var(--text)">'+household.name+'</span><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--amber-dim);color:var(--amber)">'+roleLabel(household.role)+'</span></div>';}
-  filterBar+='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';filterBar+='<button class="filter-chip" onclick="showCategorySheet()" style="background:var(--violet-dim);border-color:var(--violet-border);color:var(--violet);flex-shrink:0">🏷 Categories</button>';filterBar+='<button class="filter-chip" onclick="showMedicationSheet()" style="background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue);flex-shrink:0">💊 Meds</button>';var _smCount=items.filter(function(i){return!i.recurring&&!i.done&&!i.skipped;}).length;if(_smCount>0)filterBar+='<button class="filter-chip" onclick="enterShoppingMode()" style="background:var(--green-dim);border-color:var(--green-border);color:var(--green);flex-shrink:0">🛍 Shop</button>';filterBar+='<button class="filter-chip" onclick="showShareSheet()" style="background:var(--bg2);flex-shrink:0">↗ Share</button>';if(items.length){filterBar+='<button class="filter-chip" onclick="clearList()" style="margin-left:auto;background:var(--red-dim);border-color:rgba(248,113,113,0.3);color:var(--red);flex-shrink:0">🗑 Clear list</button>';}if(userCategories.length){userCategories.forEach(function(c){var hasCat=items.some(function(i){return i.category===c;});if(hasCat||listFilter===c)filterBar+='<button class="filter-chip'+(listFilter===c?' active':'')+'" onclick="setFilter(\'cat:'+c+'\')">'+escapeHTML(c)+'<\/button>';});}stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'<\/button>';});filterBar+='<\/div>';var _activeCount=items.length;
+  if(!household&&localStorage.getItem('la_hh_lost')){filterBar+='<div style="margin:0 16px 4px;padding:9px 14px;background:var(--red-dim);border:1px solid rgba(248,113,113,0.3);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-size:13px;font-weight:600;color:var(--red)">Household connection lost</span><div style="display:flex;align-items:center;gap:8px"><span onclick="showHouseholdSetupPanel()" style="font-size:12px;font-weight:700;color:var(--red);cursor:pointer">Re-enter code →</span><span onclick="localStorage.removeItem(\'la_hh_lost\');renderList()" style="font-size:16px;color:var(--red);cursor:pointer;opacity:.7">×</span></div></div>';}
+  filterBar+='<div class="filter-bar">';filterBar+='<button class="filter-chip'+(!listFilter?' active':'')+'" onclick="setFilter(null)">All</button>';filterBar+='<button class="filter-chip" onclick="showCategorySheet()" style="background:var(--violet-dim);border-color:var(--violet-border);color:var(--violet);flex-shrink:0">🏷 Categories</button>';filterBar+='<button class="filter-chip" onclick="showMedicationSheet()" style="background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue);flex-shrink:0">💊 Meds</button>';if(!household){filterBar+='<button class="filter-chip" onclick="showHouseholdSetupPanel()" style="background:none;border-color:var(--border2);color:var(--text3);flex-shrink:0">👥 Join household</button>';}else{var _hhLabel=household.name.length>12?household.name.slice(0,12)+'…':household.name;filterBar+='<button class="filter-chip" onclick="showHouseholdSetupPanel()" style="background:var(--amber-dim);border-color:var(--amber-border);color:var(--amber);flex-shrink:0">👨‍👩‍👧 '+escapeHTML(_hhLabel)+'</button>';}var _smCount=items.filter(function(i){return!i.recurring&&!i.done&&!i.skipped;}).length;if(_smCount>0)filterBar+='<button class="filter-chip" onclick="enterShoppingMode()" style="background:var(--green-dim);border-color:var(--green-border);color:var(--green);flex-shrink:0">🛍 Shop</button>';filterBar+='<button class="filter-chip" onclick="showShareSheet()" style="background:var(--bg2);flex-shrink:0">↗ Share</button>';if(items.length){filterBar+='<button class="filter-chip" onclick="clearList()" style="margin-left:auto;background:var(--red-dim);border-color:rgba(248,113,113,0.3);color:var(--red);flex-shrink:0">🗑 Clear list</button>';}if(userCategories.length){userCategories.forEach(function(c){var hasCat=items.some(function(i){return i.category===c;});if(hasCat||listFilter===c)filterBar+='<button class="filter-chip'+(listFilter===c?' active':'')+'" onclick="setFilter(\'cat:'+c+'\')">'+escapeHTML(c)+'<\/button>';});}stores.forEach(function(s){var hasPending=items.some(function(i){return i.store===s.id;});if(!hasPending&&listFilter!==s.id)return;filterBar+='<button class="filter-chip'+(listFilter===s.id?' active':'')+'" onclick="setFilter('+s.id+')">'+s.emoji+' '+s.name+'<\/button>';});filterBar+='<\/div>';var _activeCount=items.length;
   if(items.length>0)localStorage.setItem('la_had_items','1');if(_activeCount===0&&localStorage.getItem('la_had_items'))maybeShowHomescreenPrompt();
 
     // Render items grouped by user-defined categories (no recipe-source grouping)
@@ -1467,7 +1523,8 @@ function renderList(){var el=document.getElementById('list-body');var _ob=docume
     var actionOpen=openActionItem===it.id;
     var inCart=itemInCart(it.id);
     var cartBtn='<button onclick="event.stopPropagation();addItemToCart('+it.id+')" style="height:26px;padding:0 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;flex-shrink:0;border:1px solid '+(inCart?'var(--green-border)':'var(--border2)')+';background:'+(inCart?'var(--green-dim)':'var(--bg3)')+';color:'+(inCart?'var(--green)':'var(--text3)')+'">'+(inCart?'✓ In cart':'+ Add to cart')+'</button>';
-    return'<div class="item-row'+(actionOpen?' selected':'')+'" data-iid="'+it.id+'" onclick="openItemAction('+it.id+')"><div class="item-row-swipe-bg">🗑 Remove?</div><div class="item-info" style="cursor:default"><div class="item-name">'+escapeHTML(it.name)+'</div>'+(showBadge?'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>':'')+(userCategories.length?(it.category?'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();openItemAction('+it.id+')">🏷 '+escapeHTML(it.category)+'</div>':''):'')+'</div>'+cartBtn+'</div>'+(actionOpen?buildActionSheet(it):'')+buildPickerPanel(it);
+    var _initials=(household&&it.addedBy)?'<span style="display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:10px;background:var(--bg3);border:1px solid var(--border2);font-size:9px;font-weight:700;color:var(--text3);flex-shrink:0;margin-left:6px;padding:0 4px">'+escapeHTML(it.addedBy.slice(0,2).toUpperCase())+'</span>':'';
+    return'<div class="item-row'+(actionOpen?' selected':'')+'" data-iid="'+it.id+'" onclick="openItemAction('+it.id+')"><div class="item-row-swipe-bg-right">✓ Done</div><div class="item-row-swipe-bg">🗑 Remove</div><div class="item-info" style="cursor:default"><div class="item-name" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">'+(it.qty?'<span style="color:var(--text3);font-size:12px;font-weight:500">'+escapeHTML(it.qty)+'</span>':'')+escapeHTML(it.name)+_initials+'</div>'+(showBadge?'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();toggleStorePicker('+it.id+')">'+badge+'</div>':'')+(userCategories.length?(it.category?'<div class="item-tag" style="cursor:pointer;opacity:0.8" onclick="event.stopPropagation();openItemAction('+it.id+')">🏷 '+escapeHTML(it.category)+'</div>':''):'')+'</div>'+cartBtn+'</div>'+(actionOpen?buildActionSheet(it):'')+buildPickerPanel(it);
   }
   var listHtml='';
   if(filtered.length){
@@ -1517,16 +1574,19 @@ function toggleCategoryGroup(cat){
   localStorage.setItem(key,cur?'0':'1');
   renderList();
 }
-function clearList(){
+function clearList(localOnly){
+  if(localOnly){items=[];persist();renderList();return;}
   if(!items.length)return;
   if(!confirm('Clear list permanently? This cannot be undone.'))return;
   items.forEach(function(it){persistItemDelete(it.id);});
   items=[];
   persist();renderList();
   showToast('List cleared');
+  // Broadcast to household members — RLS blocks DELETE event propagation
+  if(household&&window.supabaseClient&&realtimeChannel){try{realtimeChannel.send({type:'broadcast',event:'list_cleared',payload:{cleared_by:household.display_name||'Someone',ts:Date.now()}});}catch(e){}}
 }
 function setFilter(storeId){listFilter=storeId;renderList();}
-function addItem(){var input=document.getElementById('item-input');var name=input.value.trim();if(!name){input.focus();input.style.borderColor='var(--red)';setTimeout(function(){input.style.borderColor='';},1200);return;}var newItem={id:nid++,name:name,store:null,done:false,sources:[],household_id:household?household.id:null};items.push(newItem);input.value='';persistItemWrite(newItem);renderList();input.focus();}
+function addItem(){var input=document.getElementById('item-input');var name=input.value.trim();if(!name){input.focus();input.style.borderColor='var(--red)';setTimeout(function(){input.style.borderColor='';},1200);return;}var newItem={id:nid++,name:name,store:null,done:false,sources:[],household_id:household?household.id:null,addedBy:household?(localStorage.getItem('la_display_name')||''):''};items.push(newItem);input.value='';persistItemWrite(newItem);renderList();input.focus();}
 function openItemAction(id){
   if(openActionItem===id){openActionItem=null;}else{openActionItem=id;}
   renderList();
@@ -1584,50 +1644,56 @@ function confirmNeverInRecipe(itemId,recipeName){
   openActionItem=null;
   renderList();
 }
+function showUndoToast(msg,undoFn){
+  var t=document.getElementById('la-toast');
+  if(!t){t=document.createElement('div');t.id='la-toast';document.body.appendChild(t);}
+  t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(26,20,16,0.92);color:#fff;font-size:13px;font-weight:600;padding:9px 14px 9px 18px;border-radius:20px;z-index:9999;opacity:0;transition:opacity .2s;font-family:Outfit,sans-serif;white-space:nowrap;display:flex;align-items:center;gap:10px;pointer-events:auto';
+  t.innerHTML=escapeHTML(msg)+'<button style="background:var(--violet);border:none;border-radius:12px;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;cursor:pointer;font-family:Outfit,sans-serif">Undo</button>';
+  t.querySelector('button').onclick=function(){clearTimeout(t._t);t.style.opacity='0';undoFn();};
+  t.style.opacity='1';
+  clearTimeout(t._t);
+  t._t=setTimeout(function(){t.style.opacity='0';t.style.pointerEvents='none';},4000);
+}
 function initSwipeHandlers(){
   var lb=document.getElementById('list-body');
   if(!lb||lb._swipeInit)return;
   lb._swipeInit=true;
-  var tx=0,ty=0,target=null,swiped=false;
+  var startX=0,startY=0,target=null,committed=false;
+  function resetRow(row){if(!row)return;row.style.transition='transform .18s';row.style.transform='translateX(0)';row.classList.remove('swiping-left','swiping-right');}
   lb.addEventListener('touchstart',function(e){
     var row=e.target.closest('.item-row');
     if(!row)return;
     var t=e.touches[0];
-    tx=t.clientX;ty=t.clientY;target=row;swiped=false;
+    startX=t.clientX;startY=t.clientY;target=row;committed=false;
+    target.style.transition='none';
   },{passive:true});
   lb.addEventListener('touchmove',function(e){
     if(!target)return;
     var t=e.touches[0];
-    var dx=tx-t.clientX,dy=Math.abs(t.clientY-ty);
-    if(dy>30){target=null;return;}
-    if(dx>40){
-      target.style.transform='translateX(-90px)';
-      target.classList.add('swiping');
-      swiped=true;
-    } else if(dx<-10&&swiped){
-      target.style.transform='translateX(0)';
-      target.classList.remove('swiping');
-      swiped=false;
-    }
+    var dx=t.clientX-startX,dy=Math.abs(t.clientY-startY);
+    if(dy>30){resetRow(target);target=null;return;}
+    var threshold=target.offsetWidth*0.4;
+    var clamped=Math.max(-(threshold+24),Math.min(threshold+24,dx));
+    target.style.transform='translateX('+clamped+'px)';
+    target.classList.toggle('swiping-right',dx>24);
+    target.classList.toggle('swiping-left',dx<-24);
+    committed=Math.abs(dx)>threshold;
   },{passive:true});
-  lb.addEventListener('touchend',function(e){
+  lb.addEventListener('touchend',function(){
     if(!target)return;
-    if(swiped){
-      var iid=parseInt(target.dataset.iid);
-      var t=target;
-      target=null;swiped=false;
-      setTimeout(function(){
-        t.style.transform='translateX(0)';
-        t.classList.remove('swiping');
-        openActionItem=iid;
-        renderList();
-      },120);
-    } else {
-      if(target)target.style.transform='translateX(0)';
-      target=null;
+    var row=target,iid=parseInt(row.dataset.iid);
+    target=null;
+    var dx=parseFloat((row.style.transform.match(/translateX\(([^p]+)px\)/)||[0,0])[1])||0;
+    var threshold=row.offsetWidth*0.4;
+    resetRow(row);
+    if(committed&&dx>threshold){
+      var it=items.find(function(i){return i.id===iid;});
+      if(it&&!it.done){it.done=true;persistItemWrite(it);if(autoclear){items=items.filter(function(i){return i.id!==iid;});persist();}renderList();}
+    } else if(committed&&dx<-threshold){
+      var _it=items.find(function(i){return i.id===iid;});
+      if(_it){var _copy=JSON.parse(JSON.stringify(_it));var _name=_it.name;persistItemDelete(iid);items=items.filter(function(i){return i.id!==iid;});persist();renderList();showUndoToast(_name+' removed',function(){items.push(_copy);persist();persistItemWrite(_copy);renderList();});}
     }
   },{passive:true});
-  // tap outside closes
   lb.addEventListener('touchstart',function(e){
     if(openActionItem!==null&&!e.target.closest('.action-sheet')&&!e.target.closest('.item-row[data-iid="'+openActionItem+'"]')){
       openActionItem=null;renderList();
@@ -1766,7 +1832,7 @@ function renderFridgeTab(){var listNames=items.filter(function(i){return!i.done&
 function handleFridgeSelect(input){var file=input.files&&input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(e){var img=new Image();img.onload=function(){var maxDim=1120;var w=img.width,h=img.height;if(w>maxDim||h>maxDim){if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}else{w=Math.round(w*maxDim/h);h=maxDim;}}var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);fridgePhotoBase64=canvas.toDataURL('image/jpeg',0.85).split(',')[1];renderFridgeTab();};img.src=e.target.result;};reader.readAsDataURL(file);}
 function clearFridgePhoto(){fridgePhotoBase64=null;document.getElementById('fridge-file-input').value='';renderFridgeTab();}
 async function runFridgeScan(){var listNames=items.filter(function(i){return!i.done&&!i.skipped;}).map(function(i){return i.name;});if(!fridgePhotoBase64||!listNames.length)return;var area=document.getElementById('recipe-input-area');area.innerHTML='<div style="padding:24px 20px;text-align:center"><div style="width:20px;height:20px;border:2px solid rgba(96,165,250,0.3);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px"></div><div style="font-size:14px;color:var(--blue);font-weight:600">Scanning your fridge...</div></div>';try{var _abortCtrl=new AbortController();var _abortTimer=setTimeout(function(){_abortCtrl.abort();},30000);var response=await fetch('https://listalert.serbronn93.workers.dev/?target=anthropic',{method:'POST',headers:{'Content-Type':'application/json'},signal:_abortCtrl.signal,body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:'You are a grocery assistant. You will be shown a photo of a fridge or pantry and a shopping list. Return ONLY a JSON array of item names from the shopping list that are clearly visible and available in the fridge/pantry photo. Only include items you can confidently identify. No explanation, no markdown, just the raw JSON array.',messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:fridgePhotoBase64}},{type:'text',text:'My shopping list: '+JSON.stringify(listNames)+'\n\nWhich of these items can you see in this fridge/pantry photo? Return ONLY a JSON array of the item names from my list that are present.'}]}]})});clearTimeout(_abortTimer);var data=await response.json();var raw=(data.content&&data.content[0]&&data.content[0].text)?data.content[0].text.trim():'';raw=raw.replace(/```json|```/g,'').trim();var found=JSON.parse(raw);if(!Array.isArray(found))throw new Error('bad response');var foundLower=found.map(function(n){return n.toLowerCase();});var removed=[];var toRemove=[];items.forEach(function(it){if(foundLower.some(function(f){return it.name.toLowerCase().indexOf(f)!==-1||f.indexOf(it.name.toLowerCase())!==-1;})){removed.push(it.name);toRemove.push(it.id);}});toRemove.forEach(function(id){persistItemDelete(id);});items=items.filter(function(it){return toRemove.indexOf(it.id)===-1;});persist();renderList();closeRecipeModal();if(removed.length){setTimeout(function(){alert('✓ Skipped '+removed.length+' item'+(removed.length!==1?'s':'')+' you already have:\n'+removed.join(', '));},200);}else{setTimeout(function(){alert('Looks like you\'ll need to buy everything on your list — nothing matched what was in the photo.');},200);}}catch(e){area.innerHTML='<div style="padding:20px;text-align:center;color:var(--red);font-size:13px">Couldn\'t scan the photo. Try a clearer, well-lit image.</div>';renderFridgeTab();}}
-async function runRecipeExtraction(){if(recipeLoading)return;if(extractedIngredients.length&&recipeTab!=='inspire'){addExtractedToList(pendingRecipeName);return;}recipeLoading=true;setGoBtnLoading();document.getElementById('recipe-result-area').innerHTML='';var messages;if(recipeTab==='photo'){if(!recipePhotoBase64){alert('Choose a photo first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:[{type:'image',source:{type:'base64',media_type:recipePhotoMime,data:recipePhotoBase64}},{type:'text',text:'This is a photo of a recipe. Return ONLY a JSON object with four keys: \"name\" (the recipe dish name, e.g. \"Sicilian Cauliflower\"), \"ingredients\" (array of grocery store ingredient names with quantities when visible — e.g. \"2 lbs Chicken Breast\", \"1 can Crushed Tomatoes\"), \"servings\" (integer or short string like \"4\" or \"4-6\", null if unknown), and \"calories_per_serving\" (integer calorie estimate per serving, null if unknown). No explanation, no markdown. Example: {\"name\":\"Lemon Herb Chicken\",\"ingredients\":[\"2 lbs Chicken Breast\",\"3 cloves Garlic\",\"2 tbsp Olive Oil\"],\"servings\":4,\"calories_per_serving\":380}. If you cannot find ingredients, return {\"name\":\"My Recipe\",\"ingredients\":[],\"servings\":null,\"calories_per_serving\":null}.'}]}];}else if(recipeTab==='smart'){var smartInput=(document.getElementById('smart-text')||{}).value||'';smartInput=smartInput.trim();if(!smartInput){alert('Tell us what you already have first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:'I already have: '+smartInput+'. Suggest 1-2 meals I can make and list ONLY the additional ingredients I need to buy. Return ONLY a JSON array of objects with "name" (specific dish name) and "ingredients" (array of items to buy only — exclude what I said I already have). No explanation, no markdown.'}];}else if(recipeTab==='pair'){var pairInput=(document.getElementById('pair-text')||{}).value||'';pairInput=pairInput.trim();if(!pairInput){alert('Tell us what you already have first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:'I already have: '+pairInput+'\nSuggest a complete meal that uses this as the main ingredient and list ONLY the additional ingredients I need to buy. Return ONLY a JSON array of objects, one per dish suggestion (1-2 max), each with "name" (specific dish name) and "ingredients" (array of grocery store ingredient names I need to buy, no quantities). No explanation, no markdown.'}];}else if(recipeTab==='inspire'){var inspireInput=(document.getElementById('inspire-text')||{}).value||'';inspireInput=inspireInput.trim();if(!inspireInput){alert('Describe what you feel like eating first.');recipeLoading=false;resetGoBtn();return;}recipeLoading=false;resetGoBtn();browseDishes();return;}else{var input='';if(recipeTab==='paste'){input=(document.getElementById('recipe-text')||{}).value||'';input=input.trim();if(!input){alert('Paste some recipe text first.');recipeLoading=false;resetGoBtn();return;}}else{var url=(document.getElementById('recipe-url')||{}).value||'';url=url.trim();if(!url){alert('Enter a URL first.');recipeLoading=false;resetGoBtn();return;}input='Recipe URL: '+url;}var prompt=recipeTab==='paste'?'Extract only the ingredient names from this recipe. Return ONLY a JSON array of strings — clean, simple grocery store names with with quantities where present (e.g. "2 cups Flour", "1 lb Butter"). No prep notes. Recipe:\\n\n'+input:'The user wants to import a recipe from this URL: '+input.replace('Recipe URL: ','')+'\n\nYou cannot fetch URLs, so respond with a JSON object: {"error": "url_unsupported"}. Do not attempt to guess or fabricate ingredients.';messages=[{role:'user',content:prompt}];}try{var systemPrompt=recipeTab==='smart'?'You are a meal planning assistant. The user has listed ingredients they already have. Suggest 1-2 complete meals using those ingredients and return ONLY the additional items they need to buy. Return ONLY a JSON array of objects with "name" (specific dish name) and "ingredients" (array of ONLY grocery store items still needed — never include what the user said they already have). No explanation, no markdown.':recipeTab==='pair'?'You are a meal planning assistant. The user will describe ingredients or items they already have at home. Suggest 1-2 specific complete meals they can make with those ingredients. Return ONLY a JSON array of objects with "name" (specific dish name, e.g. "Cheesy Quesadillas" or "Spinach Feta Omelette") and "ingredients" (array of ONLY the additional grocery store items they need to buy — do not include what they said they already have). No explanation, no markdown.':recipeTab==='inspire'?'You are a meal planning assistant. The user will give you a list of dishes they want. Return ONLY a JSON array of objects, one per dish, each with "name" (the specific dish name) and "ingredients" (array of grocery store ingredient naingredient names with quantities — e.g. \"1 lb Ground Beef\", \"1 can Crushed Tomatoes\". Add a type qualifier only when it helps — e.g. \"Chicken Thighs (fresh or frozen)\". No explanation, no markdown. Example: [{\"name\":\"Classic Burger\",\"ingredients\":[\"1 lb Ground Beef\",\"Burger Buns\",\"Lettuce\",\"Cheddar Cheese\"]}]':'You are a grocery list assistant. When asked to extract ingredients, return ONLY a raw JSON array of strings. Add a short qualifier in parentheses only when it meaningfully helps a shopper find the right item — e.g. "Crushed Tomatoes (canned)", "Chicken Thighs (fresh or frozen)", "Coconut Milk (canned)", "Corn (frozen)". Do NOT qualify obvious items like Garlic, Butter, Eggs. Include quantities when present — e.g. \"2 cups Flour\", \"1 can Crushed Tomatoes\". No markdown, no explanation, no backticks. Just the array.';var response=await fetch('https://listalert.serbronn93.workers.dev/?target=anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:systemPrompt,messages:messages})});var data=await response.json();if(data.error){showRecipeError('API said: '+data.error.type+' — '+data.error.message);recipeLoading=false;resetGoBtn();return;}var raw=(data.content&&data.content[0]&&data.content[0].text)?data.content[0].text.trim():'';raw=raw.replace(/```json|```/g,'').trim();if(raw.indexOf('"url_unsupported"')!==-1){showRecipeError('This URL couldn\'t be fetched automatically. Please open the recipe page, select all the text, copy it, and paste it using the "Paste text" tab instead.');recipeLoading=false;resetGoBtn();return;}var parsed=JSON.parse(raw);
+async function runRecipeExtraction(){if(recipeLoading)return;if(extractedIngredients.length&&recipeTab!=='inspire'){addExtractedToList(pendingRecipeName);return;}recipeLoading=true;setGoBtnLoading();document.getElementById('recipe-result-area').innerHTML='';var messages;pendingRecipeSource=null;if(recipeTab==='photo'){pendingRecipeSource={type:'photo',date:new Date().toISOString()};}else if(recipeTab==='paste'){var _pst=(document.getElementById('recipe-text')||{}).value||'';pendingRecipeSource={type:'paste',text:_pst.slice(0,500)};}else if(recipeTab==='url'){var _pu=(document.getElementById('recipe-url')||{}).value||'';pendingRecipeSource={type:'url',url:_pu.trim()};}if(recipeTab==='photo'){if(!recipePhotoBase64){alert('Choose a photo first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:[{type:'image',source:{type:'base64',media_type:recipePhotoMime,data:recipePhotoBase64}},{type:'text',text:'This is a photo of a recipe. Return ONLY a JSON object with four keys: \"name\" (the recipe dish name, e.g. \"Sicilian Cauliflower\"), \"ingredients\" (array of grocery store ingredient names with quantities when visible — e.g. \"2 lbs Chicken Breast\", \"1 can Crushed Tomatoes\"), \"servings\" (integer or short string like \"4\" or \"4-6\", null if unknown), and \"calories_per_serving\" (integer calorie estimate per serving, null if unknown). No explanation, no markdown. Example: {\"name\":\"Lemon Herb Chicken\",\"ingredients\":[\"2 lbs Chicken Breast\",\"3 cloves Garlic\",\"2 tbsp Olive Oil\"],\"servings\":4,\"calories_per_serving\":380}. If you cannot find ingredients, return {\"name\":\"My Recipe\",\"ingredients\":[],\"servings\":null,\"calories_per_serving\":null}.'}]}];}else if(recipeTab==='smart'){var smartInput=(document.getElementById('smart-text')||{}).value||'';smartInput=smartInput.trim();if(!smartInput){alert('Tell us what you already have first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:'I already have: '+smartInput+'. Suggest 1-2 meals I can make and list ONLY the additional ingredients I need to buy. Return ONLY a JSON array of objects with "name" (specific dish name) and "ingredients" (array of items to buy only — exclude what I said I already have). No explanation, no markdown.'}];}else if(recipeTab==='pair'){var pairInput=(document.getElementById('pair-text')||{}).value||'';pairInput=pairInput.trim();if(!pairInput){alert('Tell us what you already have first.');recipeLoading=false;resetGoBtn();return;}messages=[{role:'user',content:'I already have: '+pairInput+'\nSuggest a complete meal that uses this as the main ingredient and list ONLY the additional ingredients I need to buy. Return ONLY a JSON array of objects, one per dish suggestion (1-2 max), each with "name" (specific dish name) and "ingredients" (array of grocery store ingredient names I need to buy, no quantities). No explanation, no markdown.'}];}else if(recipeTab==='inspire'){var inspireInput=(document.getElementById('inspire-text')||{}).value||'';inspireInput=inspireInput.trim();if(!inspireInput){alert('Describe what you feel like eating first.');recipeLoading=false;resetGoBtn();return;}recipeLoading=false;resetGoBtn();browseDishes();return;}else{var input='';if(recipeTab==='paste'){input=(document.getElementById('recipe-text')||{}).value||'';input=input.trim();if(!input){alert('Paste some recipe text first.');recipeLoading=false;resetGoBtn();return;}}else{var url=(document.getElementById('recipe-url')||{}).value||'';url=url.trim();if(!url){alert('Enter a URL first.');recipeLoading=false;resetGoBtn();return;}input='Recipe URL: '+url;}var prompt=recipeTab==='paste'?'Extract only the ingredient names from this recipe. Return ONLY a JSON array of strings — clean, simple grocery store names with with quantities where present (e.g. "2 cups Flour", "1 lb Butter"). No prep notes. Recipe:\\n\n'+input:'The user wants to import a recipe from this URL: '+input.replace('Recipe URL: ','')+'\n\nYou cannot fetch URLs, so respond with a JSON object: {"error": "url_unsupported"}. Do not attempt to guess or fabricate ingredients.';messages=[{role:'user',content:prompt}];}try{var systemPrompt=recipeTab==='smart'?'You are a meal planning assistant. The user has listed ingredients they already have. Suggest 1-2 complete meals using those ingredients and return ONLY the additional items they need to buy. Return ONLY a JSON array of objects with "name" (specific dish name) and "ingredients" (array of ONLY grocery store items still needed — never include what the user said they already have). No explanation, no markdown.':recipeTab==='pair'?'You are a meal planning assistant. The user will describe ingredients or items they already have at home. Suggest 1-2 specific complete meals they can make with those ingredients. Return ONLY a JSON array of objects with "name" (specific dish name, e.g. "Cheesy Quesadillas" or "Spinach Feta Omelette") and "ingredients" (array of ONLY the additional grocery store items they need to buy — do not include what they said they already have). No explanation, no markdown.':recipeTab==='inspire'?'You are a meal planning assistant. The user will give you a list of dishes they want. Return ONLY a JSON array of objects, one per dish, each with "name" (the specific dish name) and "ingredients" (array of grocery store ingredient naingredient names with quantities — e.g. \"1 lb Ground Beef\", \"1 can Crushed Tomatoes\". Add a type qualifier only when it helps — e.g. \"Chicken Thighs (fresh or frozen)\". No explanation, no markdown. Example: [{\"name\":\"Classic Burger\",\"ingredients\":[\"1 lb Ground Beef\",\"Burger Buns\",\"Lettuce\",\"Cheddar Cheese\"]}]':'You are a grocery list assistant. When asked to extract ingredients, return ONLY a raw JSON array of strings. Add a short qualifier in parentheses only when it meaningfully helps a shopper find the right item — e.g. "Crushed Tomatoes (canned)", "Chicken Thighs (fresh or frozen)", "Coconut Milk (canned)", "Corn (frozen)". Do NOT qualify obvious items like Garlic, Butter, Eggs. Include quantities when present — e.g. \"2 cups Flour\", \"1 can Crushed Tomatoes\". No markdown, no explanation, no backticks. Just the array.';var response=await fetch('https://listalert.serbronn93.workers.dev/?target=anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:systemPrompt,messages:messages})});var data=await response.json();if(data.error){showRecipeError('API said: '+data.error.type+' — '+data.error.message);recipeLoading=false;resetGoBtn();return;}var raw=(data.content&&data.content[0]&&data.content[0].text)?data.content[0].text.trim():'';raw=raw.replace(/```json|```/g,'').trim();if(raw.indexOf('"url_unsupported"')!==-1){showRecipeError('This URL couldn\'t be fetched automatically. Please open the recipe page, select all the text, copy it, and paste it using the "Paste text" tab instead.');recipeLoading=false;resetGoBtn();return;}var parsed=JSON.parse(raw);
 var ingredientList;
 if((recipeTab==='inspire'||recipeTab==='pair'||recipeTab==='smart')&&Array.isArray(parsed)&&parsed.length&&parsed[0].name&&Array.isArray(parsed[0].ingredients)){
   pendingMealDishes=parsed;
@@ -1789,21 +1855,21 @@ if((recipeTab==='inspire'||recipeTab==='pair'||recipeTab==='smart')&&Array.isArr
   throw new Error('empty');
 }
 if(!ingredientList.length)throw new Error('empty');
-var seen={};extractedIngredients=ingredientList.filter(function(name){var k=name.toLowerCase();if(seen[k])return false;seen[k]=true;return typeof name==='string'&&name.trim();}).map(function(name){return{name:name.trim(),selected:true};});showRecipeResults();}catch(e){var errMsg=recipeTab==='photo'?'API error: '+(e&&e.message?e.message:JSON.stringify(e)):recipeTab==='smart'?'Couldn\'t build a list from that. Try being more specific — like "chicken tacos for 4", "high protein breakfast", or "easy salmon dinner."':recipeTab==='inspire'?'Couldn\'t generate a list for that. Try being more specific — like "chicken tacos," "high protein breakfast," or "low carb dinner."':recipeTab==='pair'?'Couldn\'t find meal ideas. Try describing what you have — like "chicken and rice" or "eggs and cheese".':'Couldn\'t parse the ingredients. Try pasting more of the recipe text, or make sure it includes a clear ingredient list.';showRecipeError(errMsg);resetGoBtn();}recipeLoading=false;}
+var seen={};extractedIngredients=ingredientList.filter(function(name){var k=name.toLowerCase();if(seen[k])return false;seen[k]=true;return typeof name==='string'&&name.trim();}).map(function(name){var _nm=name.trim();var _ia=allergies.some(function(a){return _nm.toLowerCase().indexOf(a.toLowerCase())!==-1;});return{name:_nm,selected:!_ia,isAllergy:_ia};});showRecipeResults();}catch(e){var errMsg=recipeTab==='photo'?'API error: '+(e&&e.message?e.message:JSON.stringify(e)):recipeTab==='smart'?'Couldn\'t build a list from that. Try being more specific — like "chicken tacos for 4", "high protein breakfast", or "easy salmon dinner."':recipeTab==='inspire'?'Couldn\'t generate a list for that. Try being more specific — like "chicken tacos," "high protein breakfast," or "low carb dinner."':recipeTab==='pair'?'Couldn\'t find meal ideas. Try describing what you have — like "chicken and rice" or "eggs and cheese".':'Couldn\'t parse the ingredients. Try pasting more of the recipe text, or make sure it includes a clear ingredient list.';showRecipeError(errMsg);resetGoBtn();}recipeLoading=false;}
 function showRecipeResults(){var area=document.getElementById('recipe-result-area');
 if(pendingMealDishes.length>1){
   // Flatten all dishes into extractedIngredients so toggleIngredient works across all
   extractedIngredients=[];
   pendingMealDishes.forEach(function(dish){
-    dish.ingredients.forEach(function(name){extractedIngredients.push({name:name,selected:true,dish:dish.name});});
+    dish.ingredients.forEach(function(name){var _nm=name.trim();var _ia=allergies.some(function(a){return _nm.toLowerCase().indexOf(a.toLowerCase())!==-1;});extractedIngredients.push({name:_nm,selected:!_ia,isAllergy:_ia,dish:dish.name});});
   });
   var dishHtml='';var gi=0;
   pendingMealDishes.forEach(function(dish){
-    dishHtml+='<div style="padding:8px 20px 0"><div style="font-size:12px;font-weight:700;color:var(--violet);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">'+dish.name+'<\/div><div class="recipe-items">'+dish.ingredients.map(function(name){var idx=gi++;return'<div class="recipe-item-row"><div class="recipe-item-check sel" id="rchk-'+idx+'" onclick="toggleIngredient('+idx+')"><svg width="10" height="7" viewBox="0 0 10 7" fill="none"><path d="M1 3L3.5 5.5L9 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"\\/><\/svg><\/div><span class="recipe-item-name" id="rname-'+idx+'">'+name+'<\/span><\/div>';}).join('')+'<\/div><\/div>';
+    dishHtml+='<div style="padding:8px 20px 0"><div style="font-size:12px;font-weight:700;color:var(--violet);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">'+dish.name+'<\/div><div class="recipe-items">'+dish.ingredients.map(function(name){var idx=gi++;var _ing=extractedIngredients[idx]||{selected:true,isAllergy:false};var _sel=_ing.selected!==false;var _allergy=_ing.isAllergy;return'<div class="recipe-item-row"><div class="recipe-item-check'+(_sel?' sel':'')+'" id="rchk-'+idx+'" onclick="toggleIngredient('+idx+')"><svg width="10" height="7" viewBox="0 0 10 7" fill="none"><path d="M1 3L3.5 5.5L9 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"\\/><\/svg><\/div><span class="recipe-item-name" id="rname-'+idx+'"'+(_allergy?' style="color:var(--red);opacity:.65;text-decoration:line-through"':(_sel?'':' style="text-decoration:line-through;opacity:.4"'))+'>'+escapeHTML(name)+'<\/span>'+(_allergy?'<span style="font-size:9px;font-weight:700;color:var(--red);background:var(--red-dim);border-radius:6px;padding:1px 6px;margin-left:4px">Allergy<\/span>':'')+'<\/div>';}).join('')+'<\/div><\/div>';
   });
   area.innerHTML='<div class="recipe-preview"><div class="recipe-preview-title" id="recipe-result-title">'+extractedIngredients.length+' ingredients — tap to deselect<\/div>'+dishHtml+'<\/div>';
 } else {
-  var rows=extractedIngredients.map(function(ing,i){return'<div class="recipe-item-row"><div class="recipe-item-check sel" id="rchk-'+i+'" onclick="toggleIngredient('+i+')"><svg width="10" height="7" viewBox="0 0 10 7" fill="none"><path d="M1 3L3.5 5.5L9 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"\\/><\/svg><\/div><span class="recipe-item-name" id="rname-'+i+'">'+ing.name+'<\/span><\/div>';}).join('');
+  var rows=extractedIngredients.map(function(ing,i){var _sel=ing.selected!==false;var _allergy=ing.isAllergy;return'<div class="recipe-item-row"><div class="recipe-item-check'+(_sel?' sel':'')+'" id="rchk-'+i+'" onclick="toggleIngredient('+i+')"><svg width="10" height="7" viewBox="0 0 10 7" fill="none"><path d="M1 3L3.5 5.5L9 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"\\/><\/svg><\/div><span class="recipe-item-name" id="rname-'+i+'"'+(_allergy?' style="color:var(--red);opacity:.65;text-decoration:line-through"':(_sel?'':' style="text-decoration:line-through;opacity:.4"'))+'>'+escapeHTML(ing.name)+'<\/span>'+(_allergy?'<span style="font-size:9px;font-weight:700;color:var(--red);background:var(--red-dim);border-radius:6px;padding:1px 6px;margin-left:4px">Allergy<\/span>':'')+'<\/div>';}).join('');
   area.innerHTML='<div class="recipe-preview"><div class="recipe-preview-title" id="recipe-result-title">'+extractedIngredients.length+' ingredients — tap to deselect<\/div><div class="recipe-items">'+rows+'<\/div><\/div>';
 }
 var btn=document.getElementById('recipe-go-btn');btn.disabled=false;
@@ -1952,7 +2018,7 @@ function showSaveRecipePrompt(ingredientNames,sourceName,mergeNote){
 }
 
 function toggleSaveTag(el,tag){var on=el.classList.toggle('on');if(on){if(saveRecipeTags.indexOf(tag)===-1)saveRecipeTags.push(tag);}else{saveRecipeTags=saveRecipeTags.filter(function(t){return t!==tag;});}}
-function doSaveRecipe(ingredients){var name=(document.getElementById('save-recipe-name').value||'').trim();if(!name){document.getElementById('save-recipe-name').focus();document.getElementById('save-recipe-name').style.borderColor='var(--red)';return;}var _srv=parseInt((document.getElementById('save-recipe-servings')||{}).value||'0');var _cal=parseInt((document.getElementById('save-recipe-calories')||{}).value||'0');var newRecipe={id:Date.now(),name:name,tags:saveRecipeTags.slice(),type:cbRecipeType||'',items:ingredients,servings:_srv||null,calories_per_serving:_cal||null,extracted_at:pendingExtractedAt||null,savedAt:new Date().toISOString()};pendingServings=null;pendingCalories=null;pendingExtractedAt=null;cbRecipeType='';savedRecipes.unshift(newRecipe);items.forEach(function(it){if(it.sources){var idx=it.sources.indexOf(pendingRecipeName);if(idx!==-1)it.sources[idx]=name;}});persistRecipeWrite(newRecipe);persist();if(typeof _pendingDishSaveQueue!=='undefined'&&_pendingDishSaveQueue.length>0&&_pendingDishSaveIdx>0){showNextDishSavePrompt();}else{closeRecipeModal();if(curTab==='cookbook')renderCookbookTab();}}
+function doSaveRecipe(ingredients){var name=(document.getElementById('save-recipe-name').value||'').trim();if(!name){document.getElementById('save-recipe-name').focus();document.getElementById('save-recipe-name').style.borderColor='var(--red)';return;}var _srv=parseInt((document.getElementById('save-recipe-servings')||{}).value||'0');var _cal=parseInt((document.getElementById('save-recipe-calories')||{}).value||'0');var newRecipe={id:Date.now(),name:name,tags:saveRecipeTags.slice(),type:cbRecipeType||'',items:ingredients,servings:_srv||null,calories_per_serving:_cal||null,extracted_at:pendingExtractedAt||null,savedAt:new Date().toISOString(),source_type:pendingRecipeSource&&pendingRecipeSource.type||null,source_url:pendingRecipeSource&&pendingRecipeSource.url||null,source_text:pendingRecipeSource&&pendingRecipeSource.text||null,source_date:pendingRecipeSource&&pendingRecipeSource.date||null};pendingServings=null;pendingCalories=null;pendingExtractedAt=null;pendingRecipeSource=null;cbRecipeType='';savedRecipes.unshift(newRecipe);items.forEach(function(it){if(it.sources){var idx=it.sources.indexOf(pendingRecipeName);if(idx!==-1)it.sources[idx]=name;}});persistRecipeWrite(newRecipe);persist();if(typeof _pendingDishSaveQueue!=='undefined'&&_pendingDishSaveQueue.length>0&&_pendingDishSaveIdx>0){showNextDishSavePrompt();}else{closeRecipeModal();if(curTab==='cookbook')renderCookbookTab();}}
 
 var savedRecipeFilter=null;
 function setSavedFilter(tag){savedRecipeFilter=(savedRecipeFilter===tag)?null:tag;renderSavedRecipesInModal();}
@@ -2353,6 +2419,8 @@ function renderCookbookTab(){
     }
   }
 
+  // Shared household order section
+  if(household&&_orderRecipeIds.length){var _ordRecipes=_orderRecipeIds.map(function(id){return savedRecipes.find(function(r){return r.id===id;});}).filter(Boolean);if(_ordRecipes.length){html+='<div style="margin:8px 16px 4px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:12px;padding:12px 14px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span style="font-size:13px;font-weight:700;color:var(--green)">📋 This order ('+_ordRecipes.length+' recipe'+((_ordRecipes.length!==1)?'s':'')+')</span><button onclick="_orderRecipeIds=[];_saveOrderRecipeIds();_broadcastOrderUpdate();renderCookbookTab();" style="background:none;border:none;font-size:11px;font-weight:700;color:var(--green);cursor:pointer;opacity:.7">Clear</button></div>'+_ordRecipes.map(function(r){return'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--green-border)"><span style="font-size:13px;color:var(--text);flex:1">'+escapeHTML(r.name)+'</span><span style="font-size:11px;color:var(--green)">'+r.items.length+' items</span></div>';}).join('')+'</div>';}}
   //  Individual recipes section — grouped by type
   html+='<div class="cb-sec-hdr"><span class="cb-sec-title">My Recipes</span><button class="cb-sec-action" onclick="openRecipeModal()">+ Add</button></div>';
   var typeGroups=[
@@ -2408,6 +2476,7 @@ function renderCookbookTab(){
                 )+'</div>';
             });
             html+='</div>';
+            if(r.source_type){var _srcTxt=r.source_type==='url'?'🔗 View original recipe →':r.source_type==='paste'?'📋 View pasted source →':'📷 Extracted from photo'+(r.source_date?' on '+new Date(r.source_date).toLocaleDateString():'');html+='<button onclick="event.stopPropagation();(function(){var r=savedRecipes.find(function(x){return x.id==='+r.id+';});if(!r)return;if(r.source_type===\'url\'){window.open(r.source_url,\'_blank\');}else if(r.source_type===\'paste\'){alert(r.source_text||\'No source text saved.\');}else{alert(\''+_srcTxt+'\');}})()" style="width:100%;height:32px;background:none;border:1px solid var(--border2);border-radius:8px;color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;margin-bottom:10px">'+escapeHTML(_srcTxt)+'</button>';}
             html+='<div style="display:flex;gap:8px">';
             var _inCart=recipeInCart(r.id);
             if(_inCart){
@@ -2477,12 +2546,12 @@ if(autoclear){var at=document.getElementById('autoclear-toggle');if(at){at.class
     }
   }
 })();
-if(window.navigator.standalone){document.body.style.cssText='margin:0;font-family:Outfit,sans-serif;background:#0f1117';document.body.innerHTML='<div style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center"><div style="font-size:52px;margin-bottom:20px">📱</div><div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:10px">Open in Safari</div><div style="font-size:15px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:28px">Your list and alerts live in Safari.<br>Tap below to open the full app.</div><a href="https://listalert.github.io/ListAlert/ListAlert.html" style="display:block;width:100%;max-width:320px;height:52px;background:#7c3aed;border-radius:14px;color:#fff;font-size:16px;font-weight:700;text-decoration:none;line-height:52px;letter-spacing:-.01em">Open ListAlert →</a></div>';}else{
+if(window.navigator.standalone&&!localStorage.getItem('cartItems')&&!localStorage.getItem('la_pwa_standalone_warned')){localStorage.setItem('la_pwa_standalone_warned','1');document.body.style.cssText='margin:0;font-family:Outfit,sans-serif;background:#0f1117';document.body.innerHTML='<div style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center"><div style="font-size:52px;margin-bottom:20px">🏠</div><div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:12px">Reconnect your household</div><div style="font-size:15px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:24px">Your list data lives in Safari. Enter your invite code below to reconnect your household account.</div><input id="pwa-invite-input" type="text" placeholder="Invite code" autocapitalize="none" style="width:100%;max-width:320px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:16px;padding:0 16px;box-sizing:border-box;margin-bottom:10px"><input id="pwa-name-input" type="text" placeholder="Your name (optional)" style="width:100%;max-width:320px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:16px;padding:0 16px;box-sizing:border-box;margin-bottom:14px"><button onclick="(function(){var c=document.getElementById(\'pwa-invite-input\').value.trim().toUpperCase();var n=document.getElementById(\'pwa-name-input\').value.trim()||\'Me\';if(c){localStorage.setItem(\'la_saved_invite\',c);localStorage.setItem(\'la_display_name_saved\',n);}window.location.reload();})()" style="display:block;width:100%;max-width:320px;height:52px;background:#7c3aed;border-radius:14px;color:#fff;font-size:16px;font-weight:700;border:none;cursor:pointer;margin-bottom:16px">Reconnect household →</button><button onclick="window.location.reload()" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:14px;cursor:pointer;margin-bottom:12px">Continue without reconnecting</button><a href="https://listalert.github.io/ListAlert/ListAlert.html" style="font-size:13px;color:rgba(255,255,255,0.3);text-decoration:none">Open in Safari instead</a></div>';}else{
 var _isFirstRun=!localStorage.getItem('la_demo_seen')&&!localStorage.getItem('la_onboarded');
 if(!localStorage.getItem('la_onboarded')&&localStorage.getItem('la_demo_seen')){document.getElementById('ob-modal').style.display='flex';}
 function maybeShowDemoPrompt(){if(localStorage.getItem('la_demo_seen'))return;var dp=document.getElementById('demo-prompt');if(dp){dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}}
 initSupabase().then(function(){
-  loadFromSupabase().then(function(){ flushQueue();if(_isFirstRun)setTimeout(maybeShowDemoPrompt,8000); });
+  loadFromSupabase().then(function(){ _supabaseLoading=false;flushQueue();if(_isFirstRun)setTimeout(maybeShowDemoPrompt,8000); }).catch(function(){_supabaseLoading=false;renderList();});
   var _wCtrl=new AbortController();var _wTimer=setTimeout(function(){_wCtrl.abort();},5000);
   fetch('https://listalert.serbronn93.workers.dev/?ping=1',{signal:_wCtrl.signal})
     .then(function(){clearTimeout(_wTimer);})
@@ -2618,9 +2687,11 @@ function addRecipeIngredientsToCart(recipeId){
     cartAddItem(name,'cookbook');added++;
   });
   persistCart();updateCartBadge();
+  if(_orderRecipeIds.indexOf(recipeId)===-1){_orderRecipeIds.push(recipeId);_saveOrderRecipeIds();_broadcastOrderUpdate();}
   var msg=r.name+' — '+added+' items added';
   if(skipped.length)msg+=' ('+skipped.length+' excluded — allergy)';
   showToast(msg);
+  showOrderReadyBanner(added);
   renderCookbookTab();
 }
 
@@ -2629,7 +2700,9 @@ function removeRecipeFromCart(recipeId){
   if(!r)return;
   var names=r.items.map(function(ing){return(typeof ing==='string'?ing:(ing.name||ing)).toLowerCase();});
   cartItems=cartItems.filter(function(c){return names.indexOf(c.name.toLowerCase())===-1;});
-  persistCart();updateCartBadge();renderCookbookTab();
+  persistCart();updateCartBadge();
+  _orderRecipeIds=_orderRecipeIds.filter(function(id){return id!==recipeId;});_saveOrderRecipeIds();_broadcastOrderUpdate();
+  renderCookbookTab();
 }
 
 function itemInCart(itemId){
