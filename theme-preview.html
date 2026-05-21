@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1A1410">
+<title>ListAlert — Theme Preview</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #0a0a0a;
+    color: #fff;
+  }
+
+  /* ---------- Theme section wrapper ---------- */
+  .theme-section {
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 32px;
+    border-bottom: 1px solid rgba(0,0,0,0.15);
+  }
+
+  /* ---------- Sticky theme label ---------- */
+  .theme-label {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: #0a0a0a;
+    color: #fff;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border-bottom: 1px solid #222;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .theme-label .num {
+    background: #fff;
+    color: #000;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .theme-label .swatches {
+    margin-left: auto;
+    display: flex;
+    gap: 3px;
+  }
+  .theme-label .swatches span {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    display: inline-block;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  /* ---------- Phone frame ---------- */
+  .phone {
+    max-width: 390px;
+    margin: 16px auto 0;
+    background: var(--bg);
+    border: 1px solid var(--bg4);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  }
+  .screen-label {
+    text-align: center;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text3);
+    margin: 14px 0 6px;
+    font-weight: 600;
+  }
+
+  /* ---------- Common UI ---------- */
+  .app-header {
+    background: var(--bg2);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--bg4);
+  }
+  .wordmark {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.4px;
+  }
+  .wordmark em {
+    color: var(--amber);
+    font-style: normal;
+  }
+  .gps-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg3);
+    color: var(--text2);
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .gps-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+
+  /* ---------- Chips ---------- */
+  .chip-bar {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: var(--bg);
+    border-bottom: 1px solid var(--bg4);
+    scrollbar-width: none;
+  }
+  .chip-bar::-webkit-scrollbar { display: none; }
+  .chip {
+    background: var(--bg2);
+    color: var(--text2);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid var(--bg4);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .chip.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+  .chip.store {
+    background: var(--bg3);
+    color: var(--blue);
+    border-color: var(--blue);
+  }
+
+  /* ---------- List items ---------- */
+  .list-body {
+    padding: 8px 0 120px;
+    min-height: 380px;
+  }
+  .category {
+    margin: 12px 16px 0;
+    background: var(--bg2);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--bg4);
+  }
+  .category-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg3);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text2);
+  }
+  .category-head .count {
+    color: var(--text3);
+    font-weight: 600;
+  }
+  .caret {
+    color: var(--text3);
+    font-size: 10px;
+  }
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-top: 1px solid var(--bg4);
+  }
+  .item:first-of-type { border-top: none; }
+  .check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--text3);
+    flex-shrink: 0;
+  }
+  .item-name {
+    font-size: 15px;
+    color: var(--text);
+    font-weight: 500;
+    flex: 1;
+  }
+  .item-meta {
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  /* ---------- Recurring section ---------- */
+  .recurring {
+    margin: 12px 16px 0;
+    background: color-mix(in srgb, var(--amber) 12%, var(--bg2));
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--amber) 40%, var(--bg4));
+  }
+  .recurring-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--amber);
+  }
+  .recurring-head .badge {
+    background: var(--amber);
+    color: var(--bg2);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 10px;
+  }
+  .recurring .item { border-top-color: color-mix(in srgb, var(--amber) 25%, var(--bg4)); }
+  .recurring .interval {
+    font-size: 11px;
+    color: var(--amber);
+    font-weight: 600;
+  }
+
+  /* ---------- Bottom add bar ---------- */
+  .add-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    background: var(--bg2);
+    border-top: 1px solid var(--bg4);
+  }
+  .add-bar input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--bg4);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+  }
+  .add-bar input::placeholder { color: var(--text3); }
+  .btn-add {
+    background: var(--green);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* ---------- Cookbook ---------- */
+  .tab-bar {
+    display: flex;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--bg4);
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 14px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text3);
+    border-bottom: 2px solid transparent;
+  }
+  .tab.active {
+    color: var(--text);
+    border-bottom-color: var(--amber);
+  }
+  .recipe-list {
+    padding: 12px 16px 100px;
+    min-height: 320px;
+  }
+  .recipe-card {
+    background: var(--bg2);
+    border: 1px solid var(--bg4);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .recipe-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--bg3), var(--bg4));
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+  .recipe-body { flex: 1; min-width: 0; }
+  .recipe-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .recipe-meta {
+    font-size: 12px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .recipe-chip {
+    background: color-mix(in srgb, var(--blue) 15%, var(--bg3));
+    color: var(--blue);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .recipe-chip.weeknight {
+    background: color-mix(in srgb, var(--amber) 18%, var(--bg3));
+    color: var(--amber);
+  }
+  .btn-primary {
+    display: block;
+    width: calc(100% - 32px);
+    margin: 14px 16px;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--green) 35%, transparent);
+  }
+
+  /* ---------- In-store mode ---------- */
+  .instore {
+    background: var(--bg);
+    min-height: 560px;
+    display: flex;
+    flex-direction: column;
+  }
+  .instore-head {
+    background: var(--green);
+    color: #fff;
+    padding: 18px 18px 14px;
+    text-align: center;
+  }
+  .instore-store {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+  .instore-count {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .instore-list {
+    flex: 1;
+    padding: 16px 0;
+  }
+  .instore-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--bg4);
+  }
+  .instore-check {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2.5px solid var(--text3);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+  }
+  .instore-check.done {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .instore-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+  .instore-item.done .instore-name {
+    text-decoration: line-through;
+    color: var(--text3);
+  }
+  .instore-qty {
+    font-size: 14px;
+    color: var(--text2);
+    font-weight: 500;
+  }
+  .instore-exit {
+    margin: 0;
+    background: var(--text);
+    color: var(--bg2);
+    border: none;
+    padding: 18px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  /* ---------- Palette table ---------- */
+  .palette {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 3px;
+    margin: 0 16px 8px;
+    padding-top: 12px;
+  }
+  .palette div {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+
+  /* ===================================================== */
+  /* ============== THEME DEFINITIONS ===================== */
+  /* ===================================================== */
+
+  /* Theme 1 — Warm Cream (current baseline) */
+  .t1 {
+    --bg: #F5F0E8; --bg2: #FFFFFF; --bg3: #EDE8DF; --bg4: #DDD8CE;
+    --text: #1A1410; --text2: #6B6560; --text3: #9E9890;
+    --green: #2D9B5A; --amber: #C17B2A; --blue: #4A7FA5; --red: #C0392B;
+  }
+
+  /* Theme 2 — Charcoal Dark */
+  .t2 {
+    --bg: #1A1A1C; --bg2: #242427; --bg3: #2D2D31; --bg4: #3A3A3F;
+    --text: #F5F5F7; --text2: #B8B8BD; --text3: #7A7A80;
+    --green: #3DBA6E; --amber: #E09445; --blue: #6FA8D6; --red: #E25746;
+  }
+
+  /* Theme 3 — High Contrast */
+  .t3 {
+    --bg: #FFFFFF; --bg2: #FFFFFF; --bg3: #F0F0F0; --bg4: #BFBFBF;
+    --text: #000000; --text2: #2A2A2A; --text3: #595959;
+    --green: #007A37; --amber: #A85D00; --blue: #1F4F87; --red: #A6151A;
+  }
+
+  /* Theme 4 — Cool Neutral */
+  .t4 {
+    --bg: #F0F2F5; --bg2: #FFFFFF; --bg3: #E5E9EE; --bg4: #D2D7DE;
+    --text: #131722; --text2: #5A6270; --text3: #8B92A0;
+    --green: #2E9D6C; --amber: #B07A35; --blue: #3D6EA8; --red: #B53A38;
+  }
+
+  /* Theme 5 — Warm Earthy (terracotta + sage) */
+  .t5 {
+    --bg: #EFE5D3; --bg2: #FAF4E6; --bg3: #E3D6BE; --bg4: #C9BC9F;
+    --text: #2A1F12; --text2: #6B5538; --text3: #9E8762;
+    --green: #5C8A4B; --amber: #B8651E; --blue: #5A7A8C; --red: #B4432C;
+  }
+
+  /* Theme 6 — Deep Navy */
+  .t6 {
+    --bg: #0F1B2D; --bg2: #172945; --bg3: #1F3554; --bg4: #2D4670;
+    --text: #F0F4FB; --text2: #B0C0D5; --text3: #7587A0;
+    --green: #4ABB7A; --amber: #E8A554; --blue: #7FB4E8; --red: #F0635A;
+  }
+
+  /* Theme 7 — Soft Pastels */
+  .t7 {
+    --bg: #FBF6F4; --bg2: #FFFFFF; --bg3: #F4ECE8; --bg4: #E6D9D2;
+    --text: #2D2024; --text2: #75666B; --text3: #A89AA0;
+    --green: #6FB68D; --amber: #D69970; --blue: #7FA0C2; --red: #D47883;
+  }
+
+  /* Theme 8 — OLED Black */
+  .t8 {
+    --bg: #000000; --bg2: #0A0A0A; --bg3: #141414; --bg4: #232323;
+    --text: #FFFFFF; --text2: #B0B0B0; --text3: #6E6E6E;
+    --green: #2EE665; --amber: #FFB347; --blue: #5DADE2; --red: #FF5252;
+  }
+
+  /* Intro */
+  .intro {
+    padding: 24px 20px;
+    background: #0a0a0a;
+    color: #fff;
+    text-align: center;
+    border-bottom: 1px solid #222;
+  }
+  .intro h1 {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+  }
+  .intro h1 em {
+    color: #C17B2A;
+    font-style: normal;
+  }
+  .intro p {
+    margin: 0;
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.5;
+  }
+  .toc {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    max-width: 360px;
+    margin: 14px auto 0;
+  }
+  .toc a {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    text-decoration: none;
+    text-align: left;
+    border: 1px solid #2a2a2a;
+  }
+  .toc a span {
+    color: #888;
+    font-size: 10px;
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>List<em>Alert</em> · Theme Preview</h1>
+  <p>8 palettes × 3 screens. Scroll to compare on device.</p>
+  <div class="toc">
+    <a href="#theme1"><span>01</span>Warm Cream (current)</a>
+    <a href="#theme2"><span>02</span>Charcoal Dark</a>
+    <a href="#theme3"><span>03</span>High Contrast</a>
+    <a href="#theme4"><span>04</span>Cool Neutral</a>
+    <a href="#theme5"><span>05</span>Warm Earthy</a>
+    <a href="#theme6"><span>06</span>Deep Navy</a>
+    <a href="#theme7"><span>07</span>Soft Pastels</a>
+    <a href="#theme8"><span>08</span>OLED Black</a>
+  </div>
+</div>
+
+<!-- =================================================== -->
+<!-- ============== TEMPLATE: REUSED PER THEME ========= -->
+<!-- =================================================== -->
+<!-- Each theme block follows the same structure.        -->
+
+<!-- Macro pattern (8x):
+  <section class="theme-section tN" id="themeN">
+    <div class="theme-label">
+      <span class="num">0N</span> Theme N — Name
+      <div class="swatches"><span bg></span><span bg2></span><span text></span><span green></span><span amber></span><span blue></span><span red></span></div>
+    </div>
+    <div class="palette">...</div>
+
+    <div class="screen-label">List View</div>
+    <div class="phone">...list view...</div>
+
+    <div class="screen-label">Cookbook</div>
+    <div class="phone">...cookbook...</div>
+
+    <div class="screen-label">In-Store Mode</div>
+    <div class="phone">...instore...</div>
+  </section>
+-->
+
+<!-- ========== THEME 1 ========== -->
+<section class="theme-section t1" id="theme1">
+  <div class="theme-label">
+    <span class="num">01</span> Warm Cream <span style="opacity:0.6;font-weight:400">— current baseline</span>
+    <div class="swatches">
+      <span style="background:#F5F0E8"></span>
+      <span style="background:#FFFFFF"></span>
+      <span style="background:#1A1410"></span>
+      <span style="background:#2D9B5A"></span>
+      <span style="background:#C17B2A"></span>
+      <span style="background:#4A7FA5"></span>
+      <span style="background:#C0392B"></span>
+    </div>
+  </div>
+
+  <div class="screen-label">List View</div>
+  <div class="phone">
+    <div class="app-header">
+      <div class="wordmark">List<em>Alert</em></div>
+      <div class="gps-pill"><span class="dot"></span>Near Whole Foods</div>
+    </div>
+    <div class="chip-bar">
+      <div class="chip active">All</div>
+      <div class="chip">Produce</div>
+      <div class="chip">Dairy</div>
+      <div class="chip store">+ Whole Foods</div>
+    </div>
+    <div class="list-body">
+      <div class="category">
+        <div class="category-head"><span>▼ Produce</span><span class="count">3 items</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Honeycrisp apples</div><div class="item-meta">×4</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Baby spinach</div><div class="item-meta">1 bag</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Avocados</div><div class="item-meta">×2</div></div>
+      </div>
+      <div class="recurring">
+        <div class="recurring-head"><span>⟲ Recurring</span><span class="badge">EVERY 7D</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Whole milk</div><div class="interval">Due tomorrow</div></div>
+      </div>
+    </div>
+    <div class="add-bar">
+      <input placeholder="Add item…">
+      <button class="btn-add">Add</button>
+    </div>
+  </div>
+
+  <div class="screen-label">Cookbook</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Home</div></div>
+    <div class="tab-bar">
+      <div class="tab">List</div>
+      <div class="tab active">My Cookbook</div>
+      <div class="tab">Stores &amp; Household</div>
+    </div>
+    <div class="chip-bar">
+      <div class="chip active">All</div>
+      <div class="chip">Weeknight</div>
+      <div class="chip">Quick</div>
+    </div>
+    <div class="recipe-list">
+      <div class="recipe-card">
+        <div class="recipe-thumb">🥬</div>
+        <div class="recipe-body">
+          <div class="recipe-name">Pesto Pasta</div>
+          <div class="recipe-meta">8 ingredients · <span class="recipe-chip">Quick</span></div>
+        </div>
+      </div>
+      <div class="recipe-card">
+        <div class="recipe-thumb">🍛</div>
+        <div class="recipe-body">
+          <div class="recipe-name">Chicken Tikka Masala</div>
+          <div class="recipe-meta">14 ingredients · <span class="recipe-chip weeknight">Weeknight</span></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary">✨ Extract / Inspire</button>
+  </div>
+
+  <div class="screen-label">In-Store Mode</div>
+  <div class="phone">
+    <div class="instore">
+      <div class="instore-head">
+        <div class="instore-store">Whole Foods · Park Slope</div>
+        <div class="instore-count">2 of 4 remaining</div>
+      </div>
+      <div class="instore-list">
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Whole milk</div><div class="instore-qty">1 gal</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Sourdough bread</div><div class="instore-qty">1 loaf</div></div>
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Free-range eggs</div><div class="instore-qty">dozen</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Avocados</div><div class="instore-qty">×2</div></div>
+      </div>
+      <button class="instore-exit">Done shopping</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== THEME 2 ========== -->
+<section class="theme-section t2" id="theme2">
+  <div class="theme-label">
+    <span class="num">02</span> Charcoal Dark <span style="opacity:0.6;font-weight:400">— modern dark mode</span>
+    <div class="swatches">
+      <span style="background:#1A1A1C"></span>
+      <span style="background:#242427"></span>
+      <span style="background:#F5F5F7"></span>
+      <span style="background:#3DBA6E"></span>
+      <span style="background:#E09445"></span>
+      <span style="background:#6FA8D6"></span>
+      <span style="background:#E25746"></span>
+    </div>
+  </div>
+
+  <div class="screen-label">List View</div>
+  <div class="phone">
+    <div class="app-header">
+      <div class="wordmark">List<em>Alert</em></div>
+      <div class="gps-pill"><span class="dot"></span>Near Whole Foods</div>
+    </div>
+    <div class="chip-bar">
+      <div class="chip active">All</div><div class="chip">Produce</div><div class="chip">Dairy</div><div class="chip store">+ Whole Foods</div>
+    </div>
+    <div class="list-body">
+      <div class="category">
+        <div class="category-head"><span>▼ Produce</span><span class="count">3 items</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Honeycrisp apples</div><div class="item-meta">×4</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Baby spinach</div><div class="item-meta">1 bag</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Avocados</div><div class="item-meta">×2</div></div>
+      </div>
+      <div class="recurring">
+        <div class="recurring-head"><span>⟲ Recurring</span><span class="badge">EVERY 7D</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Whole milk</div><div class="interval">Due tomorrow</div></div>
+      </div>
+    </div>
+    <div class="add-bar"><input placeholder="Add item…"><button class="btn-add">Add</button></div>
+  </div>
+
+  <div class="screen-label">Cookbook</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Home</div></div>
+    <div class="tab-bar"><div class="tab">List</div><div class="tab active">My Cookbook</div><div class="tab">Stores &amp; Household</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Weeknight</div><div class="chip">Quick</div></div>
+    <div class="recipe-list">
+      <div class="recipe-card"><div class="recipe-thumb">🥬</div><div class="recipe-body"><div class="recipe-name">Pesto Pasta</div><div class="recipe-meta">8 ingredients · <span class="recipe-chip">Quick</span></div></div></div>
+      <div class="recipe-card"><div class="recipe-thumb">🍛</div><div class="recipe-body"><div class="recipe-name">Chicken Tikka Masala</div><div class="recipe-meta">14 ingredients · <span class="recipe-chip weeknight">Weeknight</span></div></div></div>
+    </div>
+    <button class="btn-primary">✨ Extract / Inspire</button>
+  </div>
+
+  <div class="screen-label">In-Store Mode</div>
+  <div class="phone">
+    <div class="instore">
+      <div class="instore-head"><div class="instore-store">Whole Foods · Park Slope</div><div class="instore-count">2 of 4 remaining</div></div>
+      <div class="instore-list">
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Whole milk</div><div class="instore-qty">1 gal</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Sourdough bread</div><div class="instore-qty">1 loaf</div></div>
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Free-range eggs</div><div class="instore-qty">dozen</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Avocados</div><div class="instore-qty">×2</div></div>
+      </div>
+      <button class="instore-exit">Done shopping</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== THEME 3 ========== -->
+<section class="theme-section t3" id="theme3">
+  <div class="theme-label">
+    <span class="num">03</span> High Contrast <span style="opacity:0.6;font-weight:400">— accessibility-first</span>
+    <div class="swatches">
+      <span style="background:#FFFFFF"></span>
+      <span style="background:#F0F0F0"></span>
+      <span style="background:#000000"></span>
+      <span style="background:#007A37"></span>
+      <span style="background:#A85D00"></span>
+      <span style="background:#1F4F87"></span>
+      <span style="background:#A6151A"></span>
+    </div>
+  </div>
+
+  <div class="screen-label">List View</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Near Whole Foods</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Produce</div><div class="chip">Dairy</div><div class="chip store">+ Whole Foods</div></div>
+    <div class="list-body">
+      <div class="category">
+        <div class="category-head"><span>▼ Produce</span><span class="count">3 items</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Honeycrisp apples</div><div class="item-meta">×4</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Baby spinach</div><div class="item-meta">1 bag</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Avocados</div><div class="item-meta">×2</div></div>
+      </div>
+      <div class="recurring">
+        <div class="recurring-head"><span>⟲ Recurring</span><span class="badge">EVERY 7D</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Whole milk</div><div class="interval">Due tomorrow</div></div>
+      </div>
+    </div>
+    <div class="add-bar"><input placeholder="Add item…"><button class="btn-add">Add</button></div>
+  </div>
+
+  <div class="screen-label">Cookbook</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Home</div></div>
+    <div class="tab-bar"><div class="tab">List</div><div class="tab active">My Cookbook</div><div class="tab">Stores &amp; Household</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Weeknight</div><div class="chip">Quick</div></div>
+    <div class="recipe-list">
+      <div class="recipe-card"><div class="recipe-thumb">🥬</div><div class="recipe-body"><div class="recipe-name">Pesto Pasta</div><div class="recipe-meta">8 ingredients · <span class="recipe-chip">Quick</span></div></div></div>
+      <div class="recipe-card"><div class="recipe-thumb">🍛</div><div class="recipe-body"><div class="recipe-name">Chicken Tikka Masala</div><div class="recipe-meta">14 ingredients · <span class="recipe-chip weeknight">Weeknight</span></div></div></div>
+    </div>
+    <button class="btn-primary">✨ Extract / Inspire</button>
+  </div>
+
+  <div class="screen-label">In-Store Mode</div>
+  <div class="phone">
+    <div class="instore">
+      <div class="instore-head"><div class="instore-store">Whole Foods · Park Slope</div><div class="instore-count">2 of 4 remaining</div></div>
+      <div class="instore-list">
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Whole milk</div><div class="instore-qty">1 gal</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Sourdough bread</div><div class="instore-qty">1 loaf</div></div>
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Free-range eggs</div><div class="instore-qty">dozen</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Avocados</div><div class="instore-qty">×2</div></div>
+      </div>
+      <button class="instore-exit">Done shopping</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== THEME 4 ========== -->
+<section class="theme-section t4" id="theme4">
+  <div class="theme-label">
+    <span class="num">04</span> Cool Neutral <span style="opacity:0.6;font-weight:400">— gray-blue palette</span>
+    <div class="swatches">
+      <span style="background:#F0F2F5"></span>
+      <span style="background:#FFFFFF"></span>
+      <span style="background:#131722"></span>
+      <span style="background:#2E9D6C"></span>
+      <span style="background:#B07A35"></span>
+      <span style="background:#3D6EA8"></span>
+      <span style="background:#B53A38"></span>
+    </div>
+  </div>
+
+  <div class="screen-label">List View</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Near Whole Foods</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Produce</div><div class="chip">Dairy</div><div class="chip store">+ Whole Foods</div></div>
+    <div class="list-body">
+      <div class="category">
+        <div class="category-head"><span>▼ Produce</span><span class="count">3 items</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Honeycrisp apples</div><div class="item-meta">×4</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Baby spinach</div><div class="item-meta">1 bag</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Avocados</div><div class="item-meta">×2</div></div>
+      </div>
+      <div class="recurring">
+        <div class="recurring-head"><span>⟲ Recurring</span><span class="badge">EVERY 7D</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Whole milk</div><div class="interval">Due tomorrow</div></div>
+      </div>
+    </div>
+    <div class="add-bar"><input placeholder="Add item…"><button class="btn-add">Add</button></div>
+  </div>
+
+  <div class="screen-label">Cookbook</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Home</div></div>
+    <div class="tab-bar"><div class="tab">List</div><div class="tab active">My Cookbook</div><div class="tab">Stores &amp; Household</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Weeknight</div><div class="chip">Quick</div></div>
+    <div class="recipe-list">
+      <div class="recipe-card"><div class="recipe-thumb">🥬</div><div class="recipe-body"><div class="recipe-name">Pesto Pasta</div><div class="recipe-meta">8 ingredients · <span class="recipe-chip">Quick</span></div></div></div>
+      <div class="recipe-card"><div class="recipe-thumb">🍛</div><div class="recipe-body"><div class="recipe-name">Chicken Tikka Masala</div><div class="recipe-meta">14 ingredients · <span class="recipe-chip weeknight">Weeknight</span></div></div></div>
+    </div>
+    <button class="btn-primary">✨ Extract / Inspire</button>
+  </div>
+
+  <div class="screen-label">In-Store Mode</div>
+  <div class="phone">
+    <div class="instore">
+      <div class="instore-head"><div class="instore-store">Whole Foods · Park Slope</div><div class="instore-count">2 of 4 remaining</div></div>
+      <div class="instore-list">
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Whole milk</div><div class="instore-qty">1 gal</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Sourdough bread</div><div class="instore-qty">1 loaf</div></div>
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Free-range eggs</div><div class="instore-qty">dozen</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Avocados</div><div class="instore-qty">×2</div></div>
+      </div>
+      <button class="instore-exit">Done shopping</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== THEME 5 ========== -->
+<section class="theme-section t5" id="theme5">
+  <div class="theme-label">
+    <span class="num">05</span> Warm Earthy <span style="opacity:0.6;font-weight:400">— terracotta + sage</span>
+    <div class="swatches">
+      <span style="background:#EFE5D3"></span>
+      <span style="background:#FAF4E6"></span>
+      <span style="background:#2A1F12"></span>
+      <span style="background:#5C8A4B"></span>
+      <span style="background:#B8651E"></span>
+      <span style="background:#5A7A8C"></span>
+      <span style="background:#B4432C"></span>
+    </div>
+  </div>
+
+  <div class="screen-label">List View</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Near Whole Foods</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Produce</div><div class="chip">Dairy</div><div class="chip store">+ Whole Foods</div></div>
+    <div class="list-body">
+      <div class="category">
+        <div class="category-head"><span>▼ Produce</span><span class="count">3 items</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Honeycrisp apples</div><div class="item-meta">×4</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Baby spinach</div><div class="item-meta">1 bag</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Avocados</div><div class="item-meta">×2</div></div>
+      </div>
+      <div class="recurring">
+        <div class="recurring-head"><span>⟲ Recurring</span><span class="badge">EVERY 7D</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Whole milk</div><div class="interval">Due tomorrow</div></div>
+      </div>
+    </div>
+    <div class="add-bar"><input placeholder="Add item…"><button class="btn-add">Add</button></div>
+  </div>
+
+  <div class="screen-label">Cookbook</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Home</div></div>
+    <div class="tab-bar"><div class="tab">List</div><div class="tab active">My Cookbook</div><div class="tab">Stores &amp; Household</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Weeknight</div><div class="chip">Quick</div></div>
+    <div class="recipe-list">
+      <div class="recipe-card"><div class="recipe-thumb">🥬</div><div class="recipe-body"><div class="recipe-name">Pesto Pasta</div><div class="recipe-meta">8 ingredients · <span class="recipe-chip">Quick</span></div></div></div>
+      <div class="recipe-card"><div class="recipe-thumb">🍛</div><div class="recipe-body"><div class="recipe-name">Chicken Tikka Masala</div><div class="recipe-meta">14 ingredients · <span class="recipe-chip weeknight">Weeknight</span></div></div></div>
+    </div>
+    <button class="btn-primary">✨ Extract / Inspire</button>
+  </div>
+
+  <div class="screen-label">In-Store Mode</div>
+  <div class="phone">
+    <div class="instore">
+      <div class="instore-head"><div class="instore-store">Whole Foods · Park Slope</div><div class="instore-count">2 of 4 remaining</div></div>
+      <div class="instore-list">
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Whole milk</div><div class="instore-qty">1 gal</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Sourdough bread</div><div class="instore-qty">1 loaf</div></div>
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Free-range eggs</div><div class="instore-qty">dozen</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Avocados</div><div class="instore-qty">×2</div></div>
+      </div>
+      <button class="instore-exit">Done shopping</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== THEME 6 ========== -->
+<section class="theme-section t6" id="theme6">
+  <div class="theme-label">
+    <span class="num">06</span> Deep Navy <span style="opacity:0.6;font-weight:400">— dark blue + warm accents</span>
+    <div class="swatches">
+      <span style="background:#0F1B2D"></span>
+      <span style="background:#172945"></span>
+      <span style="background:#F0F4FB"></span>
+      <span style="background:#4ABB7A"></span>
+      <span style="background:#E8A554"></span>
+      <span style="background:#7FB4E8"></span>
+      <span style="background:#F0635A"></span>
+    </div>
+  </div>
+
+  <div class="screen-label">List View</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Near Whole Foods</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Produce</div><div class="chip">Dairy</div><div class="chip store">+ Whole Foods</div></div>
+    <div class="list-body">
+      <div class="category">
+        <div class="category-head"><span>▼ Produce</span><span class="count">3 items</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Honeycrisp apples</div><div class="item-meta">×4</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Baby spinach</div><div class="item-meta">1 bag</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Avocados</div><div class="item-meta">×2</div></div>
+      </div>
+      <div class="recurring">
+        <div class="recurring-head"><span>⟲ Recurring</span><span class="badge">EVERY 7D</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Whole milk</div><div class="interval">Due tomorrow</div></div>
+      </div>
+    </div>
+    <div class="add-bar"><input placeholder="Add item…"><button class="btn-add">Add</button></div>
+  </div>
+
+  <div class="screen-label">Cookbook</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Home</div></div>
+    <div class="tab-bar"><div class="tab">List</div><div class="tab active">My Cookbook</div><div class="tab">Stores &amp; Household</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Weeknight</div><div class="chip">Quick</div></div>
+    <div class="recipe-list">
+      <div class="recipe-card"><div class="recipe-thumb">🥬</div><div class="recipe-body"><div class="recipe-name">Pesto Pasta</div><div class="recipe-meta">8 ingredients · <span class="recipe-chip">Quick</span></div></div></div>
+      <div class="recipe-card"><div class="recipe-thumb">🍛</div><div class="recipe-body"><div class="recipe-name">Chicken Tikka Masala</div><div class="recipe-meta">14 ingredients · <span class="recipe-chip weeknight">Weeknight</span></div></div></div>
+    </div>
+    <button class="btn-primary">✨ Extract / Inspire</button>
+  </div>
+
+  <div class="screen-label">In-Store Mode</div>
+  <div class="phone">
+    <div class="instore">
+      <div class="instore-head"><div class="instore-store">Whole Foods · Park Slope</div><div class="instore-count">2 of 4 remaining</div></div>
+      <div class="instore-list">
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Whole milk</div><div class="instore-qty">1 gal</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Sourdough bread</div><div class="instore-qty">1 loaf</div></div>
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Free-range eggs</div><div class="instore-qty">dozen</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Avocados</div><div class="instore-qty">×2</div></div>
+      </div>
+      <button class="instore-exit">Done shopping</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== THEME 7 ========== -->
+<section class="theme-section t7" id="theme7">
+  <div class="theme-label">
+    <span class="num">07</span> Soft Pastels <span style="opacity:0.6;font-weight:400">— low-saturation rose</span>
+    <div class="swatches">
+      <span style="background:#FBF6F4"></span>
+      <span style="background:#FFFFFF"></span>
+      <span style="background:#2D2024"></span>
+      <span style="background:#6FB68D"></span>
+      <span style="background:#D69970"></span>
+      <span style="background:#7FA0C2"></span>
+      <span style="background:#D47883"></span>
+    </div>
+  </div>
+
+  <div class="screen-label">List View</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Near Whole Foods</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Produce</div><div class="chip">Dairy</div><div class="chip store">+ Whole Foods</div></div>
+    <div class="list-body">
+      <div class="category">
+        <div class="category-head"><span>▼ Produce</span><span class="count">3 items</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Honeycrisp apples</div><div class="item-meta">×4</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Baby spinach</div><div class="item-meta">1 bag</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Avocados</div><div class="item-meta">×2</div></div>
+      </div>
+      <div class="recurring">
+        <div class="recurring-head"><span>⟲ Recurring</span><span class="badge">EVERY 7D</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Whole milk</div><div class="interval">Due tomorrow</div></div>
+      </div>
+    </div>
+    <div class="add-bar"><input placeholder="Add item…"><button class="btn-add">Add</button></div>
+  </div>
+
+  <div class="screen-label">Cookbook</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Home</div></div>
+    <div class="tab-bar"><div class="tab">List</div><div class="tab active">My Cookbook</div><div class="tab">Stores &amp; Household</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Weeknight</div><div class="chip">Quick</div></div>
+    <div class="recipe-list">
+      <div class="recipe-card"><div class="recipe-thumb">🥬</div><div class="recipe-body"><div class="recipe-name">Pesto Pasta</div><div class="recipe-meta">8 ingredients · <span class="recipe-chip">Quick</span></div></div></div>
+      <div class="recipe-card"><div class="recipe-thumb">🍛</div><div class="recipe-body"><div class="recipe-name">Chicken Tikka Masala</div><div class="recipe-meta">14 ingredients · <span class="recipe-chip weeknight">Weeknight</span></div></div></div>
+    </div>
+    <button class="btn-primary">✨ Extract / Inspire</button>
+  </div>
+
+  <div class="screen-label">In-Store Mode</div>
+  <div class="phone">
+    <div class="instore">
+      <div class="instore-head"><div class="instore-store">Whole Foods · Park Slope</div><div class="instore-count">2 of 4 remaining</div></div>
+      <div class="instore-list">
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Whole milk</div><div class="instore-qty">1 gal</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Sourdough bread</div><div class="instore-qty">1 loaf</div></div>
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Free-range eggs</div><div class="instore-qty">dozen</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Avocados</div><div class="instore-qty">×2</div></div>
+      </div>
+      <button class="instore-exit">Done shopping</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== THEME 8 ========== -->
+<section class="theme-section t8" id="theme8">
+  <div class="theme-label">
+    <span class="num">08</span> OLED Black <span style="opacity:0.6;font-weight:400">— pure black, battery-friendly</span>
+    <div class="swatches">
+      <span style="background:#000000"></span>
+      <span style="background:#0A0A0A"></span>
+      <span style="background:#FFFFFF"></span>
+      <span style="background:#2EE665"></span>
+      <span style="background:#FFB347"></span>
+      <span style="background:#5DADE2"></span>
+      <span style="background:#FF5252"></span>
+    </div>
+  </div>
+
+  <div class="screen-label">List View</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Near Whole Foods</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Produce</div><div class="chip">Dairy</div><div class="chip store">+ Whole Foods</div></div>
+    <div class="list-body">
+      <div class="category">
+        <div class="category-head"><span>▼ Produce</span><span class="count">3 items</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Honeycrisp apples</div><div class="item-meta">×4</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Baby spinach</div><div class="item-meta">1 bag</div></div>
+        <div class="item"><div class="check"></div><div class="item-name">Avocados</div><div class="item-meta">×2</div></div>
+      </div>
+      <div class="recurring">
+        <div class="recurring-head"><span>⟲ Recurring</span><span class="badge">EVERY 7D</span></div>
+        <div class="item"><div class="check"></div><div class="item-name">Whole milk</div><div class="interval">Due tomorrow</div></div>
+      </div>
+    </div>
+    <div class="add-bar"><input placeholder="Add item…"><button class="btn-add">Add</button></div>
+  </div>
+
+  <div class="screen-label">Cookbook</div>
+  <div class="phone">
+    <div class="app-header"><div class="wordmark">List<em>Alert</em></div><div class="gps-pill"><span class="dot"></span>Home</div></div>
+    <div class="tab-bar"><div class="tab">List</div><div class="tab active">My Cookbook</div><div class="tab">Stores &amp; Household</div></div>
+    <div class="chip-bar"><div class="chip active">All</div><div class="chip">Weeknight</div><div class="chip">Quick</div></div>
+    <div class="recipe-list">
+      <div class="recipe-card"><div class="recipe-thumb">🥬</div><div class="recipe-body"><div class="recipe-name">Pesto Pasta</div><div class="recipe-meta">8 ingredients · <span class="recipe-chip">Quick</span></div></div></div>
+      <div class="recipe-card"><div class="recipe-thumb">🍛</div><div class="recipe-body"><div class="recipe-name">Chicken Tikka Masala</div><div class="recipe-meta">14 ingredients · <span class="recipe-chip weeknight">Weeknight</span></div></div></div>
+    </div>
+    <button class="btn-primary">✨ Extract / Inspire</button>
+  </div>
+
+  <div class="screen-label">In-Store Mode</div>
+  <div class="phone">
+    <div class="instore">
+      <div class="instore-head"><div class="instore-store">Whole Foods · Park Slope</div><div class="instore-count">2 of 4 remaining</div></div>
+      <div class="instore-list">
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Whole milk</div><div class="instore-qty">1 gal</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Sourdough bread</div><div class="instore-qty">1 loaf</div></div>
+        <div class="instore-item done"><div class="instore-check done">✓</div><div class="instore-name">Free-range eggs</div><div class="instore-qty">dozen</div></div>
+        <div class="instore-item"><div class="instore-check"></div><div class="instore-name">Avocados</div><div class="instore-qty">×2</div></div>
+      </div>
+      <button class="instore-exit">Done shopping</button>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
