@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ListAlert — Component Spike</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@1,400;1,500;1,600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #0a0a0a;
+  color: #fff;
+}
+
+/* ── Section ─────────────────────────────────────────────── */
+.theme-section {
+  background: var(--bg);
+  color: var(--text);
+  padding-bottom: 60px;
+  border-bottom: 1px solid rgba(0,0,0,0.18);
+}
+
+/* ── Sticky label ─────────────────────────────────────────── */
+.theme-label {
+  position: sticky; top: 0; z-index: 50;
+  background: #0a0a0a; color: #fff;
+  padding: 12px 18px;
+  font-size: 14px; font-weight: 600; letter-spacing: 0.3px;
+  border-bottom: 1px solid #1e1e1e;
+  display: flex; align-items: center; gap: 12px;
+}
+.tl-num {
+  background: #fff; color: #000;
+  padding: 3px 8px; border-radius: 5px;
+  font-size: 11px; font-weight: 800;
+}
+.tl-sub { opacity: 0.5; font-weight: 400; }
+.tl-swatches { margin-left: auto; display: flex; gap: 4px; }
+.tl-swatches span {
+  width: 16px; height: 16px; border-radius: 3px;
+  display: inline-block;
+  border: 1px solid rgba(255,255,255,0.12);
+  flex-shrink: 0;
+}
+
+/* ── Typography Specimen ─────────────────────────────────── */
+.specimen {
+  padding: 36px 32px 24px;
+  max-width: 1280px; margin: 0 auto;
+}
+.specimen-wordmark {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 28px;
+  letter-spacing: -2px;
+}
+.specimen-wordmark .list-part {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 900;
+  color: var(--text);
+}
+.specimen-wordmark .alert-part {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--amber);
+  letter-spacing: -3px;
+  margin-left: 2px;
+}
+.specimen-grid {
+  display: grid; grid-template-columns: 140px 1fr;
+  gap: 14px 28px; align-items: baseline;
+  border-top: 1px solid var(--bg4);
+  padding-top: 22px;
+  max-width: 720px;
+}
+.specimen-grid .label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--text3); font-weight: 700;
+}
+.specimen-h2 {
+  font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.7px;
+  color: var(--text2);
+}
+.specimen-body {
+  font-size: 16px; color: var(--text); font-weight: 500;
+}
+.specimen-caption {
+  font-size: 11px; color: var(--text3);
+}
+
+/* ── Phone Row ───────────────────────────────────────────── */
+.phone-row {
+  display: flex; flex-wrap: wrap; gap: 32px;
+  justify-content: center; padding: 16px 16px 0;
+}
+.phone-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.phone-caption {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 1.4px;
+  color: var(--text3); font-weight: 700;
+}
+
+/* ── Device Shell (realistic phone frame) ────────────────── */
+.device-shell {
+  width: 360px;
+  background: #0a0a0a;
+  border-radius: 54px;
+  padding: 11px;
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.45),
+    0 8px 18px rgba(0,0,0,0.22),
+    inset 0 0 0 2px #2a2a2a,
+    inset 0 0 0 4px #0a0a0a;
+  position: relative;
+}
+.phone-screen {
+  background: var(--bg);
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  height: 740px;
+  display: flex; flex-direction: column;
+}
+
+/* ── Status Bar ──────────────────────────────────────────── */
+.status-bar {
+  background: var(--bg);
+  height: 50px;
+  padding: 4px 28px 0;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 14px; font-weight: 700;
+  color: var(--text);
+  position: relative;
+  flex-shrink: 0;
+  z-index: 3;
+}
+.sb-notch {
+  position: absolute; left: 50%; top: 9px;
+  transform: translateX(-50%);
+  width: 104px; height: 28px;
+  background: #000;
+  border-radius: 999px;
+}
+.sb-time { font-variant-numeric: tabular-nums; letter-spacing: -0.2px; }
+.sb-icons { display: inline-flex; align-items: center; gap: 6px; }
+.sb-signal { display: inline-flex; align-items: flex-end; gap: 2px; height: 10px; }
+.sb-signal span { width: 3px; background: var(--text); border-radius: 1px; display: inline-block; }
+.sb-signal span:nth-child(1) { height: 3px; }
+.sb-signal span:nth-child(2) { height: 5px; }
+.sb-signal span:nth-child(3) { height: 7px; }
+.sb-signal span:nth-child(4) { height: 9px; }
+.sb-wifi { display: inline-block; }
+.sb-battery {
+  width: 26px; height: 12px;
+  border: 1.5px solid var(--text);
+  border-radius: 3px;
+  position: relative;
+  display: inline-block;
+  margin-right: 2px;
+}
+.sb-battery::after {
+  content: ''; position: absolute;
+  top: 3px; right: -4px;
+  width: 2px; height: 4px;
+  background: var(--text); border-radius: 0 1px 1px 0;
+}
+.sb-battery-fill {
+  position: absolute; top: 1.5px; bottom: 1.5px; left: 1.5px;
+  width: 76%;
+  background: var(--text); border-radius: 1px;
+}
+
+/* ── App content area ────────────────────────────────────── */
+.app-area {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── App header (List + Cookbook) ────────────────────────── */
+.app-header {
+  background: var(--bg2);
+  padding: 12px 18px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--bg4);
+  flex-shrink: 0;
+}
+.wordmark {
+  font-size: 26px; line-height: 1;
+  letter-spacing: -0.6px;
+}
+.wordmark .list-part {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 900;
+  color: var(--text);
+}
+.wordmark .alert-part {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--amber);
+  letter-spacing: -1.2px;
+  margin-left: 1px;
+}
+.gps-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg3); color: var(--text2);
+  padding: 6px 12px; border-radius: 999px;
+  font-size: 11px; font-weight: 700;
+  border: 1px solid var(--bg4);
+}
+.gps-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+
+/* ── Chips ───────────────────────────────────────────────── */
+.chip-bar {
+  display: flex; gap: 8px; padding: 12px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--bg4);
+  overflow-x: auto; scrollbar-width: none;
+  flex-shrink: 0;
+}
+.chip-bar::-webkit-scrollbar { display: none; }
+.chip {
+  background: var(--bg2); color: var(--text2);
+  padding: 7px 13px; border-radius: 999px;
+  font-size: 12px; font-weight: 600;
+  border: 1px solid var(--bg4);
+  white-space: nowrap; flex-shrink: 0;
+}
+.chip.active {
+  background: var(--text); color: var(--bg);
+  border-color: var(--text); font-weight: 700;
+}
+.chip.store {
+  background: color-mix(in srgb, var(--blue) 12%, var(--bg2));
+  color: var(--blue);
+  border-color: color-mix(in srgb, var(--blue) 38%, var(--bg4));
+}
+
+/* ── List body / categories ──────────────────────────────── */
+.list-body {
+  flex: 1;
+  padding: 12px 0 6px;
+  overflow: hidden;
+}
+.category {
+  margin: 10px 16px 0;
+  background: var(--bg2);
+  border-radius: 14px; overflow: hidden;
+  border: 1px solid var(--bg4);
+}
+.cat-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 14px;
+  background: var(--bg3);
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.7px;
+  color: var(--text2);
+}
+.cat-count { color: var(--text3); font-weight: 600; }
+.item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--bg4);
+}
+.check {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid var(--text3); flex-shrink: 0;
+}
+.item-name { font-size: 15px; color: var(--text); font-weight: 500; flex: 1; }
+.item-meta { font-size: 12px; color: var(--text3); font-weight: 500; }
+.recurring {
+  margin: 10px 16px 0;
+  background: color-mix(in srgb, var(--amber) 10%, var(--bg2));
+  border-radius: 14px; overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--amber) 40%, var(--bg4));
+}
+.rec-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 14px;
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.7px;
+  color: var(--amber);
+}
+.rec-badge {
+  background: var(--amber); color: #fff;
+  padding: 3px 8px; border-radius: 5px;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
+}
+.recurring .item { border-top-color: color-mix(in srgb, var(--amber) 24%, var(--bg4)); }
+.interval { font-size: 11px; color: var(--amber); font-weight: 700; }
+
+/* ── Add bar (bottom of list) ────────────────────────────── */
+.add-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px 22px;
+  background: var(--bg2);
+  border-top: 1px solid var(--bg4);
+  flex-shrink: 0;
+}
+.add-bar input {
+  flex: 1; background: var(--bg);
+  border: 1.5px solid var(--bg4); border-radius: 12px;
+  padding: 12px 14px; font-size: 14px; color: var(--text);
+  font-family: inherit; outline: none;
+  font-weight: 500;
+}
+.add-bar input::placeholder { color: var(--text3); }
+.btn-add {
+  background: var(--green); color: #fff;
+  border: none;
+  padding: 12px 22px; border-radius: 12px;
+  font-size: 14px; font-weight: 800; letter-spacing: 0.3px;
+  cursor: pointer;
+  box-shadow:
+    0 4px 12px color-mix(in srgb, var(--green) 40%, transparent),
+    inset 0 1px 0 rgba(255,255,255,0.18);
+}
+
+/* ── Tab bar (cookbook) ──────────────────────────────────── */
+.tab-bar {
+  display: flex; background: var(--bg2);
+  border-bottom: 1px solid var(--bg4);
+  flex-shrink: 0;
+}
+.tab {
+  flex: 1; text-align: center;
+  padding: 14px 4px 12px;
+  font-size: 12px; font-weight: 700;
+  color: var(--text3);
+  border-bottom: 2px solid transparent;
+  letter-spacing: 0.3px;
+}
+.tab.active { color: var(--text); border-bottom-color: var(--amber); }
+
+/* ── Recipe cards ────────────────────────────────────────── */
+.recipe-list {
+  flex: 1;
+  padding: 14px 16px 4px;
+}
+.recipe-card {
+  background: var(--bg2); border: 1px solid var(--bg4);
+  border-radius: 16px; padding: 14px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 14px;
+}
+.recipe-thumb {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--bg3), var(--bg4));
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.recipe-body { flex: 1; min-width: 0; }
+.recipe-name {
+  font-size: 16px; font-weight: 700; color: var(--text);
+  margin-bottom: 5px; letter-spacing: -0.2px;
+}
+.recipe-meta {
+  font-size: 12px; color: var(--text2);
+  display: flex; align-items: center; gap: 8px;
+}
+.rc {
+  background: color-mix(in srgb, var(--blue) 16%, var(--bg3));
+  color: var(--blue);
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 10px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.rc.wk {
+  background: color-mix(in srgb, var(--amber) 18%, var(--bg3));
+  color: var(--amber);
+}
+.btn-primary {
+  display: block; width: calc(100% - 32px);
+  margin: 6px 16px 8px;
+  background: var(--green); color: #fff;
+  border: none;
+  padding: 17px;
+  border-radius: 16px;
+  font-size: 16px; font-weight: 800; letter-spacing: 0.3px;
+  font-family: inherit;
+  box-shadow:
+    0 8px 22px color-mix(in srgb, var(--green) 46%, transparent),
+    0 2px 4px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.22);
+  cursor: pointer;
+}
+.btn-secondary {
+  display: block; width: calc(100% - 32px);
+  margin: 0 16px 22px;
+  background: transparent; color: var(--text2);
+  border: none;
+  padding: 10px;
+  font-size: 13px; font-weight: 600;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--text2) 40%, transparent);
+  cursor: pointer;
+}
+
+/* ── In-store mode ───────────────────────────────────────── */
+.instore {
+  flex: 1; display: flex; flex-direction: column;
+  background: var(--bg);
+}
+.is-head {
+  background: var(--green); color: #fff;
+  padding: 18px 20px 16px;
+  text-align: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--green) 30%, transparent);
+}
+.is-store {
+  font-size: 19px; font-weight: 800; letter-spacing: -0.3px;
+}
+.is-count {
+  font-size: 11px; opacity: 0.86;
+  margin-top: 4px;
+  text-transform: uppercase; letter-spacing: 0.9px;
+  font-weight: 700;
+}
+.is-list { flex: 1; padding: 4px 0; }
+.is-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--bg4);
+}
+.is-check {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 2.5px solid var(--text3); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 800; color: transparent;
+}
+.is-check.done {
+  background: var(--green); border-color: var(--green);
+  color: #fff;
+}
+.is-name {
+  font-size: 20px; font-weight: 600;
+  color: var(--text); flex: 1; letter-spacing: -0.2px;
+}
+.is-item.done .is-name {
+  text-decoration: line-through;
+  color: var(--text3); font-weight: 500;
+}
+.is-qty {
+  font-size: 14px; color: var(--text2); font-weight: 600;
+}
+
+/* Nearby nudge */
+.nearby-nudge {
+  display: flex; align-items: center; gap: 12px;
+  margin: 10px 14px 12px;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--amber) 13%, var(--bg2));
+  border: 1px solid color-mix(in srgb, var(--amber) 38%, var(--bg4));
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+.nn-icon {
+  width: 38px; height: 38px; border-radius: 11px;
+  background: color-mix(in srgb, var(--amber) 28%, var(--bg2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.nn-body { flex: 1; min-width: 0; }
+.nn-title {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.1px;
+}
+.nn-sub {
+  font-size: 11px; color: var(--text2); margin-top: 2px;
+  font-weight: 500;
+}
+.nn-cta {
+  font-size: 11px; font-weight: 800; color: var(--amber);
+  text-transform: uppercase; letter-spacing: 0.6px;
+  padding: 6px 10px;
+  background: color-mix(in srgb, var(--amber) 16%, var(--bg2));
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.is-exit {
+  width: 100%; margin: 0;
+  background: var(--text); color: var(--bg2);
+  border: none;
+  padding: 22px;
+  font-size: 16px; font-weight: 800; letter-spacing: 0.4px;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+/* ── Intro & TOC ─────────────────────────────────────────── */
+.intro {
+  padding: 40px 20px 32px;
+  background: #0a0a0a;
+  text-align: center;
+  border-bottom: 1px solid #1e1e1e;
+}
+.intro h1 {
+  margin: 0 0 8px;
+  font-size: 32px; line-height: 1;
+  letter-spacing: -0.8px;
+}
+.intro h1 .list-part {
+  font-family: 'Inter', sans-serif; font-weight: 900; color: #fff;
+}
+.intro h1 .alert-part {
+  font-family: 'Playfair Display', serif; font-style: italic;
+  font-weight: 500; color: #C17B2A; letter-spacing: -1.5px;
+}
+.intro h1 .sub { color: #888; font-weight: 400; font-size: 18px; margin-left: 6px; }
+.intro p {
+  margin: 14px 0 22px;
+  font-size: 14px; color: #888; line-height: 1.55;
+}
+#toc {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  justify-content: center; max-width: 720px; margin: 0 auto;
+}
+#toc a {
+  background: #161616; color: #fff;
+  padding: 10px 16px; border-radius: 8px;
+  font-size: 12px; font-weight: 600;
+  text-decoration: none;
+  border: 1px solid #2a2a2a;
+}
+#toc a:hover { border-color: #444; background: #1c1c1c; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1200px) {
+  .device-shell { width: 340px; }
+  .phone-screen { height: 700px; }
+}
+@media (max-width: 768px) {
+  .device-shell { width: 320px; }
+  .phone-screen { height: 660px; }
+  .specimen-wordmark { font-size: 48px; }
+  .specimen { padding: 28px 20px 18px; }
+}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1><span class="list-part">List</span><span class="alert-part">Alert</span> <span class="sub">· Component Spike</span></h1>
+  <p>4 palettes × 3 screens · 12 phone frames total<br>
+  Type, color, button weight, and component density — side by side.</p>
+  <div id="toc"></div>
+</div>
+
+<div id="app"></div>
+
+<script>
+const PALETTES = [
+  {
+    name: 'Warm Cream', sub: 'current baseline',
+    bg:'#F5F0E8', bg2:'#FFFFFF', bg3:'#EDE8DF', bg4:'#DDD8CE',
+    text:'#1A1410', text2:'#6B6560', text3:'#9E9890',
+    green:'#2D9B5A', amber:'#C17B2A', blue:'#4A7FA5', red:'#C0392B'
+  },
+  {
+    name: 'Warm Linen', sub: 'off-white parchment, cozy + tactile',
+    bg:'#F8F4EE', bg2:'#FDFAF6', bg3:'#EDE8DE', bg4:'#DDD5C4',
+    text:'#22190C', text2:'#6A5E4A', text3:'#9E9080',
+    green:'#5A8A48', amber:'#B87830', blue:'#557090', red:'#B84030'
+  },
+  {
+    name: 'Golden Honey', sub: 'warm amber-forward, sunlit kitchen',
+    bg:'#FDF5E4', bg2:'#FFFDF8', bg3:'#F6EDD3', bg4:'#E9DDB8',
+    text:'#1F1504', text2:'#6A5028', text3:'#9E8050',
+    green:'#3A8C52', amber:'#C47A10', blue:'#4A7EA8', red:'#B83C2A'
+  },
+  {
+    name: 'Deep Navy', sub: 'dark blue with warm amber accents',
+    bg:'#0F1B2D', bg2:'#172945', bg3:'#1F3554', bg4:'#2D4670',
+    text:'#F0F4FB', text2:'#B0C0D5', text3:'#7587A0',
+    green:'#4ABB7A', amber:'#E8A554', blue:'#7FB4E8', red:'#F0635A'
+  }
+];
+
+const wordmark = () => `<div class="wordmark"><span class="list-part">List</span><span class="alert-part">Alert</span></div>`;
+
+const wifiSVG = `<svg class="sb-wifi" width="15" height="11" viewBox="0 0 15 11" fill="currentColor" aria-hidden="true">
+  <path d="M7.5 0.5C4.7 0.5 2.1 1.55 0.2 3.28L1.5 4.7C3.05 3.3 5.15 2.45 7.5 2.45C9.85 2.45 11.95 3.3 13.5 4.7L14.8 3.28C12.9 1.55 10.3 0.5 7.5 0.5Z"/>
+  <path d="M7.5 4C5.7 4 4.05 4.65 2.85 5.72L4.15 7.08C5.05 6.35 6.22 5.92 7.5 5.92C8.78 5.92 9.95 6.35 10.85 7.08L12.15 5.72C10.95 4.65 9.3 4 7.5 4Z"/>
+  <path d="M7.5 7.35C6.65 7.35 5.85 7.68 5.25 8.2L7.5 10.7L9.75 8.2C9.15 7.68 8.35 7.35 7.5 7.35Z"/>
+</svg>`;
+
+const statusBar = () => `<div class="status-bar">
+  <div class="sb-time">9:41</div>
+  <div class="sb-notch"></div>
+  <div class="sb-icons">
+    <span class="sb-signal"><span></span><span></span><span></span><span></span></span>
+    ${wifiSVG}
+    <span class="sb-battery"><span class="sb-battery-fill"></span></span>
+  </div>
+</div>`;
+
+function screenList() {
+  return `<div class="app-area">
+  <div class="app-header">
+    ${wordmark()}
+    <div class="gps-pill"><span class="gps-dot"></span>Near Whole Foods</div>
+  </div>
+  <div class="chip-bar">
+    <div class="chip active">All</div>
+    <div class="chip">Produce</div>
+    <div class="chip">Dairy</div>
+    <div class="chip">Pantry</div>
+    <div class="chip store">+ Whole Foods</div>
+  </div>
+  <div class="list-body">
+    <div class="category">
+      <div class="cat-head"><span>▼ Produce</span><span class="cat-count">3 items</span></div>
+      <div class="item"><div class="check"></div><div class="item-name">Honeycrisp apples</div><div class="item-meta">×4</div></div>
+      <div class="item"><div class="check"></div><div class="item-name">Avocados</div><div class="item-meta">×2 ripe</div></div>
+      <div class="item"><div class="check"></div><div class="item-name">Baby spinach</div><div class="item-meta">1 bag</div></div>
+    </div>
+    <div class="category">
+      <div class="cat-head"><span>▼ Dairy</span><span class="cat-count">2 items</span></div>
+      <div class="item"><div class="check"></div><div class="item-name">Greek yogurt</div><div class="item-meta">32 oz</div></div>
+      <div class="item"><div class="check"></div><div class="item-name">Sharp cheddar</div><div class="item-meta">8 oz block</div></div>
+    </div>
+    <div class="recurring">
+      <div class="rec-head"><span>⟲ Recurring</span><span class="rec-badge">EVERY 7D</span></div>
+      <div class="item"><div class="check"></div><div class="item-name">Whole milk</div><div class="interval">Due tomorrow</div></div>
+      <div class="item"><div class="check"></div><div class="item-name">Sourdough loaf</div><div class="interval">Due Fri</div></div>
+    </div>
+  </div>
+  <div class="add-bar">
+    <input placeholder="Add item…">
+    <button class="btn-add">Add</button>
+  </div>
+</div>`;
+}
+
+function screenInstore() {
+  return `<div class="instore">
+  <div class="is-head">
+    <div class="is-store">Whole Foods · Park Slope</div>
+    <div class="is-count">2 of 4 remaining</div>
+  </div>
+  <div class="is-list">
+    <div class="is-item done"><div class="is-check done">✓</div><div class="is-name">Whole milk</div><div class="is-qty">1 gal</div></div>
+    <div class="is-item"><div class="is-check"></div><div class="is-name">Sourdough bread</div><div class="is-qty">1 loaf</div></div>
+    <div class="is-item done"><div class="is-check done">✓</div><div class="is-name">Free-range eggs</div><div class="is-qty">dozen</div></div>
+    <div class="is-item"><div class="is-check"></div><div class="is-name">Avocados</div><div class="is-qty">×2</div></div>
+  </div>
+  <div class="nearby-nudge">
+    <div class="nn-icon">📍</div>
+    <div class="nn-body">
+      <div class="nn-title">Trader Joe's — 0.3 mi</div>
+      <div class="nn-sub">2 items on your list match this store</div>
+    </div>
+    <div class="nn-cta">Switch</div>
+  </div>
+  <button class="is-exit">Done Shopping</button>
+</div>`;
+}
+
+function screenCookbook() {
+  return `<div class="app-area">
+  <div class="app-header">
+    ${wordmark()}
+    <div class="gps-pill"><span class="gps-dot"></span>Home</div>
+  </div>
+  <div class="tab-bar">
+    <div class="tab">List</div>
+    <div class="tab active">Cookbook</div>
+    <div class="tab">Household</div>
+  </div>
+  <div class="recipe-list">
+    <div class="recipe-card">
+      <div class="recipe-thumb">🍛</div>
+      <div class="recipe-body">
+        <div class="recipe-name">Chicken Tikka Masala</div>
+        <div class="recipe-meta">14 ingredients · <span class="rc wk">Weeknight</span></div>
+      </div>
+    </div>
+    <div class="recipe-card">
+      <div class="recipe-thumb">🥬</div>
+      <div class="recipe-body">
+        <div class="recipe-name">Lemon Pesto Pasta</div>
+        <div class="recipe-meta">8 ingredients · <span class="rc">Quick</span></div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-primary">✨ Extract / Inspire</button>
+  <button class="btn-secondary">Paste a URL instead</button>
+</div>`;
+}
+
+const SCREENS = [
+  { name: 'List View', build: screenList },
+  { name: 'In-Store Mode', build: screenInstore },
+  { name: 'Cookbook', build: screenCookbook }
+];
+
+const toc = document.getElementById('toc');
+const app = document.getElementById('app');
+
+PALETTES.forEach((t, i) => {
+  const n = String(i + 1).padStart(2, '0');
+
+  const a = document.createElement('a');
+  a.href = `#palette${i + 1}`;
+  a.textContent = `${n} · ${t.name}`;
+  toc.appendChild(a);
+
+  const vars = [
+    `--bg:${t.bg}`,`--bg2:${t.bg2}`,`--bg3:${t.bg3}`,`--bg4:${t.bg4}`,
+    `--text:${t.text}`,`--text2:${t.text2}`,`--text3:${t.text3}`,
+    `--green:${t.green}`,`--amber:${t.amber}`,`--blue:${t.blue}`,`--red:${t.red}`
+  ].join(';');
+
+  const swatchColors = [t.bg, t.bg2, t.text, t.green, t.amber, t.blue, t.red];
+  const swatches = swatchColors.map(c => `<span style="background:${c}"></span>`).join('');
+
+  const sec = document.createElement('section');
+  sec.className = 'theme-section';
+  sec.id = `palette${i + 1}`;
+  sec.setAttribute('style', vars);
+
+  let phoneRow = '';
+  SCREENS.forEach(s => {
+    phoneRow += `<div class="phone-wrap">
+      <div class="device-shell">
+        <div class="phone-screen">
+          ${statusBar()}
+          ${s.build()}
+        </div>
+      </div>
+      <div class="phone-caption">${s.name}</div>
+    </div>`;
+  });
+
+  sec.innerHTML = `
+<div class="theme-label">
+  <span class="tl-num">${n}</span>
+  ${t.name}
+  <span class="tl-sub">— ${t.sub}</span>
+  <div class="tl-swatches">${swatches}</div>
+</div>
+
+<div class="specimen">
+  <div class="specimen-wordmark"><span class="list-part">List</span><span class="alert-part">Alert</span></div>
+  <div class="specimen-grid">
+    <div class="label">Wordmark</div><div class="specimen-body" style="font-size:13px;color:var(--text2)">Display sans (List) + italic serif (Alert)</div>
+    <div class="label">H2 / Category</div><div class="specimen-h2">▼ PRODUCE · 3 items</div>
+    <div class="label">Body / Item</div><div class="specimen-body">Honeycrisp apples</div>
+    <div class="label">Caption / Meta</div><div class="specimen-caption">×4 · Recurring every 7 days</div>
+  </div>
+</div>
+
+<div class="phone-row">${phoneRow}</div>`;
+
+  app.appendChild(sec);
+});
+</script>
+</body>
+</html>
