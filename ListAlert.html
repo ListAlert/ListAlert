@@ -688,6 +688,7 @@ var household = JSON.parse(localStorage.getItem('la_household') || 'null');
 // { id, name, invite_code, role, display_name }
 var householdMembers = [];
 var realtimeChannel = null;
+var cbOrderItems = JSON.parse(localStorage.getItem('la_cb_order') || '[]');
 
 function supaHeaders(extra) {
   var h = {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+(supaSession?supaSession.access_token:SUPA_KEY)};
@@ -892,6 +893,8 @@ async function loadSharedData(){
     }
     await loadHouseholdCategories();
     await loadHouseholdAllergies();
+    // Load shared order from household (graceful — column may not exist yet)
+    try{var _hhOrdRows=await supaGet('households','id=eq.'+household.id+'&select=current_order');if(_hhOrdRows&&_hhOrdRows[0]&&_hhOrdRows[0].current_order){try{var _ord=JSON.parse(_hhOrdRows[0].current_order);if(Array.isArray(_ord)){cbOrderItems=_ord;persistCbOrder();}}catch(e){}}}catch(e){}
     persist();renderList();if(curTab==='cookbook')renderCookbookTab();
     subscribeRealtime();
   }catch(e){console.warn('loadSharedData failed',e);}
@@ -998,6 +1001,15 @@ function _subscribeRealtimeChannel(){
       var who=(msg.payload&&msg.payload.cleared_by)||'Someone';
       clearList(true);
       showToast(escapeHTML(who)+' cleared the list');
+    })
+    .on('broadcast',{event:'order_updated'},function(msg){
+      if(!msg||!msg.payload)return;
+      var from=(msg.payload.from)||'Someone';
+      var order=msg.payload.order||[];
+      cbOrderItems=order;
+      persistCbOrder();
+      if(curTab==='cookbook')renderCookbookTab();
+      if(household&&household.role!=='admin')showToast(escapeHTML(from)+' updated the shared order');
     })
     .subscribe();
   window.realtimeChannel.socket.accessToken=async()=>window.supaSession?.access_token||SUPA_KEY;
@@ -1607,7 +1619,7 @@ function clearList(localOnly){
   if(household&&window.supabaseClient&&realtimeChannel){try{realtimeChannel.send({type:'broadcast',event:'list_cleared',payload:{cleared_by:household.display_name||'Someone',ts:Date.now()}});}catch(e){}}
 }
 function setFilter(storeId){listFilter=storeId;renderList();}
-function addItem(){var input=document.getElementById('item-input');var name=input.value.trim();if(!name){input.focus();input.style.borderColor='var(--red)';setTimeout(function(){input.style.borderColor='';},1200);return;}var newItem={id:nid++,name:name,store:null,done:false,sources:[],household_id:household?household.id:null,addedBy:household?(localStorage.getItem('la_display_name')||''):''};items.push(newItem);input.value='';persistItemWrite(newItem);renderList();input.focus();}
+function addItem(){var input=document.getElementById('item-input');var name=input.value.trim();if(!name){input.focus();input.style.borderColor='var(--red)';setTimeout(function(){input.style.borderColor='';},1200);return;}var newItem={id:nid++,name:name,store:null,done:false,sources:[],household_id:household?household.id:null,addedBy:household?((household.display_name)||localStorage.getItem('la_display_name_saved')||''):''};items.push(newItem);input.value='';persistItemWrite(newItem);renderList();input.focus();}
 function openItemAction(id){
   if(openActionItem===id){openActionItem=null;}else{openActionItem=id;}
   renderList();
@@ -2443,6 +2455,22 @@ function renderCookbookTab(){
     }
   }
 
+  // This Order section — shared household order, uses existing .cb-order-section CSS
+  if(cbOrderItems.length){
+    html+='<div class="cb-order-section" style="margin:8px 16px 0">';
+    html+='<div class="cb-order-hdr"><span class="cb-order-title">This Order — '+cbOrderItems.length+' recipe'+(cbOrderItems.length!==1?'s':'')+'</span>';
+    if(household&&isAdmin())html+='<button onclick="clearCbOrder()" style="font-size:11px;color:var(--green);background:none;border:none;cursor:pointer;font-family:Outfit,sans-serif;font-weight:600">Clear</button>';
+    html+='</div>';
+    cbOrderItems.forEach(function(o){
+      var r=savedRecipes.find(function(x){return x.id===o.recipeId;});
+      html+='<div class="cb-order-row"><div><div class="cb-order-name">'+escapeHTML(o.recipeName)+'</div><div class="cb-order-sub">'+(r?r.items.length+' item'+(r.items.length!==1?'s':''):'')+'</div></div>';
+      if(household&&isAdmin())html+='<button class="cb-order-remove" onclick="toggleRecipeOnOrder('+o.recipeId+')">×</button>';
+      html+='</div>';
+    });
+    if(household&&isAdmin())html+='<div style="padding:10px 14px"><button class="cb-order-btn" onclick="buildSharedOrder()">🛒 Share order with household →</button></div>';
+    html+='</div>';
+  }
+
   // AI action cards — 2×2 grid
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 16px 4px">';
   html+='<div onclick="openRecipeModal();switchRecipeTab(\'photo\')" style="padding:12px;background:var(--bg2);border:1px solid var(--amber-border);border-radius:12px;cursor:pointer;display:flex;flex-direction:column;gap:3px"><div style="font-size:20px">📷</div><div style="font-size:13px;font-weight:700;color:var(--text)">Extract</div><div style="font-size:11px;color:var(--text3)">From a photo or recipe text</div></div>';
@@ -2509,6 +2537,7 @@ function renderCookbookTab(){
             if(r.source_type){var _srcTxt=r.source_type==='url'?'🔗 View original recipe →':r.source_type==='paste'?'📋 View pasted source →':'📷 Extracted from photo'+(r.source_date?' on '+new Date(r.source_date).toLocaleDateString():'');html+='<button onclick="event.stopPropagation();(function(){var r=savedRecipes.find(function(x){return x.id==='+r.id+';});if(!r)return;if(r.source_type===\'url\'){window.open(r.source_url,\'_blank\');}else if(r.source_type===\'paste\'){alert(r.source_text||\'No source text saved.\');}else{alert(\''+_srcTxt+'\');}})()" style="width:100%;height:32px;background:none;border:1px solid var(--border2);border-radius:8px;color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;margin-bottom:10px">'+escapeHTML(_srcTxt)+'</button>';}
             html+='<div style="display:flex;gap:8px">';
             html+='<button onclick="event.stopPropagation();showRecipeTripFlow('+r.id+')" style="flex:1;height:38px;background:var(--green);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif">+ Plan a trip</button>';
+            if(household&&isAdmin()){var _onOrd=cbOrderItems.some(function(o){return o.recipeId===r.id;});html+='<button onclick="event.stopPropagation();toggleRecipeOnOrder('+r.id+')" style="height:38px;padding:0 11px;background:'+(_onOrd?'var(--green)':'var(--bg3)')+';border:1px solid '+(_onOrd?'var(--green-border,var(--green))':'var(--border2)')+';border-radius:10px;color:'+(_onOrd?'#fff':'var(--text2)')+';font-size:12px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif;flex-shrink:0">'+(_onOrd?'✓ Order':'+ Order')+'</button>';}
             html+='<button onclick="event.stopPropagation();openCookbookRecipeEdit('+r.id+')" style="height:38px;width:38px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">✏️</button>';
             html+='</div></div>';
           }
@@ -2571,10 +2600,10 @@ if(autoclear){var at=document.getElementById('autoclear-toggle');if(at){at.class
     }
   }
 })();
-if(window.navigator.standalone&&!localStorage.getItem('cartItems')&&!localStorage.getItem('la_pwa_standalone_warned')){localStorage.setItem('la_pwa_standalone_warned','1');document.body.style.cssText='margin:0;font-family:Outfit,sans-serif;background:#0f1117';document.body.innerHTML='<div style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center"><div style="font-size:52px;margin-bottom:20px">🏠</div><div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:12px">Reconnect your household</div><div style="font-size:15px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:24px">Your list data lives in Safari. Enter your invite code below to reconnect your household account.</div><input id="pwa-invite-input" type="text" placeholder="Invite code" autocapitalize="none" style="width:100%;max-width:320px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:16px;padding:0 16px;box-sizing:border-box;margin-bottom:10px"><input id="pwa-name-input" type="text" placeholder="Your name (optional)" style="width:100%;max-width:320px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:16px;padding:0 16px;box-sizing:border-box;margin-bottom:14px"><button onclick="(function(){var c=document.getElementById(\'pwa-invite-input\').value.trim().toUpperCase();var n=document.getElementById(\'pwa-name-input\').value.trim()||\'Me\';if(c){localStorage.setItem(\'la_saved_invite\',c);localStorage.setItem(\'la_display_name_saved\',n);}window.location.reload();})()" style="display:block;width:100%;max-width:320px;height:52px;background:#7c3aed;border-radius:14px;color:#fff;font-size:16px;font-weight:700;border:none;cursor:pointer;margin-bottom:16px">Reconnect household →</button><button onclick="window.location.reload()" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:14px;cursor:pointer;margin-bottom:12px">Continue without reconnecting</button><a href="https://listalert.github.io/ListAlert/ListAlert.html" style="font-size:13px;color:rgba(255,255,255,0.3);text-decoration:none">Open in Safari instead</a></div>';}else{
+if(window.navigator.standalone&&!localStorage.getItem('la_items')&&!localStorage.getItem('la_pwa_standalone_warned')){localStorage.setItem('la_pwa_standalone_warned','1');document.body.style.cssText='margin:0;font-family:Outfit,sans-serif;background:#0f1117';document.body.innerHTML='<div style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center"><div style="font-size:52px;margin-bottom:20px">🏠</div><div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:12px">Reconnect your household</div><div style="font-size:15px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:24px">Your list data lives in Safari. Enter your invite code below to reconnect your household account.</div><input id="pwa-invite-input" type="text" placeholder="Invite code" autocapitalize="none" style="width:100%;max-width:320px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:16px;padding:0 16px;box-sizing:border-box;margin-bottom:10px"><input id="pwa-name-input" type="text" placeholder="Your name (optional)" style="width:100%;max-width:320px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:16px;padding:0 16px;box-sizing:border-box;margin-bottom:14px"><button onclick="(function(){var c=document.getElementById(\'pwa-invite-input\').value.trim().toUpperCase();var n=document.getElementById(\'pwa-name-input\').value.trim()||\'Me\';if(c){localStorage.setItem(\'la_saved_invite\',c);localStorage.setItem(\'la_display_name_saved\',n);}window.location.reload();})()" style="display:block;width:100%;max-width:320px;height:52px;background:#7c3aed;border-radius:14px;color:#fff;font-size:16px;font-weight:700;border:none;cursor:pointer;margin-bottom:16px">Reconnect household →</button><button onclick="window.location.reload()" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:14px;cursor:pointer;margin-bottom:12px">Continue without reconnecting</button><a href="https://listalert.github.io/ListAlert/ListAlert.html" style="font-size:13px;color:rgba(255,255,255,0.3);text-decoration:none">Open in Safari instead</a></div>';}else{
 var _isFirstRun=!localStorage.getItem('la_demo_seen')&&!localStorage.getItem('la_onboarded');
 if(!localStorage.getItem('la_onboarded')&&localStorage.getItem('la_demo_seen')){document.getElementById('ob-modal').style.display='flex';}
-function maybeShowDemoPrompt(){if(localStorage.getItem('la_demo_seen'))return;var dp=document.getElementById('demo-prompt');if(dp){dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}}
+function maybeShowDemoPrompt(){if(localStorage.getItem('la_demo_seen'))return;localStorage.setItem('la_demo_seen','1');sessionStorage.setItem('la_demo_seen','1');var dp=document.getElementById('demo-prompt');if(dp){dp.style.display='flex';setTimeout(function(){dp.classList.add('open');},10);}}
 initSupabase().then(function(){
   loadFromSupabase().then(function(){ _supabaseLoading=false;flushQueue();if(_isFirstRun)setTimeout(maybeShowDemoPrompt,8000); }).catch(function(){_supabaseLoading=false;renderList();});
   var _wCtrl=new AbortController();var _wTimer=setTimeout(function(){_wCtrl.abort();},5000);
@@ -2655,7 +2684,7 @@ function _tripGoShopping(){
 function _tripGoDeliver(){closeTripPrompt();exitTripSelect();showShareSheet();}
 function showRecipeTripFlow(recipeId){
   var r=savedRecipes.find(function(x){return x.id===recipeId;});
-  if(!r||!r.ingredients||!r.ingredients.length){showToast('No ingredients found');return;}
+  if(!r||!r.items||!r.items.length){showToast('No ingredients found');return;}
   _recipeTripId=recipeId;
   _recipeIngredientDismissed={};
   var back=document.getElementById('recipe-trip-back');
@@ -2671,8 +2700,8 @@ function _renderRecipeTripIngredients(r){
   var body=document.getElementById('recipe-trip-ingredients');
   var btn=document.getElementById('recipe-trip-confirm-btn');
   if(!body)return;
-  var checked=r.ingredients.filter(function(ing){return!_recipeIngredientDismissed[ing];});
-  body.innerHTML=r.ingredients.map(function(ing){
+  var checked=r.items.filter(function(ing){return!_recipeIngredientDismissed[ing];});
+  body.innerHTML=r.items.map(function(ing){
     var on=!_recipeIngredientDismissed[ing];
     return'<div onclick="_toggleRecipeIngDismiss(\''+ing.replace(/\'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer"><div style="width:22px;height:22px;border-radius:50%;border:2px solid '+(on?'var(--amber)':'var(--border2)')+';background:'+(on?'var(--amber)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700">'+(on?'✓':'')+' </div><span style="font-size:14px;color:'+(on?'var(--text)':'var(--text3)');text-decoration:'+(on?'none':'line-through')+'">'+escapeHTML(ing)+'</span></div>';
   }).join('');
@@ -2687,7 +2716,7 @@ function _toggleRecipeIngDismiss(ing){
 function _confirmRecipeTrip(recipeId){
   var r=savedRecipes.find(function(x){return x.id===recipeId;});
   if(!r)return;
-  _pendingTripIngredients=r.ingredients.filter(function(ing){return!_recipeIngredientDismissed[ing];});
+  _pendingTripIngredients=r.items.filter(function(ing){return!_recipeIngredientDismissed[ing];});
   var rback=document.getElementById('recipe-trip-back');
   var rsheet=document.getElementById('recipe-trip-sheet');
   if(rsheet)rsheet.style.transform='translateY(100%)';
@@ -2913,6 +2942,39 @@ async function reExtractNutrition(recipeId){
     r.extracted_at=Date.now();
     persistRecipeWrite(r);persist();renderCookbookTab();showToast('Nutrition updated for '+r.name);
   }catch(e){if(btn){btn.disabled=false;btn.textContent='+ Add nutrition info';}showToast('Could not get nutrition. Try again.');}
+}
+
+// ── Shared Order (Cookbook) ───────────────────────────────────────────────────
+function persistCbOrder(){localStorage.setItem('la_cb_order',JSON.stringify(cbOrderItems));}
+function toggleRecipeOnOrder(recipeId){
+  var r=savedRecipes.find(function(x){return x.id===recipeId;});
+  if(!r)return;
+  var idx=cbOrderItems.findIndex(function(o){return o.recipeId===recipeId;});
+  if(idx===-1){cbOrderItems.push({recipeId:recipeId,recipeName:r.name});}
+  else{cbOrderItems.splice(idx,1);}
+  persistCbOrder();
+  renderCookbookTab();
+}
+function buildSharedOrder(){
+  if(!cbOrderItems.length){showToast('Add recipes to the order first.');return;}
+  if(household&&window.supabaseClient&&realtimeChannel){
+    try{realtimeChannel.send({type:'broadcast',event:'order_updated',payload:{order:cbOrderItems,from:(household.display_name||'Admin'),ts:Date.now()}});}catch(e){}
+  }
+  if(household&&supaUserId){
+    supaPatch('households','id=eq.'+household.id,{current_order:JSON.stringify(cbOrderItems)}).catch(function(){});
+  }
+  showToast('Order shared with '+escapeHTML(household?household.name:'household')+'!');
+}
+function clearCbOrder(){
+  cbOrderItems=[];
+  persistCbOrder();
+  if(household&&window.supabaseClient&&realtimeChannel){
+    try{realtimeChannel.send({type:'broadcast',event:'order_updated',payload:{order:[],from:(household&&household.display_name)||'Admin',ts:Date.now()}});}catch(e){}
+  }
+  if(household&&supaUserId){
+    supaPatch('households','id=eq.'+household.id,{current_order:null}).catch(function(){});
+  }
+  renderCookbookTab();
 }
 
 </script>
